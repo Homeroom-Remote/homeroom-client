@@ -1,8 +1,17 @@
+const colors = require("tailwindcss/colors");
+
 module.exports = {
   content: ["./src/**/*.{js, jsx, ts, tsx}"],
   darkMode: "class",
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        primary: colors.amber,
+        secondary: colors.green,
+        background: colors.stone,
+        text: colors.slate,
+      },
+    },
   },
   plugins: [],
 };
