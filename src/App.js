@@ -10,7 +10,7 @@ function App() {
           stft <code>src/App.js</code> and save to reload.
         </p>
         <a
-          className="bg-red-200"
+          className=""
           href="https://reactjs.org"
           target="_blank"
           rel="noopener noreferrer"
