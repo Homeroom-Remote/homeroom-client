@@ -1,5 +1,6 @@
 import { Gmail, Github } from "../utils/svgs";
 import Theme from "./Theme";
+import Toolbar from "./Toolbar";
 
 const globalStyles =
   // eslint-disable-next-line no-multi-str
@@ -15,6 +16,9 @@ export default function Welcome(props) {
     <div className={globalStyles}>
       <div className="flex justify-end p-2">
         <Theme />
+      </div>
+      <div className="flex justify-end p-2">
+        <Toolbar />
       </div>
       <div className={wrapperStyles}>
         <section className={loginStyles}>
