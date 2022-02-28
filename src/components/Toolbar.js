@@ -1,6 +1,6 @@
 function ToolbarButton(props) {
   const { toggleCamera } = props.toggle;
-  <button onClick={toggleCamera}></button>;
+  return <button onClick={toggleCamera}></button>;
 }
 
 export default function Toolbar(props) {
