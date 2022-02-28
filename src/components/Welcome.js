@@ -1,4 +1,5 @@
 import { Gmail, Github } from "../utils/svgs";
+import { signInWithGoogle } from "../api/auth";
 import Theme from "./Theme";
 import Toolbar from "./Toolbar";
 
@@ -12,6 +13,10 @@ const loginStyles = "flex flex-col justify-between";
 
 const wrapperStyles = "h-screen flex justify-center items-center";
 export default function Welcome(props) {
+  const handleGoogleButtonClick = () => {
+    console.log("Trying to sign in with google");
+    signInWithGoogle((result) => console.log(result));
+  };
   return (
     <div className={globalStyles}>
       <div className="flex justify-end p-2">
@@ -30,7 +35,10 @@ export default function Welcome(props) {
               </span>
             </h1>
             <div className="flex flex-col justify-between mt-12 gap-y-2">
-              <button className="flex-1 py-4 text-md font-semibold border-2 border-black dark:border-white hover:bg-background-300 dark:hover:bg-background-600 transition-colors">
+              <button
+                onClick={handleGoogleButtonClick}
+                className="flex-1 py-4 text-md font-semibold border-2 border-black dark:border-white hover:bg-background-300 dark:hover:bg-background-600 transition-colors"
+              >
                 <Gmail
                   className="inline w-8 h-8 fill-current"
                   title="Gmail icon"
