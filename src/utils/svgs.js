@@ -58,3 +58,64 @@ export const Moon = (props) => (
     <path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
   </svg>
 );
+
+export const Mic = (props) => (
+  <svg
+    role="img"
+    viewBox="0 0 64 64"
+    xmlns="http://www.w3.org/2000/svg"
+    className={props.className}
+    fill="currentColor"
+  >
+    <title>{props.title}</title>
+    <path data-name="layer2"
+  d="M41 32a10 10 0 0 1-10 10 10 10 0 0 1-10-10V12A10 10 0 0 1 31 2a10 10 0 0 1 10 10z"
+   stroke="#202020" stroke-miterlimit="10" stroke-width="2"></path>
+  <path data-name="layer1" d="M49 22v10a18 18 0 0 1-18 18 18 18 0 0 1-18-18V22m18 28v12m-10 0h20"
+  fill="none" stroke="blue" stroke-miterlimit="10" stroke-width="2"></path>
+  </svg>
+);
+
+export const MutedMic = (props) => (
+  <svg
+    role="img"
+    viewBox="0 0 64 64"
+    xmlns="http://www.w3.org/2000/svg"
+    className={props.className}
+    fill="currentColor"
+  >
+    <title>{props.title}</title>
+    <path data-name="layer2"
+  d="M41 32a10 10 0 0 1-10 10 10 10 0 0 1-10-10V12A10 10 0 0 1 31 2a10 10 0 0 1 10 10z"
+   stroke="#202020" stroke-miterlimit="10" stroke-width="2"></path>
+  <path data-name="layer1" d="M49 22v10a18 18 0 0 1-18 18 18 18 0 0 1-18-18V22m18 28v12m-10 0h20"
+  fill="none" stroke="green" stroke-miterlimit="10" stroke-width="2"></path>
+  </svg>
+);
+
+export const Cam = (props) => (
+  <svg
+    role="img"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+    className={props.className}
+    fill="currentColor"
+  >
+    <title>{props.title}</title>
+    <path d="M16 16c0 1.104-.896 2-2 2h-12c-1.104 0-2-.896-2-2v-8c0-1.104.896-2 2-2h12c1.104 0 2 .896 2 2v8zm8-10l-6 4.223v3.554l6 4.223v-12z" />
+  </svg>
+);
+
+export const MutedCam = (props) => (
+  <svg
+    role="img"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+    className={props.className}
+    fill="green"
+  >
+    <title>{props.title}</title>
+    <path d="M16 16c0 1.104-.896 2-2 2h-12c-1.104 0-2-.896-2-2v-8c0-1.104.896-2 2-2h12c1.104 0 2 .896 2 2v8zm8-10l-6 4.223v3.554l6 4.223v-12z" />
+  </svg>
+);
+
