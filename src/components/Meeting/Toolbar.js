@@ -9,7 +9,7 @@ import {
   ShareScreen,
   Record,
   Reactions,
-} from "../utils/svgs";
+} from "../../utils/svgs";
 import { useState } from "react";
 
 function ToolbarButton(props) {
@@ -146,7 +146,7 @@ export default function Toolbar(props) {
       </div>
       <div>
         <button className="hover:bg-blue-500">
-          <span class="text-red-600">Quit</span>
+          <span className="text-red-600">Quit</span>
         </button>
       </div>
     </div>
