@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-div {
-  border-radius: 10px;
-}
-
 body {
   margin: 0;
   width: 100%;
