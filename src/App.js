@@ -2,15 +2,17 @@ import { useEffect, useState } from "react";
 
 import useTheme from "./stores/themeStore";
 import useUser from "./stores/userStore";
-import { onAuthStateChanged, logout } from "./api/auth";
+import { onAuthStateChanged } from "./api/auth";
 
-import Welcome from "./components/Welcome";
+import Welcome from "./components/Welcome/Welcome";
+import Home from "./components/Home/Home";
+import Meeting from "./components/Meeting/Meeting";
 import { BallTriangle } from "./components/Spinners";
-
 function App() {
   const { theme } = useTheme();
   const { setUser, isLoggedIn } = useUser();
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     onAuthStateChanged((authState) => {
       setLoading(true);
@@ -18,13 +20,6 @@ function App() {
       setTimeout(() => setLoading(false), 1000);
     });
   }, [setUser]);
-
-  const handleLogout = () => {
-    logout(
-      () => console.log("Logged out succesfully"),
-      () => console.warn("error logging out")
-    );
-  };
 
   if (loading) {
     return (
@@ -39,9 +34,7 @@ function App() {
   if (isLoggedIn()) {
     return (
       <div className={theme}>
-        <div className="w-screen h-screen dark:bg-background-800 bg-background-100">
-          <button onClick={handleLogout}>Log out</button>
-        </div>
+        <Home />
       </div>
     );
   }
