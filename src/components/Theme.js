@@ -7,9 +7,9 @@ export default function Theme(props) {
   return (
     <button onClick={toggleTheme}>
       {theme === "dark" ? (
-        <Moon className="h-7 w-7 text-primary-600 hover:text-primary-900 transition-all" />
+        <Moon className="h-7 w-7 text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-600 transition-all" />
       ) : (
-        <Sun className="h-7 w-7 text-primary-400 hover:text-primary-600 transition-all" />
+        <Sun className="h-7 w-7 text-primary-400 hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-600 transition-all" />
       )}
     </button>
   );

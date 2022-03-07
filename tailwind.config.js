@@ -6,10 +6,11 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: colors.amber,
-        secondary: colors.purple,
-        background: colors.stone,
-        text: colors.slate,
+        primary: colors.purple,
+        secondary: colors.green,
+        dark: colors.neutral,
+        lt: colors.slate,
+        text: colors.gray,
       },
     },
   },

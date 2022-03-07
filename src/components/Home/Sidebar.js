@@ -8,7 +8,7 @@ export default function Sidebar({ changeMainComponent, MainComponent }) {
     );
 
     return mainComponentIndex === index
-      ? "dark:text-primary-300 text-primary-600 font-medium"
+      ? "dark:text-primary-400 text-primary-700 font-medium"
       : "dark:text-white";
   };
 
@@ -18,11 +18,11 @@ export default function Sidebar({ changeMainComponent, MainComponent }) {
     );
 
     return mainComponentIndex === index
-      ? "dark:text-primary-300 text-primary-600"
+      ? "dark:text-primary-400 text-primary-700"
       : "dark:text-white";
   };
   return (
-    <nav className="col-span-2 h-full justify-between flex flex-col text-xl p-2 border-r-2 dark:border-primary-400 border-primary-600">
+    <nav className="col-span-2 h-full justify-between flex flex-col text-xl p-2 shadow-lg shadow-primary-200">
       <div className="gap-y-3 flex flex-col">
         {components.map((component, index) => (
           <button
