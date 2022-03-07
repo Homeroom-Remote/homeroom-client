@@ -1,21 +1,13 @@
 import Button from "../../Button";
-import Meeting from "../../../components/Meeting/Meeting";
-import Toolbar from "../../../components/Meeting/Toolbar";
-import ReactDOMServer from 'react-dom/server';
-
-
-function openRoom(props) {
-  const globalStyles =
-  // eslint-disable-next-line no-multi-str
-  "bg-background-100 text-text-900 \
-                      dark:bg-background-800 dark:text-text-200 \
-                      transition-colors max-h-screen h-screen overflow-y-hidden";
-  var pop = window.open("", "jswin", "width=850,height=550")
-  pop.document.body.innerHTML = ReactDOMServer.renderToString(<div className={globalStyles}><div className="flex flex-row justify-center items-center h-full bg-background-600"><Meeting /></div></div>);
-}
-
+import useMeeting from "../../../stores/meetingStore";
 
 export default function QuickSelection() {
+  const { toggleIsInMeeting } = useMeeting();
+
+  function openRoom() {
+    toggleIsInMeeting();
+  }
+
   return (
     <div className="flex flex-row items-center h-full gap-x-2 justify-center">
       {/* My Meeting */}
@@ -24,7 +16,7 @@ export default function QuickSelection() {
           {/* Header */}
           <div className="flex flex-row justify-between items-center gap-x-2">
             <p className="font-bold leading-4">Your Meeting</p>
-            <Button text="Open" onClick={openRoom}/>
+            <Button text="Open" onClick={openRoom} />
           </div>
           {/* Description */}
           <p className="text-sm text-text-400 dark:text-text-200">

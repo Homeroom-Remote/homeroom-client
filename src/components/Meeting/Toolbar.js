@@ -11,8 +11,7 @@ import {
   Reactions,
 } from "../../utils/svgs";
 import { useState } from "react";
-import { logout } from "../../api/auth";
-
+import useMeeting from "../../stores/meetingStore";
 
 function ToolbarButton(props) {
   const theState = props.state;
@@ -43,6 +42,7 @@ function ToolbarButton(props) {
 }
 
 export default function Toolbar(props) {
+  const { toggleIsInMeeting } = useMeeting();
   // const camera = props.camera
   // const toggleCamera = props.toggleCamera
 
@@ -150,7 +150,10 @@ export default function Toolbar(props) {
         />
       </div>
       <div>
-        <button className="h-16 w-14 dark:hover:bg-primary-400 hover:bg-primary-600" onClick={logout}>
+        <button
+          className="h-16 w-14 dark:hover:bg-primary-400 hover:bg-primary-600"
+          onClick={toggleIsInMeeting}
+        >
           <span className="text-red-600">Quit</span>
         </button>
       </div>
