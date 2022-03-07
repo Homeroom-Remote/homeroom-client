@@ -43,17 +43,22 @@ function ToolbarButton(props) {
 
 export default function Toolbar(props) {
   const { toggleIsInMeeting } = useMeeting();
-  // const camera = props.camera
-  // const toggleCamera = props.toggleCamera
 
-  const [camera, setCamera] = useState(false);
-  const toggleCamera = () => {
-    setCamera(!camera);
-  };
-  const [microphone, setMicrophone] = useState(false);
-  const toggleMicrophone = () => {
-    setMicrophone(!microphone);
-  };
+  const camera = props.camera
+  const toggleCamera = props.toggleCamera
+
+  // const [camera, setCamera] = useState(false);
+  // const toggleCamera = () => {
+  //   setCamera(!camera);
+  // };
+
+  const microphone = props.microphone
+  const toggleMicrophone = props.toggleMicrophone
+
+  // const [microphone, setMicrophone] = useState(false);
+  // const toggleMicrophone = () => {
+  //   setMicrophone(!microphone);
+  // };
   const [security, setSecurity] = useState(false);
   const toggleSecurity = () => {
     setSecurity(!security);
