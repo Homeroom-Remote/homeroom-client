@@ -4,8 +4,8 @@ import Theme from "../Theme";
 
 const globalStyles =
   // eslint-disable-next-line no-multi-str
-  "bg-background-100 text-text-900 \
-                      dark:bg-background-800 dark:text-text-200 \
+  "bg-lt-50 text-text-900 \
+                      dark:bg-dark-900 dark:text-text-200 \
                       transition-colors max-h-screen overflow-y-hidden";
 
 const loginStyles = "flex flex-col justify-between";
@@ -26,7 +26,7 @@ export default function Welcome(props) {
           <div className="max-w-md mx-4">
             <h1 className="text-5xl font-bold">
               Join{" "}
-              <span className="text-primary-600 dark:text-primary-200">
+              <span className="text-primary-600 dark:text-primary-400">
                 Homeroom
               </span>
             </h1>
