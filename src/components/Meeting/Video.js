@@ -8,55 +8,41 @@ function App(props) {
   const remoteVideoRef = useRef(null);
   const currentUserVideoRef = useRef(null);
   const peerInstance = useRef(null);
+  const camera = props.camera
+  const microphone = props.microphone
+  const peer = new Peer();
 
   useEffect(() => {
-    const peer = new Peer();
-
-    peer.on('open', (id) => {
-      setPeerId(id)
+    if(microphone || camera) {
       var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-
-      getUserMedia({ video: true, audio: false }, (mediaStream) => {
-  
+           getUserMedia({ video: camera, audio: microphone }, (mediaStream) => {
         currentUserVideoRef.current.srcObject = mediaStream;
         currentUserVideoRef.current.play();
       });
-      console.log(peerId)
-    });
-
-    peer.on('call', (call) => {
-      var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-
-      getUserMedia({ video: true, audio: false }, (mediaStream) => {
-        currentUserVideoRef.current.srcObject = mediaStream;
-        currentUserVideoRef.current.play();
-        call.answer(mediaStream)
-        call.on('stream', function(remoteStream) {
-          remoteVideoRef.current.srcObject = remoteStream
-          remoteVideoRef.current.play();
-        });
-      });
-    })
+    }
+    else {
+      currentUserVideoRef.current.srcObject = null;
+    }
 
     peerInstance.current = peer;
-  }, [])
+  }, [camera, microphone])
 
-  const call = (remotePeerId) => {
-    var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+  // const call = (remotePeerId) => {
+  //   var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
-    getUserMedia({ video: true, audio: false }, (mediaStream) => {
+  //   getUserMedia({ video: true, audio: false }, (mediaStream) => {
 
-      currentUserVideoRef.current.srcObject = mediaStream;
-      currentUserVideoRef.current.play();
+  //     currentUserVideoRef.current.srcObject = mediaStream;
+  //     currentUserVideoRef.current.play();
 
-      const call = peerInstance.current.call(remotePeerId, mediaStream)
+  //     const call = peerInstance.current.call(remotePeerId, mediaStream)
 
-      call.on('stream', (remoteStream) => {
-        remoteVideoRef.current.srcObject = remoteStream
-        remoteVideoRef.current.play();
-      });
-    });
-  }
+  //     call.on('stream', (remoteStream) => {
+  //       remoteVideoRef.current.srcObject = remoteStream
+  //       remoteVideoRef.current.play();
+  //     });
+    // });
+  // }
 
   return (
     <div className="App">
