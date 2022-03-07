@@ -11,6 +11,8 @@ import {
   Reactions,
 } from "../../utils/svgs";
 import { useState } from "react";
+import { logout } from "../../api/auth";
+
 
 function ToolbarButton(props) {
   const theState = props.state;
@@ -23,14 +25,14 @@ function ToolbarButton(props) {
     <button onClick={toggle}>
       {theState === true ? (
         <div className="flex flex-col items-center dark:hover:bg-primary-400 hover:bg-primary-600 p-2">
-          <LogoOn className="h-7 w-7" />
+          <LogoOn className="h-7 w-14" />
           <span className="text-secondary-200 dark:text-secondary-600 text-sm">
             {textOn}
           </span>
         </div>
       ) : (
         <div className="flex flex-col items-center dark:hover:bg-primary-400 hover:bg-primary-600 p-2">
-          <LogoOff className="h-7 w-7" />
+          <LogoOff className="h-7 w-14" />
           <span className="text-secondary-200 dark:text-secondary-600 text-sm">
             {textOff}
           </span>
@@ -41,6 +43,9 @@ function ToolbarButton(props) {
 }
 
 export default function Toolbar(props) {
+  // const camera = props.camera
+  // const toggleCamera = props.toggleCamera
+
   const [camera, setCamera] = useState(false);
   const toggleCamera = () => {
     setCamera(!camera);
@@ -145,7 +150,7 @@ export default function Toolbar(props) {
         />
       </div>
       <div>
-        <button className="hover:bg-blue-500">
+        <button className="h-16 w-14 dark:hover:bg-primary-400 hover:bg-primary-600" onClick={logout}>
           <span className="text-red-600">Quit</span>
         </button>
       </div>
