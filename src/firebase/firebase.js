@@ -1,5 +1,6 @@
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
+import "firebase/compat/firestore";
 import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
@@ -15,6 +16,7 @@ const firebaseConfig = {
 const app = firebase.initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const auth = firebase.auth();
+const db = firebase.firestore();
 
 const provider = new firebase.auth.GoogleAuthProvider();
 provider.setCustomParameters({ prompt: "select_account" });
@@ -22,5 +24,5 @@ provider.setCustomParameters({ prompt: "select_account" });
 const signInWithGoogle = (callback) =>
   auth.signInWithPopup(provider).then(callback);
 
-export { app, analytics, auth, signInWithGoogle };
+export { firebase, app, analytics, auth, signInWithGoogle, db };
 export default firebase;
