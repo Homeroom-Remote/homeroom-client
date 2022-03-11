@@ -8,7 +8,7 @@ export default function useCall(
 ) {
   const [peer, setPeer] = useState(null);
   const [id, setId] = useState(null);
-  const [peers, setPeers] = useState({});
+  const [peers, setPeers] = useState([]);
   const [callError, setCallError] = useState(null);
 
   useEffect(() => {

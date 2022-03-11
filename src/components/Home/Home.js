@@ -24,7 +24,7 @@ export default function Home() {
           changeMainComponent={changeMainComponent}
           MainComponent={MainComponent}
         />
-        <div className="col-span-8 p-4 bg-lt-100 dark:bg-dark-900">
+        <div className="col-span-8 bg-lt-100 dark:bg-dark-900">
           <MainComponent.Component />
         </div>
       </section>
