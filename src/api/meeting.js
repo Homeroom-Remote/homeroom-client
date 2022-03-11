@@ -3,6 +3,7 @@ import { firebase, db, auth } from "../firebase/firebase";
 const errors = {
   user_not_logged_in: "User is not logged in",
   not_last_person_error: "Not last person",
+  meeting_not_online_error: "Meeting is not online",
 };
 
 async function isLoggedIn() {
@@ -102,11 +103,26 @@ async function updateStatus(status) {
 }
 
 async function openMeeting() {
-  return updateStatus("online");
+  return Promise.all([updateStatus("online"), addMeToMeetingParticipants()]);
 }
 
 async function closeMeeting() {
-  return updateStatus("offline");
+  return Promise.all([updateStatus("offline"), clearParticipants()]);
+}
+
+async function clearParticipants() {
+  const clearParticipantsPromise = new Promise((resolve, reject) => {
+    isLoggedIn()
+      .then((user) =>
+        getDoc(user.uid).update({
+          updated_at: firebase.firestore.FieldValue.serverTimestamp(),
+          participants: [],
+        })
+      )
+      .catch((error) => reject(error));
+  });
+
+  return clearParticipantsPromise;
 }
 
 async function isOnline(meeting_id) {
@@ -144,8 +160,14 @@ async function closeMeetingIfLastPerson() {
     isLoggedIn()
       .then((user) => get(user.uid))
       .then((meeting) => {
-        console.log(meeting);
-        if (meeting.participants.length === 0) return closeMeeting();
+        if (
+          // Meeting is empty completely
+          meeting.participants.length === 0 ||
+          // Meeting has 1 participant (the owner and he is exiting so close it)
+          (meeting.participants.find((id) => id === meeting.owner) &&
+            meeting.participants.length === 1)
+        )
+          return closeMeeting();
         reject(errors["not_last_person_error"]);
       })
       .then()
@@ -154,6 +176,33 @@ async function closeMeetingIfLastPerson() {
   return closeMeetingIfLastPersonPromise;
 }
 
+async function addMeToMeetingParticipants() {
+  const addMeToMeetingParticipantsPromise = new Promise((resolve, reject) => {
+    isLoggedIn()
+      .then((user) => {
+        return addToMeetingParticipants(user.uid);
+      })
+      .catch((error) => reject(error));
+  });
+
+  return addMeToMeetingParticipantsPromise;
+}
+
+async function addToMeetingParticipants(uid) {
+  if (!uid) return;
+
+  const addToMeetingParticipantsPromise = new Promise((resolve, reject) => {
+    isLoggedIn()
+      .then((user) =>
+        getDoc(user.uid).update({
+          updated_at: firebase.firestore.FieldValue.serverTimestamp(),
+          participants: firebase.firestore.FieldValue.arrayUnion(uid),
+        })
+      )
+      .catch((error) => reject(error));
+  });
+  return addToMeetingParticipantsPromise;
+}
 export {
   create,
   openMeeting,
