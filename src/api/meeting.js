@@ -4,6 +4,7 @@ const errors = {
   user_not_logged_in: "User is not logged in",
   not_last_person_error: "Not last person",
   meeting_not_online_error: "Meeting is not online",
+  no_meeting_error: "No meeting was found",
 };
 
 async function isLoggedIn() {
@@ -40,7 +41,10 @@ async function getMyMeeting() {
     isLoggedIn()
       .then((user) => {
         get(user.uid)
-          .then((data) => resolve(data))
+          .then((meeting) => {
+            if (meeting) resolve(meeting);
+            else reject(errors["no_meeting_error"]);
+          })
           .catch((error) => reject(error));
       })
       .catch((error) => reject(error));
@@ -63,7 +67,8 @@ async function create() {
             db.collection("meetings")
               .doc(meeting_id)
               .set({
-                owner: user.uid,
+                owner_id: user.uid,
+                owner_name: user.displayName,
                 status: "offline",
                 participants: [],
                 created_at: firebase.firestore.FieldValue.serverTimestamp(),
@@ -90,24 +95,40 @@ async function create() {
 async function updateStatus(status) {
   const updateMeetingDocumentPromise = new Promise((resolve, reject) => {
     isLoggedIn()
-      .then((user) =>
+      .then((user) => {
         getDoc(user.uid).update({
           updated_at: firebase.firestore.FieldValue.serverTimestamp(),
           status: status,
-        })
-      )
+        });
+        resolve(true);
+      })
       .catch((error) => reject(error));
   });
 
   return updateMeetingDocumentPromise;
 }
-
 async function openMeeting() {
-  return Promise.all([updateStatus("online"), addMeToMeetingParticipants()]);
+  const openMeetingPromise = new Promise((resolve, reject) => {
+    updateStatus("online")
+      .then(() => {
+        addMeToMeetingParticipants();
+      })
+      .then(() => resolve(true))
+      .catch((error) => reject(error));
+  });
+  return openMeetingPromise;
 }
 
 async function closeMeeting() {
-  return Promise.all([updateStatus("offline"), clearParticipants()]);
+  const closeMeetingPromise = new Promise((resolve, reject) => {
+    updateStatus("offline")
+      .then(() => {
+        clearParticipants();
+      })
+      .then(() => resolve(true))
+      .catch((error) => reject(error));
+  });
+  return closeMeetingPromise;
 }
 
 async function clearParticipants() {
@@ -128,7 +149,10 @@ async function clearParticipants() {
 async function isOnline(meeting_id) {
   const isOnlinePromise = new Promise((resolve, reject) => {
     get(meeting_id)
-      .then((meeting) => resolve(meeting.status === "online"))
+      .then((meeting) => {
+        if (meeting) resolve(meeting.status === "online");
+        reject(errors["no_meeting_error"]);
+      })
       .catch((error) => reject(error));
   });
 
@@ -164,7 +188,7 @@ async function closeMeetingIfLastPerson() {
           // Meeting is empty completely
           meeting.participants.length === 0 ||
           // Meeting has 1 participant (the owner and he is exiting so close it)
-          (meeting.participants.find((id) => id === meeting.owner) &&
+          (meeting.participants.find((id) => id === meeting.owner_id) &&
             meeting.participants.length === 1)
         )
           return closeMeeting();
