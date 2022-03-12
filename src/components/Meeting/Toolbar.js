@@ -42,18 +42,18 @@ function ToolbarButton(props) {
 }
 
 export default function Toolbar(props) {
-  const { toggleIsInMeeting } = useMeeting();
+  const { exitMeeting } = useMeeting();
 
-  const camera = props.camera
-  const toggleCamera = props.toggleCamera
+  const camera = props.camera;
+  const toggleCamera = props.toggleCamera;
 
   // const [camera, setCamera] = useState(false);
   // const toggleCamera = () => {
   //   setCamera(!camera);
   // };
 
-  const microphone = props.microphone
-  const toggleMicrophone = props.toggleMicrophone
+  const microphone = props.microphone;
+  const toggleMicrophone = props.toggleMicrophone;
 
   // const [microphone, setMicrophone] = useState(false);
   // const toggleMicrophone = () => {
@@ -157,7 +157,7 @@ export default function Toolbar(props) {
       <div>
         <button
           className="h-16 w-14 dark:hover:bg-primary-400 hover:bg-primary-600"
-          onClick={toggleIsInMeeting}
+          onClick={exitMeeting}
         >
           <span className="text-red-600">Quit</span>
         </button>

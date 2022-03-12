@@ -36,6 +36,11 @@ async function get(meeting_id) {
   return getMeetingPromise;
 }
 
+async function getParticipants(id) {
+  const meeting = await get(id);
+  return meeting?.participants;
+}
+
 async function getMyMeeting() {
   const getMyMeetingPromise = new Promise((resolve, reject) => {
     isLoggedIn()
@@ -233,6 +238,7 @@ export {
   closeMeeting,
   get,
   getMyMeeting,
+  getParticipants,
   isOnline,
   isMyMeetingOnline,
   getMyMeetingId,
