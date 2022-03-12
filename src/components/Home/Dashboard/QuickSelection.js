@@ -14,7 +14,7 @@ import Button from "../../Button";
 import Tooltip from "react-tooltip";
 
 export default function QuickSelection({ setOverlayComponent }) {
-  const { toggleIsInMeeting } = useMeeting();
+  const { joinMeeting } = useMeeting();
   const [online, setOnline] = useState(false);
   const [copyMeetingTip, setCopyMeetingTip] = useState(false);
 
@@ -59,10 +59,8 @@ export default function QuickSelection({ setOverlayComponent }) {
   function openRoom() {
     create()
       .then((meeting) => openMeeting())
-      .then(() => {
-        console.log("hey");
-        toggleIsInMeeting();
-      })
+      .then(() => getMyMeetingId())
+      .then((meetingID) => joinMeeting(meetingID))
       .catch((error) => console.warn(error));
   }
 
