@@ -185,6 +185,7 @@ async function getMyMeetingId() {
 }
 
 async function closeMeetingIfLastPerson() {
+  console.trace();
   const closeMeetingIfLastPersonPromise = new Promise((resolve, reject) => {
     isLoggedIn()
       .then((user) => get(user.uid))
