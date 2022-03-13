@@ -80,10 +80,10 @@ export default function Meeting() {
       <div className="grid grid-flow-col grid-cols-8 h-full bg-stone-400">
         {/* Video & Toolbar Div */}
         <div
-          className={"flex flex-col " + (chat ? "col-span-7" : "col-span-9")}
+          className={"flex flex-col " + (chat ? "col-span-6" : "col-span-8")}
         >
           {/* Video Div */}
-          <div className="flex flex-row justify-center items-center h-full w-full">
+          <div className="h-full w-full">
             {/* My Video */}
             <Video mediaStream={myMediaStream} />
 
@@ -107,9 +107,9 @@ export default function Meeting() {
           />
         </div>
         {chat && (
-          <div className="flex flex-col items-center bg-lt-100 col-span-3">
-            <Chat chat={chat}/>
-          </div>
+        <div className="flex flex-col items-center bg-lt-100 col-span-2">
+        <Chat chat={chat}/>
+      </div>
         )}
         {/* Chat Div */}
       </div>
@@ -117,9 +117,10 @@ export default function Meeting() {
   );
 }
 
-{/* <div>
+<div>
   <div className="relative grid-cols-full">
     <Video />
     <Toolbar />
   </div>
-</div>; */}
+</div>;
+
