@@ -1,6 +1,28 @@
 import { useState, useEffect } from "react";
 import Peer from "peerjs";
 
+const createEmptyAudioTrack = () => {
+  const ctx = new AudioContext();
+  const oscillator = ctx.createOscillator();
+  const dst = oscillator.connect(ctx.createMediaStreamDestination());
+  oscillator.start();
+  const track = dst.stream.getAudioTracks()[0];
+  return Object.assign(track, { enabled: false });
+};
+
+const createEmptyVideoTrack = ({ width, height }) => {
+  const canvas = Object.assign(document.createElement("canvas"), {
+    width,
+    height,
+  });
+  canvas.getContext("2d").fillRect(0, 0, width, height);
+
+  const stream = canvas.captureStream();
+  const track = stream.getVideoTracks()[0];
+
+  return Object.assign(track, { enabled: false });
+};
+
 export default function useCall(
   defaultID = undefined,
   path = "/peerjs",
@@ -44,6 +66,20 @@ export default function useCall(
   }, [host, path, port, defaultID]);
 
   function connectToNewUser(userId, stream) {
+    console.log("Trying to connect to ", userId, peers);
+
+    if (peers.find((existingPeer) => existingPeer.peer === userId)) {
+      console.warn("Peer ", userId, " already on call.");
+      console.log(peers);
+      return;
+    }
+
+    if (!stream) {
+      stream = new MediaStream([
+        createEmptyAudioTrack(),
+        createEmptyVideoTrack({ width: 640, height: 480 }),
+      ]);
+    }
     const call = me.call(userId, stream);
     if (!call) {
       setCallError("Couldn't establish a call");
@@ -56,24 +92,20 @@ export default function useCall(
     call.on("stream", (userVideoStream) => {
       console.log("new stream");
       let newPeers = peers;
-      newPeers[userId] = { ...call, video: userVideoStream };
-      setPeers(newPeers);
+      newPeers.push({ ...call, stream: userVideoStream });
+      setPeers([...newPeers]);
     });
 
     call.on("close", () => {
-      console.log("call closed");
+      console.log("call closed", peers);
       let newPeers = peers;
-      delete newPeers[userId];
       setPeers(newPeers);
     });
-
-    setPeers((lastPeers) => ({ ...lastPeers, userId: call }));
   }
 
   function callFromArray(array, stream) {
     if (!array) return;
     for (const participantID of array) {
-      console.log("Trying to connect to ", participantID);
       connectToNewUser(participantID, stream);
     }
   }

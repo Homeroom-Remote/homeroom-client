@@ -67,10 +67,17 @@ export default function Toolbar(props) {
   const toggleParticipants = () => {
     setParticipants(!participants);
   };
-  const [chat, setChat] = useState(false);
-  const toggleChat = () => {
-    setChat(!chat);
-  };
+
+
+  const chat = props.chat;
+  const toggleChat = props.toggleChat;
+
+  // const [chat, setChat] = useState(false);
+  // const toggleChat = () => {
+  //   setChat(!chat);
+  // };
+
+
   const [shareScreen, setShareScreen] = useState(false);
   const toggleShareScreen = () => {
     setShareScreen(!shareScreen);
