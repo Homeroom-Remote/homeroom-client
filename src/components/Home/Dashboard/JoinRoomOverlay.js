@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { get } from "../../../api/meeting";
+import useStore from "../../../stores/meetingStore";
 
 import Button from "../../Button";
 import TitleBarClose from "../../TitleBarClose";
@@ -8,9 +9,11 @@ export default function JoinRoomOverlay({ close }) {
   const [meetingID, setMeetingID] = useState("");
   const [meetingDetails, setMeetingDetails] = useState(null);
   const [meetingIDError, setMeetingIDError] = useState(null);
+  const { joinMeeting } = useStore();
   const handleJoinRoom = () => {
     if (meetingIDError || !meetingDetails || meetingID.length !== 28) return;
     console.log("trying to join", meetingID);
+    joinMeeting(meetingID);
   };
 
   const showTable = () =>
