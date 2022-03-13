@@ -123,4 +123,3 @@ export default function Meeting() {
     <Toolbar />
   </div>
 </div>;
-
