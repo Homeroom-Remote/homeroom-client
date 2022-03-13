@@ -2,29 +2,31 @@ import { useState, useEffect } from "react";
 import Peer from "peerjs";
 
 export default function useCall(
+  defaultID = undefined,
   path = "/peerjs",
   host = "localhost",
   port = "3030"
 ) {
-  const [peer, setPeer] = useState(null);
+  const [me, setMe] = useState(null);
   const [id, setId] = useState(null);
-  const [peers, setPeers] = useState({});
+  const [peers, setPeers] = useState([]);
   const [callError, setCallError] = useState(null);
 
   useEffect(() => {
-    const peer = new Peer(undefined, {
+    const me = new Peer(defaultID, {
       path: path,
       host: host,
       port: port,
     });
 
-    setPeer(peer);
-
-    peer.on("open", (id) => {
+    setId(defaultID);
+    setMe(me);
+    me.on("open", (id) => {
+      console.log("new id", id);
       setId(id);
     });
 
-    peer.on("call", (request) => {
+    me.on("call", (request) => {
       navigator.mediaDevices
         .getUserMedia({ video: true, audio: true })
         .then((stream) => {
@@ -33,10 +35,16 @@ export default function useCall(
       console.log("incoming call:");
       console.log(request);
     });
-  }, [host, path, port]);
+
+    return () => {
+      console.log("Destroying peer object");
+      me.disconnect();
+      me.destroy();
+    };
+  }, [host, path, port, defaultID]);
 
   function connectToNewUser(userId, stream) {
-    const call = peer.call(userId, stream);
+    const call = me.call(userId, stream);
     if (!call) {
       setCallError("Couldn't establish a call");
       return;
@@ -62,5 +70,13 @@ export default function useCall(
     setPeers((lastPeers) => ({ ...lastPeers, userId: call }));
   }
 
-  return { id, peers, connectToNewUser, callError };
+  function callFromArray(array, stream) {
+    if (!array) return;
+    for (const participantID of array) {
+      console.log("Trying to connect to ", participantID);
+      connectToNewUser(participantID, stream);
+    }
+  }
+
+  return { id, peers, connectToNewUser, callError, callFromArray };
 }

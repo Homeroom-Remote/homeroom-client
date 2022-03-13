@@ -2,18 +2,21 @@ import create from "zustand";
 
 const useStore = create((set) => ({
   isInMeeting: false,
-  requestCloseMeeting: () => {
-    // set firebase meeting to 'offline'
-    set((state) => (state.isInMeeting = true));
+  meetingID: null,
+  setMeetingID: (meetingID) => {
+    set((state) => (state.meetingID = meetingID));
   },
-  requestOpenMeeting: () => {
-    // Check if user has a meeting object in firebase
-    // If he doesn't have meeting object in firebase: Open meeting object in firebase
-    // set firebase meeting to 'online'
-    set((state) => (state.isInMeeting = true));
+  exitMeeting: () => {
+    set((state) => {
+      state.isInMeeting = false;
+      state.meetingID = null;
+    });
   },
-  toggleIsInMeeting: () => {
-    set((state) => (state.isInMeeting = !state.isInMeeting));
+  joinMeeting: (meetingID) => {
+    set((state) => {
+      state.isInMeeting = true;
+      state.meetingID = meetingID;
+    });
   },
 }));
 
