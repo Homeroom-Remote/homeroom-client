@@ -1,5 +1,5 @@
-import { Gmail, Github } from "../../utils/svgs";
-import { signInWithGoogle } from "../../api/auth";
+import { Gmail, Github, Anonymous } from "../../utils/svgs";
+import { signInWithGoogle, signInAnonymously } from "../../api/auth";
 import Theme from "../Theme";
 
 const globalStyles =
@@ -14,7 +14,12 @@ const wrapperStyles = "h-screen flex justify-center items-center";
 export default function Welcome(props) {
   const handleGoogleButtonClick = () => {
     console.log("Trying to sign in with google");
-    signInWithGoogle((result) => console.log(result));
+    signInWithGoogle();
+  };
+
+  const handleAnonymousButtonClick = () => {
+    console.log("Trying to sign in anonymously");
+    signInAnonymously();
   };
   return (
     <div className={globalStyles}>
@@ -41,9 +46,12 @@ export default function Welcome(props) {
                 />
                 <span className="ml-5">Gmail</span>
               </button>
-              <button className="flex-1 py-4 text-md font-semibold border-2 border-black dark:border-white hover:bg-background-300 dark:hover:bg-background-600 transition-colors">
-                <Github title="Github icon" className="inline w-8 h-8" />
-                <span className="ml-5">Github</span>
+              <button
+                onClick={handleAnonymousButtonClick}
+                className="flex-1 py-4 text-md font-semibold border-2 border-black dark:border-white hover:bg-background-300 dark:hover:bg-background-600 transition-colors"
+              >
+                <Anonymous title="Anonymous icon" className="inline w-8 h-8" />
+                <span className="ml-5">Guest</span>
               </button>
             </div>
           </div>
