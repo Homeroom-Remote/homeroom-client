@@ -18,11 +18,21 @@ const analytics = getAnalytics(app);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-const provider = new firebase.auth.GoogleAuthProvider();
-provider.setCustomParameters({ prompt: "select_account" });
+const googleProvider = new firebase.auth.GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: "select_account" });
 
 const signInWithGoogle = (callback) =>
-  auth.signInWithPopup(provider).then(callback);
+  auth.signInWithPopup(googleProvider).then(callback);
 
-export { firebase, app, analytics, auth, signInWithGoogle, db };
+const signInAnonymously = (callback) => auth.signInAnonymously().then(callback);
+
+export {
+  firebase,
+  app,
+  analytics,
+  auth,
+  signInWithGoogle,
+  db,
+  signInAnonymously,
+};
 export default firebase;

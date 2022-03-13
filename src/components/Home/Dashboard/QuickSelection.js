@@ -39,10 +39,6 @@ export default function QuickSelection({ setOverlayComponent }) {
   };
 
   useEffect(() => {
-    isMyMeetingOnline()
-      .then((answer) => setOnline(answer))
-      .catch((error) => console.warn(error));
-
     const checkOnlineInterval = setInterval(
       () =>
         isMyMeetingOnline()
@@ -50,6 +46,15 @@ export default function QuickSelection({ setOverlayComponent }) {
           .catch((error) => console.warn(error)),
       20000
     );
+    isMyMeetingOnline()
+      .then((answer) => setOnline(answer))
+      .catch((error) => {
+        clearInterval(checkOnlineInterval);
+        console.warn(error);
+        console.warn(
+          "above warning occured when trying to find personal meeting status, probably isn't a meeting at all. Stopping interval"
+        );
+      });
 
     return () => {
       clearInterval(checkOnlineInterval);
