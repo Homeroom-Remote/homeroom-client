@@ -1,5 +1,6 @@
 import Toolbar from "./Toolbar";
 import Video from "./Video";
+import Chat from "./Chat";
 import React, { useState, useEffect, useCallback } from "react";
 import { getParticipants } from "../../api/meeting";
 import useMeeting from "../../stores/meetingStore";
@@ -25,6 +26,11 @@ export default function Meeting() {
   const [microphone, setMicrophone] = useState(false);
   const toggleMicrophone = () => {
     setMicrophone(!microphone);
+  };
+
+  const [chat, setChat] = useState(false);
+  const toggleChat = () => {
+    setChat(!chat);
   };
 
   const refreshParticipants = useCallback(() => {
@@ -74,7 +80,7 @@ export default function Meeting() {
       <div className="grid grid-flow-col grid-cols-8 h-full bg-stone-400">
         {/* Video & Toolbar Div */}
         <div
-          className={"flex flex-col " + (false ? "col-span-6" : "col-span-8")}
+          className={"flex flex-col " + (chat ? "col-span-6" : "col-span-8")}
         >
           {/* Video Div */}
           <div className="h-full w-full">
@@ -96,12 +102,14 @@ export default function Meeting() {
             toggleCamera={toggleCamera}
             microphone={microphone}
             toggleMicrophone={toggleMicrophone}
+            chat={chat}
+            toggleChat={toggleChat}
           />
         </div>
-        {false && (
-          <div className="flex justify-end p-2 bg-lt-100 col-span-2">
-            <div className="w-1/2"></div>
-          </div>
+        {chat && (
+        <div className="flex flex-col items-center bg-lt-100 col-span-2">
+        <Chat chat={chat}/>
+      </div>
         )}
         {/* Chat Div */}
       </div>
