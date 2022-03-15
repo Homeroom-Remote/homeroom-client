@@ -2,7 +2,6 @@ import Toolbar from "./Toolbar";
 import Video from "./Video";
 import Chat from "./Chat";
 import React, { useState, useEffect, useCallback } from "react";
-import { getParticipants } from "../../api/meeting";
 import useMeeting from "../../stores/meetingStore";
 import useUser from "../../stores/userStore";
 import useCall from "../../api/useCall";
@@ -15,15 +14,14 @@ const globalStyles =
 export default function Meeting() {
   const { meetingID } = useMeeting();
   const { user } = useUser();
-  const { id, callFromArray, peers } = useCall(user.uid);
-  const [myMediaStream, setMyMediaStream] = useState(null);
+  const { peers, setMyStream, myStream } = useCall(meetingID, user.uid);
 
-  const [camera, setCamera] = useState(false);
+  const [camera, setCamera] = useState(true);
   const toggleCamera = () => {
     setCamera(!camera);
   };
 
-  const [microphone, setMicrophone] = useState(false);
+  const [microphone, setMicrophone] = useState(true);
   const toggleMicrophone = () => {
     setMicrophone(!microphone);
   };
@@ -33,47 +31,24 @@ export default function Meeting() {
     setChat(!chat);
   };
 
-  const refreshParticipants = useCallback(() => {
-    if (!id || !meetingID) {
-      console.warn("Can't refresh participants: ID/MeetingID missing");
-      return;
+  useEffect(() => {
+    async function setMedia() {
+      let stream = null;
+
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: camera,
+          audio: microphone,
+        });
+      } catch (err) {
+        console.log(err);
+        console.warn("Error on Meeting.js: getUserMedia");
+      }
+
+      setMyStream(stream);
     }
-    const myID = user.uid;
-    getParticipants(meetingID)
-      .then((unfilteredParticipants) => {
-        const participants = unfilteredParticipants?.filter(
-          (participant) => participant !== myID
-        );
-        callFromArray(participants, myMediaStream);
-      })
-      .catch((error) => console.warn(error));
-  }, [id, meetingID, myMediaStream, user.uid]);
-
-  const getMyStream = useCallback(() => {
-    if (microphone || camera) {
-      var getUserMedia =
-        navigator.getUserMedia ||
-        navigator.webkitGetUserMedia ||
-        navigator.mozGetUserMedia;
-      getUserMedia({ video: camera, audio: microphone }, (mediaStream) => {
-        setMyMediaStream(mediaStream);
-      });
-    } else {
-      setMyMediaStream(null);
-    }
-  }, [camera, microphone]);
-
-  useEffect(() => {
-    console.log("my peers changed", peers);
-  }, [peers]);
-
-  useEffect(() => {
-    refreshParticipants();
-  }, [refreshParticipants]);
-
-  useEffect(() => {
-    getMyStream();
-  }, [getMyStream]);
+    setMedia();
+  }, [camera, microphone, setMyStream]);
 
   return (
     <div className={globalStyles}>
@@ -85,12 +60,12 @@ export default function Meeting() {
           {/* Video Div */}
           <div className="h-full w-full">
             {/* My Video */}
-            <Video mediaStream={myMediaStream} />
+            <Video mediaStream={myStream} />
 
             {/* Participants Videos */}
             {peers.map((peer, idx) => (
               <Video
-                mediaStream={peer.stream}
+                mediaStream={peer.media}
                 key={`peer-${peer.peer}-${idx}`}
               />
             ))}
@@ -107,9 +82,9 @@ export default function Meeting() {
           />
         </div>
         {chat && (
-        <div className="flex flex-col items-center bg-lt-100 col-span-2">
-        <Chat chat={chat}/>
-      </div>
+          <div className="flex flex-col items-center bg-lt-100 col-span-2">
+            <Chat chat={chat} />
+          </div>
         )}
         {/* Chat Div */}
       </div>

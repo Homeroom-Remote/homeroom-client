@@ -1,5 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Peer from "peerjs";
+import io from "socket.io-client";
+
+const errors = {
+  bad_socket_url: "Bad socket URL",
+};
 
 const createEmptyAudioTrack = () => {
   const ctx = new AudioContext();
@@ -23,92 +28,167 @@ const createEmptyVideoTrack = ({ width, height }) => {
   return Object.assign(track, { enabled: false });
 };
 
+export const peerConnectionObject = {
+  path: "/peerjs",
+  host: "localhost",
+  port: "3030",
+};
+
 export default function useCall(
+  meetingID,
   defaultID = undefined,
-  path = "/peerjs",
-  host = "localhost",
-  port = "3030"
+  peerConnection = peerConnectionObject,
+  socketPath = "http://localhost:3030/"
 ) {
   const [me, setMe] = useState(null);
+  const [socket, setSocket] = useState(null);
+  const [myStream, setMyStream] = useState(null);
   const [id, setId] = useState(null);
   const [peers, setPeers] = useState([]);
-  const [callError, setCallError] = useState(null);
+
+  const peerExists = useCallback(
+    (userID) =>
+      !!peers.find((existingPeer) => existingPeer.call.peer === userID),
+    [peers]
+  );
+  function addCallToPeers(call, peerMediaStream) {
+    const peerObject = {
+      call: call,
+      media: peerMediaStream,
+    };
+    setPeers((lastPeersState) => [...lastPeersState, peerObject]);
+  }
+
+  const handlePeerConnect = useCallback(
+    (peerID) => {
+      if (peerID === id) {
+        console.warn("Ignored connection with same ID as my ID");
+        return;
+      }
+      if (peerExists(peerID)) {
+        // Do not try and connect to an existing peer
+        console.warn("peerID already connected to");
+        return;
+      }
+
+      if (!me) {
+        console.warn(
+          "Can't connect with",
+          peerID,
+          "because peerJS isn't initialized"
+        );
+        return;
+      }
+
+      console.log("Attempting to connect with", peerID);
+
+      const stream = myStream;
+
+      const call = me.call(peerID, stream);
+      call?.on("error", (err) => console.warn(err));
+
+      if (!call) {
+        console.warn("Call to", peerID, "failed");
+        return;
+      }
+
+      console.log("Connected with", peerID, call);
+
+      call.on("stream", (peerStream) => {
+        console.log("on stream");
+        addCallToPeers(call, peerStream);
+      });
+    },
+    [peerExists, me, id, myStream]
+  );
+
+  const handlePeerDisconnect = useCallback(
+    (peerID) => {
+      // destroy every call object that matches
+      const callObjectsFromPeers = peers.filter(
+        (peer) => peer.call.peer === peerID
+      );
+      for (const peer of callObjectsFromPeers) {
+        peer.call.close();
+      }
+
+      // filter out every call with peer
+      const filteredOutPeersArray = peers.filter(
+        (peer) => peer.call.peer !== peerID
+      );
+      setPeers(filteredOutPeersArray);
+    },
+    [peers]
+  );
 
   useEffect(() => {
+    if (!me || !meetingID || !id) {
+      return;
+    }
+
+    if (!socketPath) {
+      console.warn(errors["bad_socket_url"]);
+      return;
+    }
+
+    if (!socket) {
+      setSocket(io(socketPath));
+    }
+    if (socket?.connected) {
+      return;
+    }
+    console.log("hey");
+
+    if (socket && id !== null && meetingID) {
+      socket.emit("join-room", meetingID, id);
+
+      socket.on("user-disconnected", (peerID) => handlePeerDisconnect(peerID));
+
+      socket.on("user-connected", (peerID) => {
+        handlePeerConnect(peerID);
+      });
+    }
+
+    return () => socket && socket.close();
+  }, [
+    socketPath,
+    id,
+    meetingID,
+    handlePeerDisconnect,
+    handlePeerConnect,
+    me,
+    socket,
+  ]);
+  useEffect(() => {
     const me = new Peer(defaultID, {
-      path: path,
-      host: host,
-      port: port,
+      path: peerConnection.path,
+      host: peerConnection.host,
+      port: peerConnection.port,
     });
 
     setId(defaultID);
     setMe(me);
     me.on("open", (id) => {
-      console.log("new id", id);
+      console.log("New PeerJS ID:", id);
       setId(id);
     });
 
-    me.on("call", (request) => {
-      navigator.mediaDevices
-        .getUserMedia({ video: true, audio: true })
-        .then((stream) => {
-          request.answer(stream);
+    me.on("call", (call) => {
+      const stream =
+        myStream ||
+        new MediaStream([createEmptyAudioTrack(), createEmptyVideoTrack()]);
+      const peerID = call.peer;
+      console.log("Incoming call from ", peerID);
+
+      if (!peerExists(peerID)) {
+        call.answer(stream);
+
+        call.on("stream", (peerVideoStream) => {
+          addCallToPeers(call, peerVideoStream);
         });
-      console.log("incoming call:");
-      console.log(request);
+      }
     });
+  }, [defaultID, peerConnection, peerExists, myStream]);
 
-    return () => {
-      console.log("Destroying peer object");
-      me.disconnect();
-      me.destroy();
-    };
-  }, [host, path, port, defaultID]);
-
-  function connectToNewUser(userId, stream) {
-    console.log("Trying to connect to ", userId, peers);
-
-    if (peers.find((existingPeer) => existingPeer.peer === userId)) {
-      console.warn("Peer ", userId, " already on call.");
-      console.log(peers);
-      return;
-    }
-
-    if (!stream) {
-      stream = new MediaStream([
-        createEmptyAudioTrack(),
-        createEmptyVideoTrack({ width: 640, height: 480 }),
-      ]);
-    }
-    const call = me.call(userId, stream);
-    if (!call) {
-      setCallError("Couldn't establish a call");
-      return;
-    }
-
-    setCallError(null);
-    console.log("Established call", call);
-
-    call.on("stream", (userVideoStream) => {
-      console.log("new stream");
-      let newPeers = peers;
-      newPeers.push({ ...call, stream: userVideoStream });
-      setPeers([...newPeers]);
-    });
-
-    call.on("close", () => {
-      console.log("call closed", peers);
-      let newPeers = peers;
-      setPeers(newPeers);
-    });
-  }
-
-  function callFromArray(array, stream) {
-    if (!array) return;
-    for (const participantID of array) {
-      connectToNewUser(participantID, stream);
-    }
-  }
-
-  return { id, peers, connectToNewUser, callError, callFromArray };
+  return { id, peers, setMyStream, myStream };
 }
