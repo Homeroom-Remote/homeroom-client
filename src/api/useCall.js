@@ -1,10 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Peer from "peerjs";
 import io from "socket.io-client";
-
-const errors = {
-  bad_socket_url: "Bad socket URL",
-};
+import socketHandler from "./socket";
 
 const createEmptyAudioTrack = () => {
   const ctx = new AudioContext();
@@ -36,159 +33,103 @@ export const peerConnectionObject = {
 
 export default function useCall(
   meetingID,
-  defaultID = undefined,
+  userID,
   peerConnection = peerConnectionObject,
-  socketPath = "http://localhost:3030/"
+  socketPath = "http://localhost:3033/"
 ) {
   const [me, setMe] = useState(null);
   const [socket, setSocket] = useState(null);
   const [myStream, setMyStream] = useState(null);
-  const [id, setId] = useState(null);
-  const [peers, setPeers] = useState([]);
+  const [peers, setPeers] = useState({});
+  const [callQueue, setCallQueue] = useState([]);
 
-  const peerExists = useCallback(
-    (userID) =>
-      !!peers.find((existingPeer) => existingPeer.call.peer === userID),
-    [peers]
-  );
-  function addCallToPeers(call, peerMediaStream) {
-    const peerObject = {
-      call: call,
-      media: peerMediaStream,
-    };
-    setPeers((lastPeersState) => [...lastPeersState, peerObject]);
-  }
-
-  const handlePeerConnect = useCallback(
-    (peerID) => {
-      if (peerID === id) {
-        console.warn("Ignored connection with same ID as my ID");
-        return;
-      }
-      if (peerExists(peerID)) {
-        // Do not try and connect to an existing peer
-        console.warn("peerID already connected to");
-        return;
-      }
-
-      if (!me) {
-        console.warn(
-          "Can't connect with",
-          peerID,
-          "because peerJS isn't initialized"
-        );
-        return;
-      }
-
-      console.log("Attempting to connect with", peerID);
-
-      const stream = myStream;
-
-      const call = me.call(peerID, stream);
-      call?.on("error", (err) => console.warn(err));
-
-      if (!call) {
-        console.warn("Call to", peerID, "failed");
-        return;
-      }
-
-      console.log("Connected with", peerID, call);
-
-      call.on("stream", (peerStream) => {
-        console.log("on stream");
-        addCallToPeers(call, peerStream);
-      });
-    },
-    [peerExists, me, id, myStream]
-  );
-
-  const handlePeerDisconnect = useCallback(
-    (peerID) => {
-      // destroy every call object that matches
-      const callObjectsFromPeers = peers.filter(
-        (peer) => peer.call.peer === peerID
-      );
-      for (const peer of callObjectsFromPeers) {
-        peer.call.close();
-      }
-
-      // filter out every call with peer
-      const filteredOutPeersArray = peers.filter(
-        (peer) => peer.call.peer !== peerID
-      );
-      setPeers(filteredOutPeersArray);
-    },
-    [peers]
-  );
-
+  /////////
+  // PeerJS
+  /////////
   useEffect(() => {
-    if (!me || !meetingID || !id) {
-      return;
-    }
+    //////////////////
+    // Initialize Peer
+    //////////////////
+    var myPeerHandler = me;
 
-    if (!socketPath) {
-      console.warn(errors["bad_socket_url"]);
-      return;
-    }
+    // Either we have a stream or we need to send an empty MediaStream to trick peerJS
+    const stream =
+      myStream ||
+      new MediaStream([
+        createEmptyAudioTrack(),
+        createEmptyVideoTrack({ width: 640, height: 280 }),
+      ]);
 
-    if (!socket) {
-      setSocket(io(socketPath));
-    }
-    if (socket?.connected) {
-      return;
-    }
-    console.log("hey");
-
-    if (socket && id !== null && meetingID) {
-      socket.emit("join-room", meetingID, id);
-
-      socket.on("user-disconnected", (peerID) => handlePeerDisconnect(peerID));
-
-      socket.on("user-connected", (peerID) => {
-        handlePeerConnect(peerID);
+    if (!me) {
+      const myPeerHandler = new Peer(userID, {
+        path: peerConnection.path,
+        host: peerConnection.host,
+        port: peerConnection.port,
       });
-    }
 
-    return () => socket && socket.close();
-  }, [
-    socketPath,
-    id,
-    meetingID,
-    handlePeerDisconnect,
-    handlePeerConnect,
-    me,
-    socket,
-  ]);
-  useEffect(() => {
-    const me = new Peer(defaultID, {
-      path: peerConnection.path,
-      host: peerConnection.host,
-      port: peerConnection.port,
-    });
+      setMe(myPeerHandler);
 
-    setId(defaultID);
-    setMe(me);
-    me.on("open", (id) => {
-      console.log("New PeerJS ID:", id);
-      setId(id);
-    });
-
-    me.on("call", (call) => {
-      const stream =
-        myStream ||
-        new MediaStream([createEmptyAudioTrack(), createEmptyVideoTrack()]);
-      const peerID = call.peer;
-      console.log("Incoming call from ", peerID);
-
-      if (!peerExists(peerID)) {
+      myPeerHandler.on("call", (call) => {
         call.answer(stream);
-
-        call.on("stream", (peerVideoStream) => {
-          addCallToPeers(call, peerVideoStream);
+        call.on("stream", (peerMediaStream) => {
+          setPeers((peers) => ({ ...peers, [call.peer]: peerMediaStream }));
         });
-      }
-    });
-  }, [defaultID, peerConnection, peerExists, myStream]);
+      });
+    }
 
-  return { id, peers, setMyStream, myStream };
+    ////////////////////
+    // Handle call queue
+    ////////////////////
+    if (callQueue.length > 0) {
+      // Call each ID in the queue
+      callQueue.forEach((callID) => {
+        setTimeout(() => {
+          const call = myPeerHandler.call(callID, stream);
+
+          if (!call) {
+            console.warn("Calling", callID, "Failed");
+            return;
+          }
+          call.on("stream", (peerStream) => {
+            call.answer(stream);
+            setPeers((peers) => ({ ...peers, [callID]: peerStream }));
+          });
+        }, 5000);
+      });
+
+      // Reset queue (for now, might change this later)
+      setCallQueue([]);
+    }
+  }, [callQueue, me, myStream, peerConnection, userID]);
+
+  /////////
+  // Socket
+  /////////
+  useEffect(() => {
+    ////////////////////
+    // Initialize socket
+    ////////////////////
+    const newSocket = io(socketPath);
+    setSocket(newSocket);
+
+    ////////////
+    // Join Room
+    ////////////
+    socketHandler.joinRoom(newSocket, meetingID, userID);
+
+    ////////////////////////
+    // Socket Event Handlers
+    ////////////////////////
+    socketHandler.onNewUserInRoom(newSocket, (peerID) => {
+      console.log(peerID, "joined the room");
+      setCallQueue((formerQueue) => [...formerQueue, peerID]);
+    });
+    socketHandler.onUserLeaveRoom(newSocket, (peerID) => {
+      console.log(peerID, "left the room");
+      setPeers((peers) => ({ ...peers, [peerID]: undefined }));
+    });
+    return () => newSocket.close();
+  }, [socketPath, userID, meetingID]);
+
+  return { peers, setMyStream, myStream };
 }
