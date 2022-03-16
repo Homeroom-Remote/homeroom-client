@@ -14,6 +14,7 @@ function App() {
   const { setUser, isLoggedIn } = useUser();
   const { isInMeeting } = useMeeting();
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     onAuthStateChanged((authState) => {
       setLoading(true);

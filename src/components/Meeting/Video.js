@@ -1,4 +1,5 @@
 function App(props) {
+  console.log(props?.mediaStream);
   return (
     <div className="App">
       <div>

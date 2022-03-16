@@ -1,7 +1,7 @@
 import Toolbar from "./Toolbar";
 import Video from "./Video";
 import Chat from "./Chat";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import useMeeting from "../../stores/meetingStore";
 import useUser from "../../stores/userStore";
 import useCall from "../../api/useCall";
@@ -50,6 +50,10 @@ export default function Meeting() {
     setMedia();
   }, [camera, microphone, setMyStream]);
 
+  useEffect(() => {
+    console.log(peers);
+  }, [peers]);
+
   return (
     <div className={globalStyles}>
       <div className="grid grid-flow-col grid-cols-8 h-full bg-stone-400">
@@ -63,11 +67,8 @@ export default function Meeting() {
             <Video mediaStream={myStream} />
 
             {/* Participants Videos */}
-            {peers.map((peer, idx) => (
-              <Video
-                mediaStream={peer.media}
-                key={`peer-${peer.peer}-${idx}`}
-              />
+            {Object.keys(peers).map((callID, idx) => (
+              <Video mediaStream={peers[callID]} key={`peer-${idx}`} />
             ))}
           </div>
 
