@@ -59,6 +59,7 @@ export default function useCall(
         createEmptyAudioTrack(),
         createEmptyVideoTrack({ width: 640, height: 280 }),
       ]);
+    console.log(stream, myStream);
 
     if (!me) {
       const myPeerHandler = new Peer(userID, {
@@ -83,18 +84,16 @@ export default function useCall(
     if (callQueue.length > 0) {
       // Call each ID in the queue
       callQueue.forEach((callID) => {
-        setTimeout(() => {
-          const call = myPeerHandler.call(callID, stream);
+        const call = myPeerHandler.call(callID, stream);
 
-          if (!call) {
-            console.warn("Calling", callID, "Failed");
-            return;
-          }
-          call.on("stream", (peerStream) => {
-            call.answer(stream);
-            setPeers((peers) => ({ ...peers, [callID]: peerStream }));
-          });
-        }, 5000);
+        if (!call) {
+          console.warn("Calling", callID, "Failed");
+          return;
+        }
+        call.on("stream", (peerStream) => {
+          call.answer(stream);
+          setPeers((peers) => ({ ...peers, [callID]: peerStream }));
+        });
       });
 
       // Reset queue (for now, might change this later)
@@ -116,6 +115,7 @@ export default function useCall(
     // Join Room
     ////////////
     socketHandler.joinRoom(newSocket, meetingID, userID);
+    newSocket.emit("ready");
 
     ////////////////////////
     // Socket Event Handlers
