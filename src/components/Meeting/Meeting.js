@@ -5,6 +5,7 @@ import React, { useState, useEffect } from "react";
 import useMeeting from "../../stores/meetingStore";
 import useUser from "../../stores/userStore";
 import useCall from "../../api/useCall";
+import Wrapper from "./Wrapper";
 const globalStyles =
   // eslint-disable-next-line no-multi-str
   "bg-background-100 text-text-900 \
@@ -47,6 +48,7 @@ export default function Meeting() {
 
       setMyStream(stream);
     }
+
     setMedia();
   }, [camera, microphone, setMyStream]);
 
@@ -62,7 +64,8 @@ export default function Meeting() {
           className={"flex flex-col " + (chat ? "col-span-6" : "col-span-8")}
         >
           {/* Video Div */}
-          <div className="h-full w-full">
+          {/* <Wrapper myStream={} mainSpeaker={} otherParticipants={[]} /> */}
+          <div className="h-full w-full grid grid-flow-row grid-cols-3 gap-x-1">
             {/* My Video */}
             <Video mediaStream={myStream} />
 
