@@ -10,7 +10,7 @@ const globalStyles =
   // eslint-disable-next-line no-multi-str
   "bg-background-100 text-text-900 \
                       dark:bg-background-800 dark:text-text-200 \
-                      transition-colors max-h-screen h-screen overflow-y-hidden";
+                      transition-colors max-h-screen h-screen max-w-screen w-screen overflow-y-hidden";
 
 export default function Meeting() {
   const { meetingID } = useMeeting();
@@ -58,14 +58,15 @@ export default function Meeting() {
 
   return (
     <div className={globalStyles}>
-      <div className="grid grid-flow-col grid-cols-8 h-full bg-stone-400">
+      <div className="h-full dark:bg-dark-800 bg-lt-600 grid grid-flow-col grid-cols-8 divide-x dark:divide-dark-600 divide-lt-600">
         {/* Video & Toolbar Div */}
         <div
-          className={"flex flex-col " + (chat ? "col-span-6" : "col-span-8")}
+          className={
+            "h-full grid grid-rows-10 grid-flow-row grid-rows " +
+            (chat ? "col-span-6" : "col-span-8")
+          }
         >
-          {/* Video Div */}
-          {/* <Wrapper myStream={} mainSpeaker={} otherParticipants={[]} /> */}
-          <div className="h-full w-full grid grid-flow-row grid-cols-3 gap-x-1">
+          <div className="dark:bg-dark-700 bg-lt-400 row-span-9">
             {/* My Video */}
             <Video mediaStream={myStream} />
 
@@ -74,31 +75,20 @@ export default function Meeting() {
               <Video mediaStream={peers[callID]} key={`peer-${idx}`} />
             ))}
           </div>
-
-          {/* Toolbar */}
-          <Toolbar
-            camera={camera}
-            toggleCamera={toggleCamera}
-            microphone={microphone}
-            toggleMicrophone={toggleMicrophone}
-            chat={chat}
-            toggleChat={toggleChat}
-          />
-        </div>
-        {chat && (
-          <div className="flex flex-col items-center bg-lt-100 col-span-2">
-            <Chat chat={chat} />
+          <div className="row-span-1">
+            <Toolbar
+              camera={camera}
+              toggleCamera={toggleCamera}
+              microphone={microphone}
+              toggleMicrophone={toggleMicrophone}
+              chat={chat}
+              toggleChat={toggleChat}
+            />
           </div>
-        )}
+        </div>
         {/* Chat Div */}
+        {chat && <Chat />}
       </div>
     </div>
   );
 }
-
-<div>
-  <div className="relative grid-cols-full">
-    <Video />
-    <Toolbar />
-  </div>
-</div>;

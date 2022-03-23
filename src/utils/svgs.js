@@ -274,6 +274,19 @@ export const Record = (props) => (
   </svg>
 );
 
+export const Send = (props) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    className={props.className}
+    strokeWidth={2}
+  >
+    <title>{props.title}</title>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+  </svg>
+);
 export const Reactions = (props) => (
   <svg
     role="img"

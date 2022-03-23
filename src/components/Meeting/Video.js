@@ -2,7 +2,7 @@ function App({ mediaStream }) {
   const shouldDisplayVideoStream =
     mediaStream && !mediaStream.id?.includes("-");
   return (
-    <div className="col-span-1 h-max w-max">
+    <div className="w-64 h-64">
       <div>
         {shouldDisplayVideoStream ? (
           <video
