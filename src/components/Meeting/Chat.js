@@ -92,7 +92,7 @@ function Chat(props) {
   };
 
   return (
-    <div className="flex flex-col justify-between dark:bg-dark-900 bg-lt-50 col-span-2">
+    <div className="flex flex-col justify-between dark:bg-dark-900 bg-lt-50 col-span-3">
       {/* Tabs */}
       <div>
         <div className="flex flex-row justify-center items-center">

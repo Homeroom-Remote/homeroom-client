@@ -53,13 +53,8 @@ export default function useCall(
     var myPeerHandler = me;
 
     // Either we have a stream or we need to send an empty MediaStream to trick peerJS
-    const stream =
-      myStream ||
-      new MediaStream([
-        createEmptyAudioTrack(),
-        createEmptyVideoTrack({ width: 640, height: 280 }),
-      ]);
-    console.log(stream, myStream);
+    if (!myStream) return;
+    const stream = myStream;
 
     if (!me) {
       const myPeerHandler = new Peer(userID, {

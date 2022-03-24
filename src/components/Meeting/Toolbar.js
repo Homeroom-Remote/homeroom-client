@@ -48,7 +48,7 @@ export default function Toolbar(props) {
   const toggleChat = props.toggleChat;
 
   return (
-    <div className="flex flex-row dark:bg-dark-900 bg-lt-50 w-full items-center justify-between">
+    <div className="flex flex-row dark:bg-dark-900 bg-lt-50 items-center justify-between h-full">
       <div className="flex flex-row gap-x-2 p-6">
         <ToolbarButton
           state={camera}

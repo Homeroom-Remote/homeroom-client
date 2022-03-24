@@ -5,68 +5,75 @@ import React, { useState, useEffect } from "react";
 import useMeeting from "../../stores/meetingStore";
 import useUser from "../../stores/userStore";
 import useCall from "../../api/useCall";
+import mediaSource from "../../api/mediaSource";
 import Wrapper from "./Wrapper";
 const globalStyles =
   // eslint-disable-next-line no-multi-str
   "bg-background-100 text-text-900 \
                       dark:bg-background-800 dark:text-text-200 \
-                      transition-colors max-h-screen h-screen max-w-screen w-screen overflow-y-hidden";
+                      transition-colors max-h-screen h-screen max-w-screen min-h-max w-screen overflow-y-hidden";
 
 export default function Meeting() {
   const { meetingID } = useMeeting();
   const { user } = useUser();
   const { peers, setMyStream, myStream } = useCall(meetingID, user.uid);
 
-  const [camera, setCamera] = useState(true);
+  const [media, setMedia] = useState(null);
+  const [chat, setChat] = useState(false);
+  const [microphone, setMicrophone] = useState(false);
+  const [camera, setCamera] = useState(false);
+
   const toggleCamera = () => {
+    refreshMedia(!camera, microphone);
     setCamera(!camera);
   };
 
-  const [microphone, setMicrophone] = useState(true);
   const toggleMicrophone = () => {
+    refreshMedia(camera, !microphone);
     setMicrophone(!microphone);
   };
 
-  const [chat, setChat] = useState(false);
   const toggleChat = () => {
     setChat(!chat);
   };
 
-  useEffect(() => {
-    async function setMedia() {
-      let stream = null;
-
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: camera,
-          audio: microphone,
-        });
-      } catch (err) {
-        console.log(err);
-        console.warn("Error on Meeting.js: getUserMedia");
-      }
-
-      setMyStream(stream);
+  const refreshMedia = (shouldUseVideo, shouldUseAudio) => {
+    if (!shouldUseAudio && !shouldUseVideo) {
+      media.removeAudio();
+      media.removeVideo();
+      setMyStream(media.getSource());
+      return;
     }
 
-    setMedia();
-  }, [camera, microphone, setMyStream]);
+    navigator.mediaDevices
+      .getUserMedia({ video: shouldUseVideo, audio: shouldUseAudio })
+      .then((stream) => {
+        media.addAudioFromStream(stream);
+        media.addVideoFromStream(stream);
+        setMyStream(media.getSource());
+      });
+  };
 
   useEffect(() => {
-    console.log(peers);
-  }, [peers]);
+    const media = new mediaSource();
+    setMedia(media);
+    setMyStream(media.getSource());
+  }, [setMyStream]);
+
+  // useEffect(() => {
+  //   console.log(peers);
+  // }, [peers]);
 
   return (
     <div className={globalStyles}>
-      <div className="h-full dark:bg-dark-800 bg-lt-600 grid grid-flow-col grid-cols-8 divide-x dark:divide-dark-600 divide-lt-600">
-        {/* Video & Toolbar Div */}
+      <div className="h-full grid grid-flow-col grid-cols-10 grid-rows-1">
         <div
           className={
-            "h-full grid grid-rows-10 grid-flow-row grid-rows " +
-            (chat ? "col-span-6" : "col-span-8")
+            "grid grid-rows-10 grid-flow-row bg-red-200 h-full " +
+            (chat ? "col-span-7" : "col-span-10")
           }
         >
-          <div className="dark:bg-dark-700 bg-lt-400 row-span-9">
+          <div className="row-span-9 dark:bg-dark-700 bg-lt-400">
             {/* My Video */}
             <Video mediaStream={myStream} />
 
