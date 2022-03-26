@@ -3,28 +3,6 @@ import Peer from "peerjs";
 import io from "socket.io-client";
 import socketHandler from "./socket";
 
-const createEmptyAudioTrack = () => {
-  const ctx = new AudioContext();
-  const oscillator = ctx.createOscillator();
-  const dst = oscillator.connect(ctx.createMediaStreamDestination());
-  oscillator.start();
-  const track = dst.stream.getAudioTracks()[0];
-  return Object.assign(track, { enabled: false });
-};
-
-const createEmptyVideoTrack = ({ width, height }) => {
-  const canvas = Object.assign(document.createElement("canvas"), {
-    width,
-    height,
-  });
-  canvas.getContext("2d").fillRect(0, 0, width, height);
-
-  const stream = canvas.captureStream();
-  const track = stream.getVideoTracks()[0];
-
-  return Object.assign(track, { enabled: false });
-};
-
 export const peerConnectionObject = {
   path: "/peerjs",
   host: "localhost",
@@ -43,6 +21,84 @@ export default function useCall(
   const [peers, setPeers] = useState({});
   const [callQueue, setCallQueue] = useState([]);
 
+  const Call = {
+    id: null,
+    callObject: null,
+    stream: null,
+  };
+
+  const createCall = () => Object.assign({}, Call);
+
+  function removePeer(peerID) {
+    console.log("Removing peer", peerID);
+    if (!peerID) return;
+
+    const peersCopy = peers;
+    delete peersCopy[peerID];
+    setPeers({ ...peersCopy });
+  }
+
+  function initCall(peerID) {
+    if (!peerID || !me || !myStream) return;
+
+    console.log("Trying to connect to", peerID);
+    const callObject = me.call(peerID, myStream);
+
+    if (!callObject) {
+      console.warn("Calling", peerID, "Failed");
+      return;
+    }
+
+    console.log("Call to", peerID, "established");
+
+    console.log(peers);
+
+    var call = createCall();
+    call.id = peerID;
+    call.callObject = callObject;
+
+    callObject.on("stream", (peerStream) => {
+      callObject.answer(myStream);
+      call.stream = peerStream;
+
+      const oldPeers = peers;
+      oldPeers[peerID] = call;
+      setPeers({ ...oldPeers });
+    });
+
+    callObject.on("close", () => {
+      removePeer(peerID);
+    });
+  }
+  function refreshCallsAfterNewMediaStream() {
+    socketHandler.newStream(socket);
+    Object.keys(peers).forEach((peer) => {
+      const call = peers[peer];
+      if (!call.id || !call.callObject) return;
+      call.callObject.close();
+      removePeer(call.id);
+      initCall(call.id);
+    });
+  }
+
+  const onMediaStreamChange = () =>
+    me &&
+    Object.keys(peers).length > 0 &&
+    myStream &&
+    refreshCallsAfterNewMediaStream();
+
+  /////////////////
+  // PeerJS Cleanup
+  /////////////////
+  useEffect(() => {
+    return () => {
+      if (me) {
+        console.log("Closing PeerJS Connection");
+        me?.destroy();
+      }
+    };
+  }, [me]);
+
   /////////
   // PeerJS
   /////////
@@ -50,11 +106,8 @@ export default function useCall(
     //////////////////
     // Initialize Peer
     //////////////////
-    var myPeerHandler = me;
 
-    // Either we have a stream or we need to send an empty MediaStream to trick peerJS
     if (!myStream) return;
-    const stream = myStream;
 
     if (!me) {
       const myPeerHandler = new Peer(userID, {
@@ -65,11 +118,25 @@ export default function useCall(
 
       setMe(myPeerHandler);
 
-      myPeerHandler.on("call", (call) => {
-        call.answer(stream);
-        call.on("stream", (peerMediaStream) => {
-          setPeers((peers) => ({ ...peers, [call.peer]: peerMediaStream }));
+      myPeerHandler.on("call", (callObject) => {
+        var call = createCall();
+        call.id = callObject.peer;
+        call.callObject = callObject;
+        console.log("Got a call", callObject);
+        callObject.answer(myStream);
+        callObject.on("stream", (peerMediaStream) => {
+          call.stream = peerMediaStream;
+          const oldPeers = peers;
+          oldPeers[call.id] = call;
+          setPeers({ ...oldPeers });
         });
+
+        callObject.on("close", () => {
+          removePeer(callObject.peer);
+        });
+      });
+      myPeerHandler.on("error", (error) => {
+        console.warn("peerjs error", error);
       });
     }
 
@@ -79,21 +146,15 @@ export default function useCall(
     if (callQueue.length > 0) {
       // Call each ID in the queue
       callQueue.forEach((callID) => {
-        const call = myPeerHandler.call(callID, stream);
-
-        if (!call) {
-          console.warn("Calling", callID, "Failed");
-          return;
-        }
-        call.on("stream", (peerStream) => {
-          call.answer(stream);
-          setPeers((peers) => ({ ...peers, [callID]: peerStream }));
-        });
+        initCall(callID);
       });
 
       // Reset queue (for now, might change this later)
       setCallQueue([]);
     }
+    /////////////////////////////
+    // Destruct PeerJS Connection
+    /////////////////////////////
   }, [callQueue, me, myStream, peerConnection, userID]);
 
   /////////
@@ -121,10 +182,15 @@ export default function useCall(
     });
     socketHandler.onUserLeaveRoom(newSocket, (peerID) => {
       console.log(peerID, "left the room");
-      setPeers((peers) => ({ ...peers, [peerID]: undefined }));
+      removePeer(peerID);
+    });
+
+    socketHandler.onNewStream(newSocket, (peerID) => {
+      console.log(peerID, "changing stream");
+      removePeer(peerID);
     });
     return () => newSocket.close();
   }, [socketPath, userID, meetingID]);
 
-  return { peers, setMyStream, myStream };
+  return { peers, setMyStream, myStream, onMediaStreamChange };
 }

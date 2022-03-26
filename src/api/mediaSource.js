@@ -37,6 +37,19 @@ export default class mediaSource {
     if (!stream) return;
     this.replaceAudio(stream.getAudioTracks()[0]);
   };
+
+  toggleVideo = () => {
+    this.#source
+      ?.getVideoTracks()
+      .forEach((track) => (track.enabled = !track.enabled));
+  };
+
+  toggleAudio = () => {
+    this.#source
+      ?.getAudioTracks()
+      .forEach((track) => (track.enabled = !track.enabled));
+  };
+
   createEmptyMediaStream({ width, height }) {
     const canvas = Object.assign(document.createElement("canvas"), {
       width,

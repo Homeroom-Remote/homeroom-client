@@ -2,7 +2,7 @@ function App({ mediaStream }) {
   const shouldDisplayVideoStream = !!mediaStream;
 
   return (
-    <div className="">
+    <div className="h-80 w-80">
       <div>
         {shouldDisplayVideoStream ? (
           <video
@@ -12,7 +12,7 @@ function App({ mediaStream }) {
             autoPlay={true}
           />
         ) : (
-          <div className="bg-black">Shachar with 2 L's</div>
+          <div className="bg-black">Can't display video</div>
         )}
       </div>
     </div>

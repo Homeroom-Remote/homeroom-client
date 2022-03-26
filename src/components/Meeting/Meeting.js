@@ -16,7 +16,10 @@ const globalStyles =
 export default function Meeting() {
   const { meetingID } = useMeeting();
   const { user } = useUser();
-  const { peers, setMyStream, myStream } = useCall(meetingID, user.uid);
+  const { peers, setMyStream, myStream, onMediaStreamChange } = useCall(
+    meetingID,
+    user.uid
+  );
 
   const [media, setMedia] = useState(null);
   const [chat, setChat] = useState(false);
@@ -42,6 +45,7 @@ export default function Meeting() {
       media.removeAudio();
       media.removeVideo();
       setMyStream(media.getSource());
+      onMediaStreamChange();
       return;
     }
 
@@ -51,6 +55,7 @@ export default function Meeting() {
         media.addAudioFromStream(stream);
         media.addVideoFromStream(stream);
         setMyStream(media.getSource());
+        onMediaStreamChange();
       });
   };
 
@@ -60,9 +65,9 @@ export default function Meeting() {
     setMyStream(media.getSource());
   }, [setMyStream]);
 
-  // useEffect(() => {
-  //   console.log(peers);
-  // }, [peers]);
+  useEffect(() => {
+    console.log("peers changed", peers);
+  }, [peers]);
 
   return (
     <div className={globalStyles}>
@@ -78,8 +83,8 @@ export default function Meeting() {
             <Video mediaStream={myStream} />
 
             {/* Participants Videos */}
-            {Object.keys(peers).map((callID, idx) => (
-              <Video mediaStream={peers[callID]} key={`peer-${idx}`} />
+            {Object.keys(peers).map((call, idx) => (
+              <Video mediaStream={peers[call]?.stream} key={`peer-${idx}`} />
             ))}
           </div>
           <div className="row-span-1">
