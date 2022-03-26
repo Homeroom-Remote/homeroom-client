@@ -37,25 +37,30 @@ function ChatTab({ name, messages, active, onClick }) {
     <button
       onClick={handleTabClick}
       className={
-        "outline-none w-full flex flex-row border-b dark:border-dark-600 border-lt-300 justify-center gap-x-4 p-4 " +
+        "outline-none relative w-full border-b dark:border-dark-600 border-lt-300 justify-center " +
         (active && "dark:border-dark-400 border-lt-600")
       }
     >
-      <p
-        className={
-          "font-medium " +
-          (active
-            ? "dark:text-text-200 text-text-900"
-            : "dark:text-text-500 text-text-500")
-        }
-      >
-        {name}
-      </p>{" "}
-      {messages && (
-        <span className="rounded-full w-6 h-6 flex items-center justify-center dark:bg-dark-600 bg-lt-300 bg-opacity-60">
-          {messages.length}
-        </span>
+      {active && (
+        <span className="absolute top-1/8 left-0 rounded-full w-full h-full bg-primary-600 blur-md dark:opacity-10 opacity-20"></span>
       )}
+      <span className="flex flex-row gap-x-4 p-3 justify-center">
+        <p
+          className={
+            "font-medium " +
+            (active
+              ? "dark:text-text-200 text-text-900"
+              : "dark:text-text-500 text-text-500")
+          }
+        >
+          {name}
+        </p>{" "}
+        {messages && (
+          <span className="rounded-full w-6 h-6 flex items-center justify-center dark:bg-dark-600 bg-lt-300 bg-opacity-60">
+            {messages.length}
+          </span>
+        )}
+      </span>
     </button>
   );
 }
