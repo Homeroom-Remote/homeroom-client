@@ -28,12 +28,20 @@ export default function useCall(
   };
 
   const createCall = () => Object.assign({}, Call);
+  const closeHandler = (peerID) => {
+    console.log("Closing call with", peerID);
+    removePeer(peerID);
+  };
+
+  const callErrorHandler = (error) => {
+    console.warn("Call error", error);
+  };
 
   function removePeer(peerID) {
     console.log("Removing peer", peerID);
-    if (!peerID) return;
+    if (!peerID || peerID === userID) return;
 
-    const peersCopy = peers;
+    var peersCopy = peers;
     delete peersCopy[peerID];
     setPeers({ ...peersCopy });
   }
@@ -49,26 +57,26 @@ export default function useCall(
       return;
     }
 
-    console.log("Call to", peerID, "established");
-
-    console.log(peers);
+    console.log("Call to", peerID, "established", callObject);
 
     var call = createCall();
     call.id = peerID;
     call.callObject = callObject;
 
+    const newPeers = peers;
+    newPeers[peerID] = call;
+    setPeers(newPeers);
+
     callObject.on("stream", (peerStream) => {
-      callObject.answer(myStream);
+      console.log("getting stream");
       call.stream = peerStream;
-
-      const oldPeers = peers;
-      oldPeers[peerID] = call;
-      setPeers({ ...oldPeers });
+      var newPeers = peers;
+      newPeers[peerID] = call;
+      setPeers({ ...newPeers });
     });
 
-    callObject.on("close", () => {
-      removePeer(peerID);
-    });
+    callObject.on("error", callErrorHandler);
+    callObject.on("close", () => closeHandler(callObject.peer));
   }
   function refreshCallsAfterNewMediaStream() {
     socketHandler.newStream(socket);
@@ -122,18 +130,23 @@ export default function useCall(
         var call = createCall();
         call.id = callObject.peer;
         call.callObject = callObject;
-        console.log("Got a call", callObject);
+        console.log("Got a call", callObject, peers);
         callObject.answer(myStream);
-        callObject.on("stream", (peerMediaStream) => {
-          call.stream = peerMediaStream;
-          const oldPeers = peers;
-          oldPeers[call.id] = call;
-          setPeers({ ...oldPeers });
+
+        var newPeers = peers;
+        newPeers[call.id] = call;
+        setPeers(newPeers);
+
+        callObject.on("stream", (peerStream) => {
+          call.stream = peerStream;
+
+          var newPeers = peers;
+          newPeers[call.id] = call;
+          setPeers({ ...newPeers });
         });
 
-        callObject.on("close", () => {
-          removePeer(callObject.peer);
-        });
+        callObject.on("error", callErrorHandler);
+        callObject.on("close", () => closeHandler(callObject.peer));
       });
       myPeerHandler.on("error", (error) => {
         console.warn("peerjs error", error);
@@ -185,10 +198,6 @@ export default function useCall(
       removePeer(peerID);
     });
 
-    socketHandler.onNewStream(newSocket, (peerID) => {
-      console.log(peerID, "changing stream");
-      removePeer(peerID);
-    });
     return () => newSocket.close();
   }, [socketPath, userID, meetingID]);
 

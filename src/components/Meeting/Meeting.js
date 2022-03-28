@@ -42,8 +42,7 @@ export default function Meeting() {
 
   const refreshMedia = (shouldUseVideo, shouldUseAudio) => {
     if (!shouldUseAudio && !shouldUseVideo) {
-      media.removeAudio();
-      media.removeVideo();
+      media.initWithEmptyStream();
       setMyStream(media.getSource());
       onMediaStreamChange();
       return;

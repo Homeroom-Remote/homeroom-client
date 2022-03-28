@@ -7,15 +7,17 @@ export default class mediaSource {
   getSource = () => this.#source;
 
   removeVideo = () => {
-    this.#source
-      .getVideoTracks()
-      .forEach((track) => this.#source.removeTrack(track));
+    this.#source.getVideoTracks().forEach((track) => {
+      track.stop();
+      this.#source.removeTrack(track);
+    });
   };
 
   removeAudio = () => {
-    this.#source
-      .getAudioTracks()
-      .forEach((track) => this.#source.removeTrack(track));
+    this.#source.getAudioTracks().forEach((track) => {
+      track.stop();
+      this.#source.removeTrack(track);
+    });
   };
 
   replaceVideo = (videoTrack) => {
@@ -48,6 +50,12 @@ export default class mediaSource {
     this.#source
       ?.getAudioTracks()
       .forEach((track) => (track.enabled = !track.enabled));
+  };
+
+  initWithEmptyStream = () => {
+    this.removeAudio();
+    this.removeVideo();
+    this.#source = this.createEmptyMediaStream({ width: 640, height: 480 });
   };
 
   createEmptyMediaStream({ width, height }) {
