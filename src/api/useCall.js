@@ -18,6 +18,7 @@ export default function useCall(
   const [me, setMe] = useState(null);
   const [socket, setSocket] = useState(null);
   const [myStream, setMyStream] = useState(null);
+  const [messageListener, setMessageListener] = useState({});
   const [peers, setPeers] = useState({});
   const [callQueue, setCallQueue] = useState([]);
 
@@ -26,6 +27,8 @@ export default function useCall(
     callObject: null,
     stream: null,
   };
+
+  const sendMessage = (message) => socketHandler.sendMessage(socket, message);
 
   const createCall = () => Object.assign({}, Call);
   const closeHandler = (peerID) => {
@@ -198,8 +201,19 @@ export default function useCall(
       removePeer(peerID);
     });
 
+    socketHandler.onMessage(newSocket, (message) => {
+      setMessageListener(message);
+    });
+
     return () => newSocket.close();
   }, [socketPath, userID, meetingID]);
 
-  return { peers, setMyStream, myStream, onMediaStreamChange };
+  return {
+    peers,
+    setMyStream,
+    myStream,
+    onMediaStreamChange,
+    sendMessage,
+    messageListener,
+  };
 }

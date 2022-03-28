@@ -16,15 +16,34 @@ const globalStyles =
 export default function Meeting() {
   const { meetingID } = useMeeting();
   const { user } = useUser();
-  const { peers, setMyStream, myStream, onMediaStreamChange } = useCall(
-    meetingID,
-    user.uid
-  );
+  const {
+    peers,
+    setMyStream,
+    myStream,
+    onMediaStreamChange,
+    sendMessage,
+    messageListener,
+  } = useCall(meetingID, user.uid);
 
   const [media, setMedia] = useState(null);
   const [chat, setChat] = useState(false);
   const [microphone, setMicrophone] = useState(false);
   const [camera, setCamera] = useState(false);
+  const [generalMessages, setGeneralMessages] = useState([]);
+  const [privateMessages, setPrivateMessages] = useState([]);
+  const [unreadGeneralMessages, setUnreadGeneralMessages] = useState(0);
+  const [unreadPrivateMessages, setUnreadPrivateMessages] = useState(0);
+
+  // messageListener === new socket message
+  useEffect(() => {
+    if (messageListener) {
+      setGeneralMessages((formerGeneralMessages) => [
+        ...formerGeneralMessages,
+        { ...messageListener, isMe: user.sender === messageListener.uid },
+      ]);
+    }
+    setUnreadGeneralMessages((unread) => unread + 1);
+  }, [messageListener]);
 
   const toggleCamera = () => {
     refreshMedia(!camera, microphone);
@@ -39,6 +58,18 @@ export default function Meeting() {
   const toggleChat = () => {
     setChat(!chat);
   };
+
+  const sendMessageFromChat = (message) => {
+    if (!message || message.length > 200 || message.length <= 0) {
+      console.warn("Message has to be a string between 0 & 200 chars");
+      return;
+    }
+
+    sendMessage(message);
+  };
+
+  const onOpenGeneralMessages = () => setUnreadGeneralMessages(0);
+  const onOpenPrivateMessages = () => setUnreadPrivateMessages(0);
 
   const refreshMedia = (shouldUseVideo, shouldUseAudio) => {
     if (!shouldUseAudio && !shouldUseVideo) {
@@ -98,7 +129,17 @@ export default function Meeting() {
           </div>
         </div>
         {/* Chat Div */}
-        {chat && <Chat />}
+        {chat && (
+          <Chat
+            sendMessage={sendMessageFromChat}
+            generalMessages={generalMessages}
+            privateMessages={privateMessages}
+            unreadGeneralMessages={unreadGeneralMessages}
+            unreadPrivateMessages={unreadPrivateMessages}
+            onOpenGeneralMessages={onOpenGeneralMessages}
+            onOpenPrivateMessages={onOpenPrivateMessages}
+          />
+        )}
       </div>
     </div>
   );

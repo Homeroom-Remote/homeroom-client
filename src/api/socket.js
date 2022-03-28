@@ -4,6 +4,7 @@ const events = {
   user_disconnected_event: "user-disconnected",
   ready_event: "ready",
   new_stream_event: "new-stream",
+  new_message: "message",
 };
 
 const declareReady = (socket) => socket && socket.emit(events["ready_event"]);
@@ -23,15 +24,23 @@ const onUserLeaveRoom = (socket, callback) =>
 const onNewStream = (socket, callback) =>
   socket && callback && socket.on(events["new_stream_event"], callback);
 
+const onMessage = (socket, callback) =>
+  socket && callback && socket.on(events["new_message"], callback);
+
 const newStream = (socket) => socket && socket.emit(events["new_stream_event"]);
+
+const sendMessage = (socket, message) =>
+  socket && socket.emit(events["new_message"], message);
 
 const socketHandler = {
   joinRoom,
+  declareReady,
   onNewUserInRoom,
   onUserLeaveRoom,
   onNewStream,
-  declareReady,
+  onMessage,
   newStream,
+  sendMessage,
 };
 
 export default socketHandler;

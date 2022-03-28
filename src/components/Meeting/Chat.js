@@ -1,32 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Reactions, Send } from "../../utils/svgs";
 
-const generalMessages = [
-  { message: "Hello World", sender: "Anthony L.", time: "1:57pm" },
-  {
-    message:
-      "Mollit voluptate aliquip in ex voluptate et Lorem nulla mollit Lorem pariatur et. Lorem nostrud fugiat deserunt irure. Cillum ea nulla incididunt officia enim est et reprehenderit minim voluptate ad. Ex et nostrud proident ipsum. Irure consectetur proident do nulla fugiat nostrud nulla elit consequat. Sit nisi quis cupidatat labore ad do eu do reprehenderit excepteur. Id magna do culpa voluptate commodo veniam commodo eu ad.",
-    sender: "Anthony L.",
-    time: "1:57pm",
-  },
-  {
-    message:
-      "Sit cillum veniam elit sunt irure velit est dolor et ipsum elit quis qui minim.",
-    sender: "Sarah K.",
-    time: "1:57pm",
-  },
-  { message: "Hello World", sender: "Michal S.", time: "1:57pm" },
-];
-
-const privateMessages = [
-  {
-    message: "k",
-    sender: "f",
-    time: "1:23 pm",
-  },
-];
-
-function ChatTab({ name, messages, active, onClick }) {
+function ChatTab({ name, messages, unread, active, onClick }) {
   const handleTabClick = () => {
     if (active) return;
 
@@ -55,9 +30,9 @@ function ChatTab({ name, messages, active, onClick }) {
         >
           {name}
         </p>{" "}
-        {messages && (
+        {messages && unread > 0 && (
           <span className="rounded-full w-6 h-6 flex items-center justify-center dark:bg-dark-600 bg-lt-300 bg-opacity-60">
-            {messages.length}
+            {unread}
           </span>
         )}
       </span>
@@ -77,24 +52,61 @@ function Message({ message }) {
   );
 }
 
-function Chat(props) {
+function Chat({
+  sendMessage,
+  generalMessages,
+  privateMessages,
+  unreadGeneralMessages,
+  unreadPrivateMessages,
+  onOpenGeneralMessages,
+  onOpenPrivateMessages,
+}) {
   const [generalTab, setGeneralTab] = useState(true);
   const [privateTab, setPrivateTab] = useState(false);
+  const [message, setMessage] = useState("");
+  const inputRef = useRef(null);
 
   const handleGeneralTabClick = () => {
     setPrivateTab(false);
     setGeneralTab(true);
+    onOpenGeneralMessages();
   };
 
   const handlePrivateTabClick = () => {
     setPrivateTab(true);
     setGeneralTab(false);
+    onOpenPrivateMessages();
   };
 
   const getMessages = () => {
+    console.log(generalMessages, privateMessages);
     if (generalTab) return generalMessages;
     else return privateMessages;
   };
+
+  const handleChange = (e) => {
+    e.persist();
+    setMessage(e.target.value);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleSendMessage();
+    }
+  };
+
+  const handleSendMessage = () => {
+    sendMessage(message);
+    inputRef.current.value = "";
+  };
+
+  useEffect(() => {
+    if (generalTab) onOpenGeneralMessages();
+  }, [generalMessages]);
+
+  useEffect(() => {
+    if (privateTab) onOpenPrivateMessages();
+  }, [privateMessages]);
 
   return (
     <div className="flex flex-col justify-between dark:bg-dark-900 bg-lt-50 col-span-3">
@@ -104,12 +116,14 @@ function Chat(props) {
           <ChatTab
             name={"General"}
             messages={generalMessages}
+            unread={unreadGeneralMessages}
             active={generalTab}
             onClick={handleGeneralTabClick}
           />
           <ChatTab
             name={"Private"}
             messages={privateMessages}
+            unread={unreadPrivateMessages}
             active={privateTab}
             onClick={handlePrivateTabClick}
           />
@@ -129,9 +143,15 @@ function Chat(props) {
         <input
           className="dark:bg-dark-900 bg-lt-50 outline-none"
           type="text"
+          ref={inputRef}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
           placeholder="Type your message..."
         />
-        <button className="outline-none text-text-900 dark:text-text-200">
+        <button
+          className="outline-none text-text-900 dark:text-text-200"
+          onClick={handleSendMessage}
+        >
           <Send className="w-6 h-6" />
         </button>
       </div>
