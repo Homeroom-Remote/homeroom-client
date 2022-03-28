@@ -6,7 +6,7 @@ import useMeeting from "../../stores/meetingStore";
 import useUser from "../../stores/userStore";
 import useCall from "../../api/useCall";
 import mediaSource from "../../api/mediaSource";
-import Wrapper from "./Wrapper";
+import VideoWrapper from "./VideoWrapper";
 const globalStyles =
   // eslint-disable-next-line no-multi-str
   "bg-background-100 text-text-900 \
@@ -59,6 +59,36 @@ export default function Meeting() {
     setChat(!chat);
   };
 
+
+
+///////////////////////////////////////////////////////////////////////////////////
+
+
+const myArray = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21]
+const streamArray = [myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream]
+const numOfVideosInPage = 8
+
+const [startIndex, setStartIndex] = useState(0);
+const toggleForward = () => {
+  if(startIndex + numOfVideosInPage < streamArray.length - 1) {
+    setStartIndex(Math.min(startIndex+numOfVideosInPage))
+    setEndIndex(Math.min(endIndex+numOfVideosInPage, streamArray.length-1))
+  }
+};
+
+const [endIndex, setEndIndex] = useState(Math.min(numOfVideosInPage-1, streamArray.length-1));
+const toggleBackward = () => {
+  if(startIndex >= numOfVideosInPage) {
+    setEndIndex(Math.min(startIndex-1, streamArray.length-1))
+    setStartIndex(startIndex-numOfVideosInPage)
+  }
+};
+
+///////////////////////////////////////////////////////////////////////////////////
+
+
+
+
   const sendMessageFromChat = (message) => {
     if (!message || message.length > 200 || message.length <= 0) {
       console.warn("Message has to be a string between 0 & 200 chars");
@@ -108,15 +138,8 @@ export default function Meeting() {
             (chat ? "col-span-7" : "col-span-10")
           }
         >
-          <div className="row-span-9 dark:bg-dark-700 bg-lt-400">
-            {/* My Video */}
-            <Video mediaStream={myStream} />
+          <VideoWrapper startIndex={startIndex} endIndex={endIndex} toggleForward={toggleForward} toggleBackward={toggleBackward} chat={chat} myStream={myStream} mainSpeaker={myStream} otherParticipants={streamArray} myArray={myArray} />
 
-            {/* Participants Videos */}
-            {Object.keys(peers).map((call, idx) => (
-              <Video mediaStream={peers[call]?.stream} key={`peer-${idx}`} />
-            ))}
-          </div>
           <div className="row-span-1">
             <Toolbar
               camera={camera}

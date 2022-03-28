@@ -1,21 +1,18 @@
-function App({ mediaStream }) {
-  const shouldDisplayVideoStream = !!mediaStream;
-
+function App({ mediaStream, height, width }) {
+  const shouldDisplayVideoStream = !!mediaStream
   return (
-    <div className="h-80 w-80">
-      <div>
+    <div className="h-full w-full place-items-center justify-center flex">
         {shouldDisplayVideoStream ? (
-          <video
+          <video className="object-fill h-full w-full"
             ref={(e) => {
               if (e) e.srcObject = mediaStream;
             }}
             autoPlay={true}
           />
         ) : (
-          <div className="bg-black">Can't display video</div>
+          <div>User Name</div>
         )}
       </div>
-    </div>
   );
 }
 
