@@ -1,5 +1,5 @@
-import { Mic, MutedMic, Cam, MutedCam, Chat } from "../../utils/svgs";
-import useMeeting from "../../stores/meetingStore";
+import { Mic, MutedMic, Cam, MutedCam, Security, Participants, Chat, ShareScreen, Record, Reactions } from "../../utils/svgs";
+import { useState } from "react";import useMeeting from "../../stores/meetingStore";
 import Button from "../Button";
 import OnlineIndicator from "../OnlineIndicator";
 
@@ -18,14 +18,14 @@ function ToolbarButton(props) {
       {theState === true ? (
         <>
           <OnlineIndicator online={true} ping={false} />
-          <LogoOn className="h-6 w-12 opacity-100" />
+          <LogoOn className="h-7 w-14 opacity-100" />
           <span className="dark:text-text-200 text-text-200 text-sm">
             {textOn}
           </span>
         </>
       ) : (
         <>
-          <LogoOff className="h-6 w-12 opacity-60" />
+          <LogoOff className="h-7 w-14 opacity-60" />
           <span className="dark:text-text-200 text-text-200 text-opacity-60 dark:text-opacity-60 text-sm">
             {textOff}
           </span>
@@ -47,10 +47,32 @@ export default function Toolbar(props) {
   const chat = props.chat;
   const toggleChat = props.toggleChat;
 
+
+  const [security, setSecurity] = useState(false);
+  const toggleSecurity = () => {
+    setSecurity(!security);
+  };
+  const [participants, setParticipants] = useState(false);
+  const toggleParticipants = () => {
+    setParticipants(!participants);
+  };
+  const [shareScreen, setShareScreen] = useState(false);
+  const toggleShareScreen = () => {
+    setShareScreen(!shareScreen);
+  };
+  const [record, setRecord] = useState(false);
+  const toggleRecord = () => {
+    setRecord(!record);
+  };
+  const [reactions, setReactions] = useState(false);
+  const toggleReactions = () => {
+    setReactions(!reactions);
+  };
+
   return (
     <div className="flex flex-row dark:bg-dark-900 bg-lt-50 items-center justify-between h-full">
       <div className="flex flex-row gap-x-2 p-6">
-        <ToolbarButton
+      <ToolbarButton
           state={camera}
           toggle={toggleCamera}
           logoOn={Cam}
@@ -66,6 +88,25 @@ export default function Toolbar(props) {
           textOn={"Mute"}
           textOff={"Unmute"}
         />
+      </div>
+      <div className="flex flex-row gap-x-6">
+        <ToolbarButton
+          className="hover:text-primary-900"
+          state={security}
+          toggle={toggleSecurity}
+          logoOn={Security}
+          logoOff={Security}
+          textOn={"Security"}
+          textOff={"Security"}
+        />
+        <ToolbarButton
+          state={participants}
+          toggle={toggleParticipants}
+          logoOn={Participants}
+          logoOff={Participants}
+          textOn={"Participants"}
+          textOff={"Participants"}
+        />
         <ToolbarButton
           state={chat}
           toggle={toggleChat}
@@ -73,6 +114,30 @@ export default function Toolbar(props) {
           logoOff={Chat}
           textOn={"Chat"}
           textOff={"Chat"}
+        />
+        <ToolbarButton
+          state={shareScreen}
+          toggle={toggleShareScreen}
+          logoOn={ShareScreen}
+          logoOff={ShareScreen}
+          textOn={"Share Screen"}
+          textOff={"Share Screen"}
+        />
+        <ToolbarButton
+          state={record}
+          toggle={toggleRecord}
+          logoOn={Record}
+          logoOff={Record}
+          textOn={"Record"}
+          textOff={"Record"}
+        />
+        <ToolbarButton
+          state={reactions}
+          toggle={toggleReactions}
+          logoOn={Reactions}
+          logoOff={Reactions}
+          textOn={"Reactions"}
+          textOff={"Reactions"}
         />
       </div>
       <div className="px-2">
