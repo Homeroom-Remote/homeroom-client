@@ -1,31 +1,34 @@
+import { useEffect, useState } from "react";
+
 import Toolbar from "./Toolbar";
-import Video from "./Video";
 import Chat from "./Chat";
-import React, { useState, useEffect } from "react";
+import VideoWrapper from "./VideoWrapper";
+
 import useMeeting from "../../stores/meetingStore";
 import useUser from "../../stores/userStore";
-import useCall from "../../api/useCall";
-import mediaSource from "../../api/mediaSource";
-import VideoWrapper from "./VideoWrapper";
+import useRoom from "../../api/useColyseus";
+import { getToken } from "../../api/auth";
+
 const globalStyles =
   // eslint-disable-next-line no-multi-str
   "bg-background-100 text-text-900 \
                       dark:bg-background-800 dark:text-text-200 \
                       transition-colors max-h-screen h-screen max-w-screen min-h-max w-screen overflow-y-hidden";
 
+function RoomLoading() {
+  return <div className={globalStyles}>Loading meeting</div>;
+}
+
+function Error({ error }) {
+  return <div className={globalStyles}>Error</div>;
+}
 export default function Meeting() {
+  // External hooks
   const { meetingID } = useMeeting();
   const { user } = useUser();
-  const {
-    peers,
-    setMyStream,
-    myStream,
-    onMediaStreamChange,
-    sendMessage,
-    messageListener,
-  } = useCall(meetingID, user.uid);
+  const { isOnline, error, registerMessages } = useRoom(meetingID);
 
-  const [media, setMedia] = useState(null);
+  // Internal hooks
   const [chat, setChat] = useState(false);
   const [microphone, setMicrophone] = useState(false);
   const [camera, setCamera] = useState(false);
@@ -33,17 +36,6 @@ export default function Meeting() {
   const [privateMessages, setPrivateMessages] = useState([]);
   const [unreadGeneralMessages, setUnreadGeneralMessages] = useState(0);
   const [unreadPrivateMessages, setUnreadPrivateMessages] = useState(0);
-
-  // messageListener === new socket message
-  useEffect(() => {
-    if (messageListener) {
-      setGeneralMessages((formerGeneralMessages) => [
-        ...formerGeneralMessages,
-        { ...messageListener, isMe: user.sender === messageListener.uid },
-      ]);
-    }
-    setUnreadGeneralMessages((unread) => unread + 1);
-  }, [messageListener]);
 
   const toggleCamera = () => {
     refreshMedia(!camera, microphone);
@@ -59,75 +51,86 @@ export default function Meeting() {
     setChat(!chat);
   };
 
+  ///////////////////////////////////////////////////////////////////////////////////
 
+  // const myArray = [
+  //   0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+  //   21,
+  // ];
+  // const streamArray = [
+  //   myStream,
+  //   myStream,
+  //   myStream,
+  //   myStream,
+  //   myStream,
+  //   myStream,
+  //   myStream,
+  //   myStream,
+  //   myStream,
+  //   myStream,
+  //   myStream,
+  //   myStream,
+  //   myStream,
+  //   myStream,
+  //   myStream,
+  //   myStream,
+  //   myStream,
+  //   myStream,
+  //   myStream,
+  // ];
+  // const numOfVideosInPage = 8;
 
-///////////////////////////////////////////////////////////////////////////////////
+  // const [startIndex, setStartIndex] = useState(0);
+  // const toggleForward = () => {
+  //   if (startIndex + numOfVideosInPage < streamArray.length - 1) {
+  //     setStartIndex(Math.min(startIndex + numOfVideosInPage));
+  //     setEndIndex(
+  //       Math.min(endIndex + numOfVideosInPage, streamArray.length - 1)
+  //     );
+  //   }
+  // };
 
+  // const [endIndex, setEndIndex] = useState(
+  //   Math.min(numOfVideosInPage - 1, streamArray.length - 1)
+  // );
+  // const toggleBackward = () => {
+  //   if (startIndex >= numOfVideosInPage) {
+  //     setEndIndex(Math.min(startIndex - 1, streamArray.length - 1));
+  //     setStartIndex(startIndex - numOfVideosInPage);
+  //   }
+  // };
 
-const myArray = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21]
-const streamArray = [myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream]
-const numOfVideosInPage = 8
-
-const [startIndex, setStartIndex] = useState(0);
-const toggleForward = () => {
-  if(startIndex + numOfVideosInPage < streamArray.length - 1) {
-    setStartIndex(Math.min(startIndex+numOfVideosInPage))
-    setEndIndex(Math.min(endIndex+numOfVideosInPage, streamArray.length-1))
-  }
-};
-
-const [endIndex, setEndIndex] = useState(Math.min(numOfVideosInPage-1, streamArray.length-1));
-const toggleBackward = () => {
-  if(startIndex >= numOfVideosInPage) {
-    setEndIndex(Math.min(startIndex-1, streamArray.length-1))
-    setStartIndex(startIndex-numOfVideosInPage)
-  }
-};
-
-///////////////////////////////////////////////////////////////////////////////////
-
-
-
+  ///////////////////////////////////////////////////////////////////////////////////
 
   const sendMessageFromChat = (message) => {
-    if (!message || message.length > 200 || message.length <= 0) {
-      console.warn("Message has to be a string between 0 & 200 chars");
-      return;
-    }
-
-    sendMessage(message);
+    console.log("Send message");
   };
 
   const onOpenGeneralMessages = () => setUnreadGeneralMessages(0);
   const onOpenPrivateMessages = () => setUnreadPrivateMessages(0);
 
   const refreshMedia = (shouldUseVideo, shouldUseAudio) => {
-    if (!shouldUseAudio && !shouldUseVideo) {
-      media.initWithEmptyStream();
-      setMyStream(media.getSource());
-      onMediaStreamChange();
-      return;
-    }
-
-    navigator.mediaDevices
-      .getUserMedia({ video: shouldUseVideo, audio: shouldUseAudio })
-      .then((stream) => {
-        media.addAudioFromStream(stream);
-        media.addVideoFromStream(stream);
-        setMyStream(media.getSource());
-        onMediaStreamChange();
-      });
+    console.log("Refresh media");
   };
 
-  useEffect(() => {
-    const media = new mediaSource();
-    setMedia(media);
-    setMyStream(media.getSource());
-  }, [setMyStream]);
+  if (error) {
+    return <Error error={error} />;
+  }
 
-  useEffect(() => {
-    console.log("peers changed", peers);
-  }, [peers]);
+  if (!isOnline) {
+    return <RoomLoading />;
+  }
+
+  registerMessages([
+    {
+      name: "join",
+      callback: (data) => console.log(data, "-> Joined"),
+    },
+    {
+      name: "leave",
+      callback: (data) => console.log(data, "-> Left"),
+    },
+  ]);
 
   return (
     <div className={globalStyles}>
@@ -138,7 +141,17 @@ const toggleBackward = () => {
             (chat ? "col-span-7" : "col-span-10")
           }
         >
-          <VideoWrapper startIndex={startIndex} endIndex={endIndex} toggleForward={toggleForward} toggleBackward={toggleBackward} chat={chat} myStream={myStream} mainSpeaker={myStream} otherParticipants={streamArray} myArray={myArray} />
+          {/* <VideoWrapper
+            startIndex={startIndex}
+            endIndex={endIndex}
+            toggleForward={toggleForward}
+            toggleBackward={toggleBackward}
+            chat={chat}
+            myStream={myStream}
+            mainSpeaker={myStream}
+            otherParticipants={streamArray}
+            myArray={myArray}
+          /> */}
 
           <div className="row-span-1">
             <Toolbar

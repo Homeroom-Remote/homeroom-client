@@ -3,7 +3,6 @@ import {
   create,
   getMyMeetingId,
   isMyMeetingOnline,
-  openMeeting,
 } from "../../../api/meeting";
 import { useEffect, useState } from "react";
 
@@ -63,7 +62,6 @@ export default function QuickSelection({ setOverlayComponent }) {
 
   function openRoom() {
     create()
-      .then((meeting) => openMeeting())
       .then(() => getMyMeetingId())
       .then((meetingID) => joinMeeting(meetingID))
       .catch((error) => console.warn(error));

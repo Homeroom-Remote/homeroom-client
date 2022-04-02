@@ -5,22 +5,29 @@ import useStore from "../../../stores/meetingStore";
 import Button from "../../Button";
 import TitleBarClose from "../../TitleBarClose";
 import OnlineIndicator from "../../OnlineIndicator";
+
+const MEETING_ID_LENGTH = 6;
 export default function JoinRoomOverlay({ close }) {
   const [meetingID, setMeetingID] = useState("");
   const [meetingDetails, setMeetingDetails] = useState(null);
   const [meetingIDError, setMeetingIDError] = useState(null);
   const { joinMeeting } = useStore();
   const handleJoinRoom = () => {
-    if (meetingIDError || !meetingDetails || meetingID.length !== 28) return;
+    if (
+      meetingIDError ||
+      !meetingDetails ||
+      meetingID.length !== MEETING_ID_LENGTH
+    )
+      return;
     console.log("trying to join", meetingID);
     joinMeeting(meetingID);
   };
 
   const showTable = () =>
-    !meetingIDError && meetingDetails && meetingID.length === 28;
+    !meetingIDError && meetingDetails && meetingID.length === MEETING_ID_LENGTH;
 
   useEffect(() => {
-    if (meetingID.length === 28) {
+    if (meetingID.length === MEETING_ID_LENGTH) {
       get(meetingID)
         .then((meeting) => {
           if (meeting) {
