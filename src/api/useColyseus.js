@@ -1,6 +1,7 @@
 import * as Colyseus from "colyseus.js";
 import { useState, useEffect } from "react";
 import { getToken } from "./auth";
+import useUser from "../stores/userStore";
 
 const defaultWsUrl = `ws://${window.location.hostname}:3030`;
 
@@ -9,6 +10,7 @@ export default function RoomManager(meetingID, options) {
   const [error, setError] = useState(null);
   const [client, setClient] = useState(null);
   const [room, setRoom] = useState(null);
+  const { user } = useUser();
 
   function registerMessages(messagesCallbackList) {
     room.removeAllListeners();
@@ -18,6 +20,11 @@ export default function RoomManager(meetingID, options) {
       if (!name || !callback) throw Error("Invalid message name/callback");
       room.onMessage(name, callback);
     });
+  }
+
+  function sendChatMessage(message) {
+    if (!room) return;
+    room.send("chat-message", message);
   }
 
   useEffect(() => {
@@ -37,6 +44,7 @@ export default function RoomManager(meetingID, options) {
         const room = await newClient.joinOrCreate("peer", {
           accessToken: token,
           meetingId: meetingID,
+          name: user.displayName,
         });
         setRoom(room);
         setIsOnline(true);
@@ -49,5 +57,5 @@ export default function RoomManager(meetingID, options) {
     joinRoom();
   }, [options]);
 
-  return { isOnline, error, registerMessages };
+  return { isOnline, error, registerMessages, sendChatMessage };
 }

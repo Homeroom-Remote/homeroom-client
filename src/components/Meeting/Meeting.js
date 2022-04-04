@@ -26,7 +26,8 @@ export default function Meeting() {
   // External hooks
   const { meetingID } = useMeeting();
   const { user } = useUser();
-  const { isOnline, error, registerMessages } = useRoom(meetingID);
+  const { isOnline, error, registerMessages, sendChatMessage } =
+    useRoom(meetingID);
 
   // Internal hooks
   const [chat, setChat] = useState(false);
@@ -103,7 +104,11 @@ export default function Meeting() {
   ///////////////////////////////////////////////////////////////////////////////////
 
   const sendMessageFromChat = (message) => {
-    console.log("Send message");
+    sendChatMessage(message);
+  };
+
+  const addGeneralMessage = (messageObject) => {
+    setGeneralMessages((oldMessages) => [...oldMessages, messageObject]);
   };
 
   const onOpenGeneralMessages = () => setUnreadGeneralMessages(0);
@@ -129,6 +134,10 @@ export default function Meeting() {
     {
       name: "leave",
       callback: (data) => console.log(data, "-> Left"),
+    },
+    {
+      name: "chat-message",
+      callback: (messageObject) => addGeneralMessage(messageObject),
     },
   ]);
 

@@ -41,11 +41,17 @@ function ChatTab({ name, messages, unread, active, onClick }) {
 }
 
 function Message({ message }) {
+  const getMessageStyles = () => {
+    if (message.me) return "font-bold text-primary-600";
+    return "font-medium dark:text-text-400 text-text-800";
+  };
+
+  const getTime = () => new Date(message.time).toLocaleTimeString();
   return (
     <div className="flex flex-col gap-y-2 p-2">
       <header className="flex flex-row justify-between">
-        <p className="dark:text-text-200 font-medium">{message.sender}</p>
-        <p className="dark:text-text-400">{message.time}</p>
+        <p className={getMessageStyles()}>{message.name}</p>
+        <p className="dark:text-text-400">{getTime()}</p>
       </header>
       <p className="dark:text-text-400">{message.message}</p>
     </div>
@@ -79,7 +85,6 @@ function Chat({
   };
 
   const getMessages = () => {
-    console.log(generalMessages, privateMessages);
     if (generalTab) return generalMessages;
     else return privateMessages;
   };
