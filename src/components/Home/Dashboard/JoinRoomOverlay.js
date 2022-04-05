@@ -12,6 +12,13 @@ export default function JoinRoomOverlay({ close }) {
   const [meetingDetails, setMeetingDetails] = useState(null);
   const [meetingIDError, setMeetingIDError] = useState(null);
   const { joinMeeting } = useStore();
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleJoinRoom();
+    }
+  };
+
   const handleJoinRoom = () => {
     if (
       meetingIDError ||
@@ -53,6 +60,7 @@ export default function JoinRoomOverlay({ close }) {
           Enter Meeting ID:
           <input
             onChange={(event) => setMeetingID(event.target.value)}
+            onKeyDown={handleKeyDown}
             type="text"
             className="rounded px-1 pointer-events-auto text-text-800"
           />

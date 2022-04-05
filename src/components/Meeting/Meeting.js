@@ -5,10 +5,9 @@ import Chat from "./Chat";
 import VideoWrapper from "./VideoWrapper";
 
 import useMeeting from "../../stores/meetingStore";
-import useUser from "../../stores/userStore";
+import useVideoSettings from "../../stores/videoSettingsStore";
 import useRoom from "../../api/useColyseus";
 import usePeer from "../../api/usePeer";
-import { getToken } from "../../api/auth";
 
 const globalStyles =
   // eslint-disable-next-line no-multi-str
@@ -24,24 +23,20 @@ function Error({ error }) {
   return <div className={globalStyles}>Error</div>;
 }
 export default function Meeting() {
-  // Internal hooks
+  const { defaultVideo, defaultAudio } = useVideoSettings();
+  const [myStream, setMyStream] = useState(null);
   const [chat, setChat] = useState(false);
-  const [microphone, setMicrophone] = useState(false);
-  const [camera, setCamera] = useState(false);
+  const [microphone, setMicrophone] = useState(defaultAudio);
+  const [camera, setCamera] = useState(defaultVideo);
   const [generalMessages, setGeneralMessages] = useState([]);
   const [privateMessages, setPrivateMessages] = useState([]);
   const [unreadGeneralMessages, setUnreadGeneralMessages] = useState(0);
   const [unreadPrivateMessages, setUnreadPrivateMessages] = useState(0);
 
-  // External hooks
   const { meetingID } = useMeeting();
-  const { user } = useUser();
   const { isOnline, error, registerMessages, sendChatMessage } =
     useRoom(meetingID);
-  const { createPeer, signalPeer, destroyPeer, myStream } = usePeer({
-    video: camera,
-    audio: microphone,
-  });
+  const { createPeer, destroyPeer, peers } = usePeer(myStream);
 
   const toggleCamera = () => {
     setCamera(!camera);
@@ -51,82 +46,52 @@ export default function Meeting() {
     setMicrophone(!microphone);
   };
 
+  const refreshMedia = (video, audio) => {
+    function getMedia(constraints) {
+      return navigator.mediaDevices.getUserMedia(constraints);
+    }
+
+    getMedia({ video, audio })
+      .then((stream) => setMyStream(stream))
+      .catch(() => {
+        if (myStream) {
+          myStream.getTracks().forEach((track) => track.stop());
+        }
+        setMyStream(null);
+      });
+  };
+
+  useEffect(() => {
+    refreshMedia(camera, microphone);
+  }, [camera, microphone]);
+
   const toggleChat = () => {
     setChat(!chat);
   };
-
-  useEffect(() => {}, []);
-
-  ///////////////////////////////////////////////////////////////////////////////////
-
-  // const myArray = [
-  //   0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-  //   21,
-  // ];
-  // const streamArray = [
-  //   myStream,
-  //   myStream,
-  //   myStream,
-  //   myStream,
-  //   myStream,
-  //   myStream,
-  //   myStream,
-  //   myStream,
-  //   myStream,
-  //   myStream,
-  //   myStream,
-  //   myStream,
-  //   myStream,
-  //   myStream,
-  //   myStream,
-  //   myStream,
-  //   myStream,
-  //   myStream,
-  //   myStream,
-  // ];
-  // const numOfVideosInPage = 8;
-
-  // const [startIndex, setStartIndex] = useState(0);
-  // const toggleForward = () => {
-  //   if (startIndex + numOfVideosInPage < streamArray.length - 1) {
-  //     setStartIndex(Math.min(startIndex + numOfVideosInPage));
-  //     setEndIndex(
-  //       Math.min(endIndex + numOfVideosInPage, streamArray.length - 1)
-  //     );
-  //   }
-  // };
-
-  // const [endIndex, setEndIndex] = useState(
-  //   Math.min(numOfVideosInPage - 1, streamArray.length - 1)
-  // );
-  // const toggleBackward = () => {
-  //   if (startIndex >= numOfVideosInPage) {
-  //     setEndIndex(Math.min(startIndex - 1, streamArray.length - 1));
-  //     setStartIndex(startIndex - numOfVideosInPage);
-  //   }
-  // };
-
-  ///////////////////////////////////////////////////////////////////////////////////
 
   const sendMessageFromChat = (message) => {
     sendChatMessage(message);
   };
 
   const addGeneralMessage = (messageObject) => {
+    setUnreadGeneralMessages((unread) => unread + 1);
     setGeneralMessages((oldMessages) => [...oldMessages, messageObject]);
   };
 
   const onOpenGeneralMessages = () => setUnreadGeneralMessages(0);
   const onOpenPrivateMessages = () => setUnreadPrivateMessages(0);
 
+  // TODO: graphic of error and a return button
   if (error) {
     return <Error error={error} />;
   }
 
+  // TODO: graphic of room loading
   if (!isOnline) {
     return <RoomLoading />;
   }
 
+  // socket room messages
   registerMessages([
     {
       name: "join",
@@ -155,17 +120,11 @@ export default function Meeting() {
             (chat ? "col-span-7" : "col-span-10")
           }
         >
-          {/* <VideoWrapper
-            startIndex={startIndex}
-            endIndex={endIndex}
-            toggleForward={toggleForward}
-            toggleBackward={toggleBackward}
+          <VideoWrapper
             chat={chat}
             myStream={myStream}
-            mainSpeaker={myStream}
-            otherParticipants={streamArray}
-            myArray={myArray}
-          /> */}
+            otherParticipants={peers}
+          />
 
           <div className="row-span-1">
             <Toolbar
