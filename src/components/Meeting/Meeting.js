@@ -7,6 +7,7 @@ import VideoWrapper from "./VideoWrapper";
 import useMeeting from "../../stores/meetingStore";
 import useUser from "../../stores/userStore";
 import useRoom from "../../api/useColyseus";
+import usePeer from "../../api/usePeer";
 import { getToken } from "../../api/auth";
 
 const globalStyles =
@@ -23,12 +24,6 @@ function Error({ error }) {
   return <div className={globalStyles}>Error</div>;
 }
 export default function Meeting() {
-  // External hooks
-  const { meetingID } = useMeeting();
-  const { user } = useUser();
-  const { isOnline, error, registerMessages, sendChatMessage } =
-    useRoom(meetingID);
-
   // Internal hooks
   const [chat, setChat] = useState(false);
   const [microphone, setMicrophone] = useState(false);
@@ -38,19 +33,29 @@ export default function Meeting() {
   const [unreadGeneralMessages, setUnreadGeneralMessages] = useState(0);
   const [unreadPrivateMessages, setUnreadPrivateMessages] = useState(0);
 
+  // External hooks
+  const { meetingID } = useMeeting();
+  const { user } = useUser();
+  const { isOnline, error, registerMessages, sendChatMessage } =
+    useRoom(meetingID);
+  const { createPeer, signalPeer, destroyPeer, myStream } = usePeer({
+    video: camera,
+    audio: microphone,
+  });
+
   const toggleCamera = () => {
-    refreshMedia(!camera, microphone);
     setCamera(!camera);
   };
 
   const toggleMicrophone = () => {
-    refreshMedia(camera, !microphone);
     setMicrophone(!microphone);
   };
 
   const toggleChat = () => {
     setChat(!chat);
   };
+
+  useEffect(() => {}, []);
 
   ///////////////////////////////////////////////////////////////////////////////////
 
@@ -114,10 +119,6 @@ export default function Meeting() {
   const onOpenGeneralMessages = () => setUnreadGeneralMessages(0);
   const onOpenPrivateMessages = () => setUnreadPrivateMessages(0);
 
-  const refreshMedia = (shouldUseVideo, shouldUseAudio) => {
-    console.log("Refresh media");
-  };
-
   if (error) {
     return <Error error={error} />;
   }
@@ -129,15 +130,19 @@ export default function Meeting() {
   registerMessages([
     {
       name: "join",
-      callback: (data) => console.log(data, "-> Joined"),
+      callback: (room, message) => createPeer(room, message, true),
     },
     {
       name: "leave",
-      callback: (data) => console.log(data, "-> Left"),
+      callback: (room, message) => destroyPeer(message.sessionId),
+    },
+    {
+      name: "signal",
+      callback: (room, message) => createPeer(room, message, false),
     },
     {
       name: "chat-message",
-      callback: (messageObject) => addGeneralMessage(messageObject),
+      callback: (room, message) => addGeneralMessage(message),
     },
   ]);
 

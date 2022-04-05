@@ -18,7 +18,7 @@ export default function RoomManager(meetingID, options) {
     messagesCallbackList.forEach((mcObject) => {
       const { name, callback } = mcObject;
       if (!name || !callback) throw Error("Invalid message name/callback");
-      room.onMessage(name, callback);
+      room.onMessage(name, (message) => callback(room, message));
     });
   }
 
