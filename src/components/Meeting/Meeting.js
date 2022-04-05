@@ -3,25 +3,20 @@ import { useEffect, useState } from "react";
 import Toolbar from "./Toolbar";
 import Chat from "./Chat";
 import VideoWrapper from "./VideoWrapper";
+import Error from "./Error";
 
 import useMeeting from "../../stores/meetingStore";
 import useVideoSettings from "../../stores/videoSettingsStore";
 import useRoom from "../../api/useColyseus";
 import usePeer from "../../api/usePeer";
+import MeetingLoading from "./MeetingLoading";
 
 const globalStyles =
   // eslint-disable-next-line no-multi-str
-  "bg-background-100 text-text-900 \
-                      dark:bg-background-800 dark:text-text-200 \
-                      transition-colors max-h-screen h-screen max-w-screen min-h-max w-screen overflow-y-hidden";
+  "bg-lt-100 text-text-900 \
+                      dark:bg-dark-900 dark:text-text-200 \
+                      transition-colors max-h-screen h-screen overflow-y-hidden";
 
-function RoomLoading() {
-  return <div className={globalStyles}>Loading meeting</div>;
-}
-
-function Error({ error }) {
-  return <div className={globalStyles}>Error</div>;
-}
 export default function Meeting() {
   const { defaultVideo, defaultAudio } = useVideoSettings();
   const [myStream, setMyStream] = useState(null);
@@ -33,7 +28,7 @@ export default function Meeting() {
   const [unreadGeneralMessages, setUnreadGeneralMessages] = useState(0);
   const [unreadPrivateMessages, setUnreadPrivateMessages] = useState(0);
 
-  const { meetingID } = useMeeting();
+  const { meetingID, exitMeeting } = useMeeting();
   const { isOnline, error, registerMessages, sendChatMessage } =
     useRoom(meetingID);
   const { createPeer, destroyPeer, peers } = usePeer(myStream);
@@ -81,14 +76,13 @@ export default function Meeting() {
   const onOpenGeneralMessages = () => setUnreadGeneralMessages(0);
   const onOpenPrivateMessages = () => setUnreadPrivateMessages(0);
 
-  // TODO: graphic of error and a return button
   if (error) {
-    return <Error error={error} />;
+    return <Error error={error} goBack={exitMeeting} />;
   }
 
   // TODO: graphic of room loading
   if (!isOnline) {
-    return <RoomLoading />;
+    return <MeetingLoading />;
   }
 
   // socket room messages

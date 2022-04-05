@@ -66,6 +66,7 @@ export default function usePeer(myStream) {
     });
 
     peer.on("track", (track, stream) => {
+      // Mute happens when track is removed (audio and video)
       track.addEventListener("mute", () => {
         updatePeers(message.sessionId, {
           id: message.sessionId,
