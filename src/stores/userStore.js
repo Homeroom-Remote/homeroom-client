@@ -10,7 +10,9 @@ const useStore = create((set, get) => ({
       return;
     }
     // Given name for annoymous user
-    user.displayName = user?.isAnonymous ? `bot-${uuid()}` : user?.displayName;
+    user.displayName = user?.isAnonymous
+      ? `bot-${uuid().slice(0, 10)}`
+      : user?.displayName;
     set((state) => ({
       ...state,
       user: user,

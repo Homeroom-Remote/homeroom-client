@@ -1,133 +1,109 @@
+import { useEffect, useState } from "react";
+
 import Toolbar from "./Toolbar";
-import Video from "./Video";
 import Chat from "./Chat";
-import React, { useState, useEffect } from "react";
-import useMeeting from "../../stores/meetingStore";
-import useUser from "../../stores/userStore";
-import useCall from "../../api/useCall";
-import mediaSource from "../../api/mediaSource";
 import VideoWrapper from "./VideoWrapper";
+import Error from "./Error";
+
+import useMeeting from "../../stores/meetingStore";
+import useVideoSettings from "../../stores/videoSettingsStore";
+import useRoom from "../../api/useColyseus";
+import usePeer from "../../api/usePeer";
+import MeetingLoading from "./MeetingLoading";
+
 const globalStyles =
   // eslint-disable-next-line no-multi-str
-  "bg-background-100 text-text-900 \
-                      dark:bg-background-800 dark:text-text-200 \
-                      transition-colors max-h-screen h-screen max-w-screen min-h-max w-screen overflow-y-hidden";
+  "bg-lt-100 text-text-900 \
+                      dark:bg-dark-900 dark:text-text-200 \
+                      transition-colors max-h-screen h-screen overflow-y-hidden";
 
 export default function Meeting() {
-  const { meetingID } = useMeeting();
-  const { user } = useUser();
-  const {
-    peers,
-    setMyStream,
-    myStream,
-    onMediaStreamChange,
-    sendMessage,
-    messageListener,
-  } = useCall(meetingID, user.uid);
-
-  const [media, setMedia] = useState(null);
+  const { defaultVideo, defaultAudio } = useVideoSettings();
+  const [myStream, setMyStream] = useState(null);
   const [chat, setChat] = useState(false);
-  const [microphone, setMicrophone] = useState(false);
-  const [camera, setCamera] = useState(false);
+  const [microphone, setMicrophone] = useState(defaultAudio);
+  const [camera, setCamera] = useState(defaultVideo);
   const [generalMessages, setGeneralMessages] = useState([]);
   const [privateMessages, setPrivateMessages] = useState([]);
   const [unreadGeneralMessages, setUnreadGeneralMessages] = useState(0);
   const [unreadPrivateMessages, setUnreadPrivateMessages] = useState(0);
 
-  // messageListener === new socket message
-  useEffect(() => {
-    if (messageListener) {
-      setGeneralMessages((formerGeneralMessages) => [
-        ...formerGeneralMessages,
-        { ...messageListener, isMe: user.sender === messageListener.uid },
-      ]);
-    }
-    setUnreadGeneralMessages((unread) => unread + 1);
-  }, [messageListener]);
+  const { meetingID, exitMeeting } = useMeeting();
+  const { isOnline, error, registerMessages, sendChatMessage } =
+    useRoom(meetingID);
+  const { createPeer, destroyPeer, peers } = usePeer(myStream);
 
   const toggleCamera = () => {
-    refreshMedia(!camera, microphone);
     setCamera(!camera);
   };
 
   const toggleMicrophone = () => {
-    refreshMedia(camera, !microphone);
     setMicrophone(!microphone);
   };
+
+  const refreshMedia = (video, audio) => {
+    function getMedia(constraints) {
+      return navigator.mediaDevices.getUserMedia(constraints);
+    }
+
+    getMedia({ video, audio })
+      .then((stream) => setMyStream(stream))
+      .catch(() => {
+        if (myStream) {
+          myStream.getTracks().forEach((track) => track.stop());
+        }
+        setMyStream(null);
+      });
+  };
+
+  useEffect(() => {
+    refreshMedia(camera, microphone);
+  }, [camera, microphone]);
 
   const toggleChat = () => {
     setChat(!chat);
   };
 
-
-
-///////////////////////////////////////////////////////////////////////////////////
-
-
-const myArray = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21]
-const streamArray = [myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream, myStream]
-const numOfVideosInPage = 8
-
-const [startIndex, setStartIndex] = useState(0);
-const toggleForward = () => {
-  if(startIndex + numOfVideosInPage < streamArray.length - 1) {
-    setStartIndex(Math.min(startIndex+numOfVideosInPage))
-    setEndIndex(Math.min(endIndex+numOfVideosInPage, streamArray.length-1))
-  }
-};
-
-const [endIndex, setEndIndex] = useState(Math.min(numOfVideosInPage-1, streamArray.length-1));
-const toggleBackward = () => {
-  if(startIndex >= numOfVideosInPage) {
-    setEndIndex(Math.min(startIndex-1, streamArray.length-1))
-    setStartIndex(startIndex-numOfVideosInPage)
-  }
-};
-
-///////////////////////////////////////////////////////////////////////////////////
-
-
-
-
   const sendMessageFromChat = (message) => {
-    if (!message || message.length > 200 || message.length <= 0) {
-      console.warn("Message has to be a string between 0 & 200 chars");
-      return;
-    }
+    sendChatMessage(message);
+  };
 
-    sendMessage(message);
+  const addGeneralMessage = (messageObject) => {
+    setUnreadGeneralMessages((unread) => unread + 1);
+    setGeneralMessages((oldMessages) => [...oldMessages, messageObject]);
   };
 
   const onOpenGeneralMessages = () => setUnreadGeneralMessages(0);
   const onOpenPrivateMessages = () => setUnreadPrivateMessages(0);
 
-  const refreshMedia = (shouldUseVideo, shouldUseAudio) => {
-    if (!shouldUseAudio && !shouldUseVideo) {
-      media.initWithEmptyStream();
-      setMyStream(media.getSource());
-      onMediaStreamChange();
-      return;
-    }
+  if (error) {
+    return <Error error={error} goBack={exitMeeting} />;
+  }
 
-    navigator.mediaDevices
-      .getUserMedia({ video: shouldUseVideo, audio: shouldUseAudio })
-      .then((stream) => {
-        media.addAudioFromStream(stream);
-        media.addVideoFromStream(stream);
-        setMyStream(media.getSource());
-        onMediaStreamChange();
-      });
-  };
+  // TODO: graphic of room loading
+  if (!isOnline) {
+    return <MeetingLoading />;
+  }
 
-  useEffect(() => {
-    const media = new mediaSource();
-    setMedia(media);
-    setMyStream(media.getSource());
-  }, [setMyStream]);
-
-  useEffect(() => {
-    console.log("peers changed", peers);
-  }, [peers]);
+  // socket room messages
+  registerMessages([
+    {
+      name: "join",
+      callback: (room, message) => createPeer(room, message, true),
+    },
+    {
+      name: "leave",
+      callback: (room, message) => destroyPeer(message.sessionId),
+    },
+    {
+      name: "signal",
+      callback: (room, message) => createPeer(room, message, false),
+    },
+    {
+      name: "chat-message",
+      callback: (room, message) => addGeneralMessage(message),
+    },
+  ]);
 
   return (
     <div className={globalStyles}>
@@ -138,7 +114,11 @@ const toggleBackward = () => {
             (chat ? "col-span-7" : "col-span-10")
           }
         >
-          <VideoWrapper startIndex={startIndex} endIndex={endIndex} toggleForward={toggleForward} toggleBackward={toggleBackward} chat={chat} myStream={myStream} mainSpeaker={myStream} otherParticipants={streamArray} myArray={myArray} />
+          <VideoWrapper
+            chat={chat}
+            myStream={myStream}
+            otherParticipants={peers}
+          />
 
           <div className="row-span-1">
             <Toolbar

@@ -7,6 +7,9 @@ const errors = {
   no_meeting_error: "No meeting was found",
 };
 
+function getMeetingFromUserID(uid) {
+  return uid.slice(0, 6);
+}
 async function isLoggedIn() {
   const isLoggedInPromise = new Promise((resolve, reject) => {
     const user = auth.currentUser;
@@ -45,7 +48,7 @@ async function getMyMeeting() {
   const getMyMeetingPromise = new Promise((resolve, reject) => {
     isLoggedIn()
       .then((user) => {
-        get(user.uid)
+        get(getMeetingFromUserID(user.uid))
           .then((meeting) => {
             if (meeting) resolve(meeting);
             else reject(errors["no_meeting_error"]);
@@ -64,7 +67,7 @@ async function create() {
 
     if (user) {
       // User is logged in
-      const meeting_id = user.uid;
+      const meeting_id = getMeetingFromUserID(user.uid);
       get(meeting_id)
         .then((document) => {
           if (!document) {
@@ -101,7 +104,7 @@ async function updateStatus(status) {
   const updateMeetingDocumentPromise = new Promise((resolve, reject) => {
     isLoggedIn()
       .then((user) => {
-        getDoc(user.uid).update({
+        getDoc(getMeetingFromUserID(user.uid)).update({
           updated_at: firebase.firestore.FieldValue.serverTimestamp(),
           status: status,
         });
@@ -140,7 +143,7 @@ async function clearParticipants() {
   const clearParticipantsPromise = new Promise((resolve, reject) => {
     isLoggedIn()
       .then((user) =>
-        getDoc(user.uid).update({
+        getDoc(getMeetingFromUserID(user.uid)).update({
           updated_at: firebase.firestore.FieldValue.serverTimestamp(),
           participants: [],
         })
@@ -167,7 +170,7 @@ async function isOnline(meeting_id) {
 async function isMyMeetingOnline() {
   const isMyMeetingOnlinePromise = new Promise((resolve, reject) => {
     isLoggedIn()
-      .then((user) => isOnline(user.uid))
+      .then((user) => isOnline(getMeetingFromUserID(user.uid)))
       .then((answer) => resolve(answer))
       .catch((error) => reject(error));
   });
@@ -178,7 +181,7 @@ async function isMyMeetingOnline() {
 async function getMyMeetingId() {
   const getMyMeetingIdPromise = new Promise((resolve, reject) => {
     isLoggedIn()
-      .then((user) => resolve(user.uid))
+      .then((user) => resolve(getMeetingFromUserID(user.uid)))
       .catch((error) => reject(error));
   });
   return getMyMeetingIdPromise;
@@ -188,7 +191,7 @@ async function closeMeetingIfLastPerson() {
   console.trace();
   const closeMeetingIfLastPersonPromise = new Promise((resolve, reject) => {
     isLoggedIn()
-      .then((user) => get(user.uid))
+      .then((user) => get(getMeetingFromUserID(user.uid)))
       .then((meeting) => {
         if (
           // Meeting is empty completely
@@ -224,7 +227,7 @@ async function addToMeetingParticipants(uid) {
   const addToMeetingParticipantsPromise = new Promise((resolve, reject) => {
     isLoggedIn()
       .then((user) =>
-        getDoc(user.uid).update({
+        getDoc(getMeetingFromUserID(user.uid)).update({
           updated_at: firebase.firestore.FieldValue.serverTimestamp(),
           participants: firebase.firestore.FieldValue.arrayUnion(uid),
         })
