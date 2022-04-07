@@ -1,5 +1,17 @@
-import { Mic, MutedMic, Cam, MutedCam, Security, Participants, Chat, ShareScreen, Record, Reactions } from "../../utils/svgs";
-import { useState } from "react";import useMeeting from "../../stores/meetingStore";
+import {
+  Mic,
+  MutedMic,
+  Cam,
+  MutedCam,
+  Security,
+  Participants,
+  Chat,
+  ShareScreen,
+  Record,
+  Reactions,
+} from "../../utils/svgs";
+import { useState } from "react";
+import useMeeting from "../../stores/meetingStore";
 import Button from "../Button";
 import OnlineIndicator from "../OnlineIndicator";
 
@@ -47,7 +59,6 @@ export default function Toolbar(props) {
   const chat = props.chat;
   const toggleChat = props.toggleChat;
 
-
   const [security, setSecurity] = useState(false);
   const toggleSecurity = () => {
     setSecurity(!security);
@@ -70,9 +81,9 @@ export default function Toolbar(props) {
   };
 
   return (
-    <div className="flex flex-row dark:bg-dark-900 bg-lt-50 items-center justify-between h-full">
+    <div className="flex flex-row dark:bg-dark-900 bg-lt-400 items-center justify-between h-full">
       <div className="flex flex-row gap-x-2 p-6">
-      <ToolbarButton
+        <ToolbarButton
           state={camera}
           toggle={toggleCamera}
           logoOn={Cam}

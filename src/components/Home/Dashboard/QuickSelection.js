@@ -48,7 +48,7 @@ export default function QuickSelection({ setOverlayComponent }) {
     isMyMeetingOnline()
       .then((answer) => setOnline(answer))
       .catch((error) => {
-        clearInterval(checkOnlineInterval);
+        checkOnlineInterval && clearInterval(checkOnlineInterval);
         console.warn(error);
         console.warn(
           "above warning occured when trying to find personal meeting status, probably isn't a meeting at all. Stopping interval"
@@ -56,7 +56,7 @@ export default function QuickSelection({ setOverlayComponent }) {
       });
 
     return () => {
-      clearInterval(checkOnlineInterval);
+      checkOnlineInterval && clearInterval(checkOnlineInterval);
     };
   }, []);
 

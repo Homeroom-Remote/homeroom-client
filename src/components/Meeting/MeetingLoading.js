@@ -15,7 +15,7 @@ export default function MeetingLoading() {
       setLoadingText((text) => (text.length < 10 ? text + "." : "Loading"));
     }, 500);
 
-    return () => setInterval(loadingTextInterval);
+    return () => loadingTextInterval && clearInterval(loadingTextInterval);
   }, []);
   return (
     <div className={globalStyles}>
