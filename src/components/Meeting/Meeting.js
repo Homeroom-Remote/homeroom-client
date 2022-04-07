@@ -7,6 +7,7 @@ import Error from "./Error";
 
 import useMeeting from "../../stores/meetingStore";
 import useVideoSettings from "../../stores/videoSettingsStore";
+import useChat from "../../stores/chatStore";
 import useRoom from "../../api/useColyseus";
 import usePeer from "../../api/usePeer";
 import MeetingLoading from "./MeetingLoading";
@@ -23,14 +24,12 @@ export default function Meeting() {
   const [chat, setChat] = useState(false);
   const [microphone, setMicrophone] = useState(defaultAudio);
   const [camera, setCamera] = useState(defaultVideo);
-  const [generalMessages, setGeneralMessages] = useState([]);
-  const [privateMessages, setPrivateMessages] = useState([]);
-  const [unreadGeneralMessages, setUnreadGeneralMessages] = useState(0);
-  const [unreadPrivateMessages, setUnreadPrivateMessages] = useState(0);
+
   const { meetingID, exitMeeting } = useMeeting();
   const { isOnline, error, registerMessages, sendChatMessage } =
     useRoom(meetingID);
   const { createPeer, destroyPeer, peers } = usePeer(myStream);
+  const { addGeneralMessage } = useChat();
 
   const toggleCamera = () => {
     setCamera(!camera);
@@ -47,6 +46,7 @@ export default function Meeting() {
   useEffect(() => {
     return () => myStream && stopStream(myStream);
   }, []);
+
   const refreshMedia = (video, audio) => {
     function getMedia(constraints) {
       return navigator.mediaDevices.getUserMedia(constraints);
@@ -74,14 +74,6 @@ export default function Meeting() {
   const sendMessageFromChat = (message) => {
     sendChatMessage(message);
   };
-
-  const addGeneralMessage = (messageObject) => {
-    setUnreadGeneralMessages((unread) => unread + 1);
-    setGeneralMessages((oldMessages) => [...oldMessages, messageObject]);
-  };
-
-  const onOpenGeneralMessages = () => setUnreadGeneralMessages(0);
-  const onOpenPrivateMessages = () => setUnreadPrivateMessages(0);
 
   if (error) {
     return <Error error={error} goBack={exitMeeting} />;
@@ -133,17 +125,7 @@ export default function Meeting() {
           </div>
         </div>
         {/* Chat Div */}
-        {chat && (
-          <Chat
-            sendMessage={sendMessageFromChat}
-            generalMessages={generalMessages}
-            privateMessages={privateMessages}
-            unreadGeneralMessages={unreadGeneralMessages}
-            unreadPrivateMessages={unreadPrivateMessages}
-            onOpenGeneralMessages={onOpenGeneralMessages}
-            onOpenPrivateMessages={onOpenPrivateMessages}
-          />
-        )}
+        {chat && <Chat sendMessage={sendMessageFromChat} chat={chat} />}
       </div>
     </div>
   );

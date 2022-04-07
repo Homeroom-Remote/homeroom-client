@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Reactions, Send } from "../../utils/svgs";
+import useChat from "../../stores/chatStore";
 
 function ChatTab({ name, messages, unread, active, onClick }) {
   const handleTabClick = () => {
@@ -58,35 +59,35 @@ function Message({ message }) {
   );
 }
 
-function Chat({
-  sendMessage,
-  generalMessages,
-  privateMessages,
-  unreadGeneralMessages,
-  unreadPrivateMessages,
-  onOpenGeneralMessages,
-  onOpenPrivateMessages,
-}) {
+function Chat({ sendMessage }) {
   const [generalTab, setGeneralTab] = useState(true);
   const [privateTab, setPrivateTab] = useState(false);
   const [message, setMessage] = useState("");
   const inputRef = useRef(null);
+  const {
+    onOpenGeneralChat,
+    onOpenPrivateChat,
+    unreadGeneralChatMessages,
+    unreadPrivateChatMessages,
+    generalChat,
+    privateChat,
+  } = useChat();
 
   const handleGeneralTabClick = () => {
     setPrivateTab(false);
     setGeneralTab(true);
-    onOpenGeneralMessages();
+    onOpenGeneralChat();
   };
 
   const handlePrivateTabClick = () => {
     setPrivateTab(true);
     setGeneralTab(false);
-    onOpenPrivateMessages();
+    onOpenPrivateChat();
   };
 
   const getMessages = () => {
-    if (generalTab) return generalMessages;
-    else return privateMessages;
+    if (generalTab) return generalChat;
+    else return privateChat;
   };
 
   const handleChange = (e) => {
@@ -106,12 +107,12 @@ function Chat({
   };
 
   useEffect(() => {
-    if (generalTab) onOpenGeneralMessages();
-  }, [generalMessages]);
+    if (generalTab) onOpenGeneralChat();
+  }, [generalChat]);
 
   useEffect(() => {
-    if (privateTab) onOpenPrivateMessages();
-  }, [privateMessages]);
+    if (privateTab) onOpenPrivateChat();
+  }, [privateTab]);
 
   return (
     <div className="flex flex-col justify-between dark:bg-dark-900 bg-lt-50 col-span-3">
@@ -120,15 +121,15 @@ function Chat({
         <div className="flex flex-row justify-center items-center">
           <ChatTab
             name={"General"}
-            messages={generalMessages}
-            unread={unreadGeneralMessages}
+            messages={generalChat}
+            unread={unreadGeneralChatMessages}
             active={generalTab}
             onClick={handleGeneralTabClick}
           />
           <ChatTab
             name={"Private"}
-            messages={privateMessages}
-            unread={unreadPrivateMessages}
+            messages={privateChat}
+            unread={unreadPrivateChatMessages}
             active={privateTab}
             onClick={handlePrivateTabClick}
           />

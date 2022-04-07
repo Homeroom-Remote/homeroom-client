@@ -5,7 +5,6 @@ import { NextPageArrow, PrevPageArrow } from "../../utils/svgs";
 const NUM_OF_VIDEOS_IN_PAGE = 8;
 
 export default function VideoWrapper({ otherParticipants, myStream }) {
-  const [page, setPage] = useState(0);
   const [startIndex, setStartIndex] = useState(0);
   const [endIndex, setEndIndex] = useState(
     Math.min(NUM_OF_VIDEOS_IN_PAGE - 1, otherParticipants.length - 1)
