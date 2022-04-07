@@ -17,7 +17,7 @@ function ChatTab({ name, messages, unread, active, onClick }) {
       }
     >
       {active && (
-        <span className="absolute top-1/8 left-0 rounded-full w-full h-full bg-primary-600 blur-md dark:opacity-10 opacity-20"></span>
+        <span className="absolute top-1/8 left-0 rounded-full w-full h-full dark:opacity-10 opacity-20"></span>
       )}
       <span className="flex flex-row gap-x-4 p-3 justify-center">
         <p
@@ -135,7 +135,7 @@ function Chat({
         </div>
       </div>
       {/* Chat Messages */}
-      <div className="h-full">
+      <div className="h-full overflow-y-scroll">
         {getMessages().map((message, idx) => (
           <Message message={message} key={`message-${idx}`} />
         ))}

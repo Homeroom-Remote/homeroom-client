@@ -27,7 +27,6 @@ export default function Meeting() {
   const [privateMessages, setPrivateMessages] = useState([]);
   const [unreadGeneralMessages, setUnreadGeneralMessages] = useState(0);
   const [unreadPrivateMessages, setUnreadPrivateMessages] = useState(0);
-
   const { meetingID, exitMeeting } = useMeeting();
   const { isOnline, error, registerMessages, sendChatMessage } =
     useRoom(meetingID);
@@ -41,17 +40,25 @@ export default function Meeting() {
     setMicrophone(!microphone);
   };
 
+  const stopStream = (streamToStop) => {
+    streamToStop.getTracks().forEach((track) => track.stop());
+  };
+
+  useEffect(() => {
+    return () => myStream && stopStream(myStream);
+  }, []);
   const refreshMedia = (video, audio) => {
     function getMedia(constraints) {
       return navigator.mediaDevices.getUserMedia(constraints);
     }
 
     getMedia({ video, audio })
-      .then((stream) => setMyStream(stream))
+      .then((stream) => {
+        if (myStream) stopStream(myStream);
+        setMyStream(stream);
+      })
       .catch(() => {
-        if (myStream) {
-          myStream.getTracks().forEach((track) => track.stop());
-        }
+        if (myStream) stopStream(myStream);
         setMyStream(null);
       });
   };
@@ -79,8 +86,6 @@ export default function Meeting() {
   if (error) {
     return <Error error={error} goBack={exitMeeting} />;
   }
-
-  // TODO: graphic of room loading
   if (!isOnline) {
     return <MeetingLoading />;
   }
@@ -114,11 +119,7 @@ export default function Meeting() {
             (chat ? "col-span-7" : "col-span-10")
           }
         >
-          <VideoWrapper
-            chat={chat}
-            myStream={myStream}
-            otherParticipants={peers}
-          />
+          <VideoWrapper myStream={myStream} otherParticipants={peers} />
 
           <div className="row-span-1">
             <Toolbar
