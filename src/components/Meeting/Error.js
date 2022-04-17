@@ -9,7 +9,7 @@ const globalStyles =
                       transition-colors max-h-screen h-screen overflow-y-hidden flex items-center justify-center relative";
 
 export default function Error({ error, goBack }) {
-  const [rightAlign, setRightAlign] = useState("right-0");
+  const [rightAlign, setRightAlign] = useState("right-1");
   useEffect(() => {
     const rightAlignTimeout = setTimeout(() => {
       setRightAlign("right-2 animate-bounce");
