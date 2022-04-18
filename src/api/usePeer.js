@@ -32,6 +32,7 @@ export default function usePeer(myStream) {
   }, [myStream]);
 
   function createPeer(room, message, initiator) {
+    console.log(message);
     const peerExists = peers.find((peer) => peer.id === message.sessionId);
     if (!initiator && peerExists) {
       // Recieved signal
@@ -42,6 +43,14 @@ export default function usePeer(myStream) {
       initiator: initiator,
       trickle: true,
       stream: myStream,
+    });
+
+    updatePeers(message.sessionId, {
+      id: message.sessionId,
+      peer: peer,
+      room: room,
+      name: message.name,
+      stream: null,
     });
 
     initiator || peer.signal(message.data);
@@ -58,7 +67,6 @@ export default function usePeer(myStream) {
         name: message.name,
         stream: peerStream,
       });
-      console.log(peerStream, "-> stream recieved");
     });
 
     peer.on("error", (err) => {
@@ -68,6 +76,7 @@ export default function usePeer(myStream) {
     peer.on("track", (track, stream) => {
       // Mute happens when track is removed (audio and video)
       track.addEventListener("mute", () => {
+        console.log("update -> ", message.name);
         updatePeers(message.sessionId, {
           id: message.sessionId,
           peer: peer,

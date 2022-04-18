@@ -1,7 +1,7 @@
 function Video({ stream, name }) {
-  const shouldDisplayVideoStream = !!stream;
+  const shouldDisplayVideoStream = stream && stream.active;
   return (
-    <div className="h-full w-full place-items-center justify-center flex border p-1 shadow-lg dark:border-dark-200 border-lt-400 rounded-lg">
+    <div className="h-full w-full dark:bg-dark-900 bg-lt-300 place-items-center justify-center flex border p-1 shadow-lg dark:border-dark-200 border-lt-400 rounded-lg">
       {shouldDisplayVideoStream ? (
         <video
           className="h-full w-full object-fill"
@@ -11,7 +11,7 @@ function Video({ stream, name }) {
           autoPlay={true}
         />
       ) : (
-        <div>{name}</div>
+        <h1 className="font-bold text-4xl">{name}</h1>
       )}
     </div>
   );

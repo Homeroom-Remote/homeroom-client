@@ -1,7 +1,7 @@
 import create from "zustand";
 
 const useStore = create((set) => ({
-  defaultVideo: true,
+  defaultVideo: false,
   defaultAudio: false,
   toggleVideo: () =>
     set((state) => ({ ...state, defaultVideo: !state.defaultVideo })),

@@ -7,6 +7,9 @@ const errors = {
   no_meeting_error: "No meeting was found",
 };
 
+const USERS_COLLECTION = "users";
+const MEETINGS_COLLECTION = "meetings";
+
 function getMeetingFromUserID(uid) {
   return uid.slice(0, 6);
 }
@@ -24,12 +27,12 @@ async function isLoggedIn() {
 }
 
 function getDoc(meeting_id) {
-  return db.collection("meetings").doc(meeting_id);
+  return db.collection(MEETINGS_COLLECTION).doc(meeting_id);
 }
 
 async function get(meeting_id) {
   const getMeetingPromise = new Promise((resolve, reject) => {
-    db.collection("meetings")
+    db.collection(MEETINGS_COLLECTION)
       .doc(meeting_id)
       .get()
       .then((snapshot) => resolve(snapshot.data()))
@@ -72,7 +75,7 @@ async function create() {
         .then((document) => {
           if (!document) {
             // Create meeting
-            db.collection("meetings")
+            db.collection(MEETINGS_COLLECTION)
               .doc(meeting_id)
               .set({
                 owner_id: user.uid,
@@ -236,6 +239,18 @@ async function addToMeetingParticipants(uid) {
   });
   return addToMeetingParticipantsPromise;
 }
+
+async function getMeetingHistory() {
+  const getMeetingHistoryPromise = new Promise((resolve, reject) => {
+    isLoggedIn()
+      .then((user) => db.collection(USERS_COLLECTION).doc(user.uid).get())
+      .then((snapshot) => snapshot.data())
+      .then((data) => resolve(data))
+      .catch((e) => reject(e));
+  });
+
+  return getMeetingHistoryPromise;
+}
 export {
   create,
   openMeeting,
@@ -247,4 +262,5 @@ export {
   isMyMeetingOnline,
   getMyMeetingId,
   closeMeetingIfLastPerson,
+  getMeetingHistory,
 };
