@@ -22,6 +22,10 @@ export default function RoomManager(meetingID, options) {
     });
   }
 
+  /////////////////////////// 
+  /// Add: sendGesture
+
+
   function sendChatMessage(message) {
     if (!room) return;
     room.send("chat-message", message);

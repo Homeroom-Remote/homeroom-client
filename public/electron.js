@@ -3,6 +3,8 @@ const path = require("path");
 const { app, BrowserWindow } = require("electron");
 const isDev = require("electron-is-dev");
 
+// const pyshell_module = require("python-shell");
+
 function createWindow() {
   const win = new BrowserWindow({
     minWidth: 1024,
@@ -13,6 +15,8 @@ function createWindow() {
     transparent: true,
     webPreferences: {
       nodeIntegration: true,
+      contextIsolation: false,
+      enableRemoteModule: true
     },
   });
 
