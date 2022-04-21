@@ -4,7 +4,7 @@ function Video({ stream, name }) {
     <div className="h-full w-full dark:bg-dark-900 bg-lt-300 place-items-center justify-center flex border p-1 shadow-lg dark:border-dark-200 border-lt-400 rounded-lg">
       {shouldDisplayVideoStream ? (
         <video
-          className="h-full w-full object-fill"
+          className="h-full w-full"
           ref={(e) => {
             if (e) e.srcObject = stream;
           }}
