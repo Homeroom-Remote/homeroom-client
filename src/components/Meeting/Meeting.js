@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Toolbar from "./Toolbar";
 import Chat from "./Chat";
 import VideoWrapper from "./VideoWrapper";
+import Participants from "./Participants"
 import Error from "./Error";
 
 import useMeeting from "../../stores/meetingStore";
@@ -24,6 +25,7 @@ export default function Meeting() {
   const [chat, setChat] = useState(false);
   const [microphone, setMicrophone] = useState(defaultAudio);
   const [camera, setCamera] = useState(defaultVideo);
+  const [participants, setParticipants] = useState(false);
 
   const { meetingID, exitMeeting } = useMeeting();
   const { isOnline, error, registerMessages, sendChatMessage } =
@@ -71,6 +73,11 @@ export default function Meeting() {
     setChat(!chat);
   };
 
+  const toggleParticipants = () => {
+    setParticipants(!participants);
+  };
+
+
   const sendMessageFromChat = (message) => {
     sendChatMessage(message);
   };
@@ -106,10 +113,10 @@ export default function Meeting() {
     <div className={globalStyles}>
       <div className="h-full grid grid-flow-col grid-cols-10 grid-rows-1">
         <div
-          className={
-            "grid grid-rows-10 grid-flow-row bg-red-200 h-full " +
-            (chat ? "col-span-7" : "col-span-10")
-          }
+            className={
+              "grid grid-rows-10 grid-flow-row bg-red-200 h-full " +
+              ((participants || chat) ? "col-span-7" : "col-span-10")
+            }
         >
           <VideoWrapper myStream={myStream} otherParticipants={peers} />
 
@@ -121,11 +128,16 @@ export default function Meeting() {
               toggleMicrophone={toggleMicrophone}
               chat={chat}
               toggleChat={toggleChat}
+              participants={participants}
+              toggleParticipants={toggleParticipants}
             />
           </div>
         </div>
         {/* Chat Div */}
-        {chat && <Chat sendMessage={sendMessageFromChat} chat={chat} />}
+        <div className="flex flex-col bg-red-500 w-full h-full col-span-3 divide-y-2 divide-opacity-50">
+        {chat && <Chat sendMessage={sendMessageFromChat} isParticipantsOpen={participants}/>}
+        {participants && <Participants peers={peers} cameraState={camera} microphoneState={microphone} isChatOpen={chat}/>}
+        </div>
       </div>
     </div>
   );
