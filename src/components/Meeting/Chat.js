@@ -59,7 +59,7 @@ function Message({ message }) {
   );
 }
 
-function Chat({ sendMessage }) {
+function Chat({ sendMessage, isParticipantsOpen }) {
   const [generalTab, setGeneralTab] = useState(true);
   const [privateTab, setPrivateTab] = useState(false);
   const [message, setMessage] = useState("");
@@ -115,7 +115,7 @@ function Chat({ sendMessage }) {
   }, [privateTab]);
 
   return (
-    <div className="flex flex-col justify-between dark:bg-dark-900 bg-lt-50 col-span-3">
+    <div className={"flex flex-col justify-between dark:bg-dark-900 bg-lt-50 col-span-3 " + (isParticipantsOpen ? "h-1/2" : "h-full")}>
       {/* Tabs */}
       <div>
         <div className="flex flex-row justify-center items-center">
@@ -136,7 +136,7 @@ function Chat({ sendMessage }) {
         </div>
       </div>
       {/* Chat Messages */}
-      <div className="h-full overflow-y-scroll">
+      <div className="h-full overflow-auto">
         {getMessages().map((message, idx) => (
           <Message message={message} key={`message-${idx}`} />
         ))}
