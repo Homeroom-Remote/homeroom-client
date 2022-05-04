@@ -9,11 +9,13 @@ import {
 
 
 
+
 export default function Participants({peers, cameraState, microphoneState, isChatOpen}) {
 
     function buttonClicked(idx) {
         console.log(idx)
     };
+
 
     const MicLogoOn = Mic;
     const MicLogoOff = MutedMic;
