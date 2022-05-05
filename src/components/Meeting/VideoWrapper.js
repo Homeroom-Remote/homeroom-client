@@ -8,24 +8,16 @@ const NUM_OF_VIDEOS = 9;
 export default function VideoWrapper({ otherParticipants, myStream }) {
 
   const NUM_OF_VIDEOS_IN_PAGE = (startIndex) => {
-    if (startIndex == 0) return NUM_OF_VIDEOS - 1
+    if (startIndex === 0) return NUM_OF_VIDEOS - 1
     return NUM_OF_VIDEOS
   }
   const [forInitialize, setForInitialize] = useState(false)
-
-
   const [startIndex, setStartIndex] = useState(0);
   const [endIndex, setEndIndex] = useState(Math.min(NUM_OF_VIDEOS_IN_PAGE(startIndex), otherParticipants.length));
-
   const [forwardClick, setForwardClick] = useState(false)
   const [backwardClick, setBackwardClick] = useState(false)
-
-
-
   const [peersToShow, setPeersToShow] = useState([]);
-
   const showPagination = () => otherParticipants.length >= NUM_OF_VIDEOS;
-
 
   const toggleForward = () => {
     if (!otherParticipants) return;
@@ -36,7 +28,7 @@ export default function VideoWrapper({ otherParticipants, myStream }) {
 
   const toggleBackward = () => {
     setForInitialize(true)
-    if (startIndex == NUM_OF_VIDEOS - 1) {
+    if (startIndex === NUM_OF_VIDEOS - 1) {
       setBackwardClick(true)
       setEndIndex(Math.min(NUM_OF_VIDEOS - 1, otherParticipants.length))
     }
@@ -49,13 +41,13 @@ export default function VideoWrapper({ otherParticipants, myStream }) {
 
   useEffect(() => {
     if (!forInitialize) return
-    if (endIndex == -1) {
+    if (endIndex === -1) {
       setEndIndex(Math.min(startIndex, otherParticipants.length));
       return
     }
     else if (backwardClick) {
       setBackwardClick(false)
-      if (startIndex == NUM_OF_VIDEOS - 1) {
+      if (startIndex === NUM_OF_VIDEOS - 1) {
         setStartIndex(0)
       }
       else if (startIndex > NUM_OF_VIDEOS - 1) {
