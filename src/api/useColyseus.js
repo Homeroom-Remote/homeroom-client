@@ -8,7 +8,6 @@ const defaultWsUrl = `ws://${window.location.hostname}:3030`;
 export default function RoomManager(meetingID, options) {
   const [isOnline, setIsOnline] = useState(false);
   const [error, setError] = useState(null);
-  const [client, setClient] = useState(null);
   const [room, setRoom] = useState(null);
   const { user } = useUser();
 
@@ -36,7 +35,6 @@ export default function RoomManager(meetingID, options) {
   useEffect(() => {
     const wsUrl = options?.wsUrl || defaultWsUrl;
     const newClient = new Colyseus.Client(wsUrl);
-    setClient(newClient);
 
     async function joinRoom() {
       try {

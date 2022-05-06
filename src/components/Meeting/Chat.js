@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import { Reactions, Send } from "../../utils/svgs";
-import useChat from "../../stores/chatStore";
 
 function ChatTab({ name, messages, unread, active, onClick }) {
   const handleTabClick = () => {
@@ -43,35 +42,39 @@ function ChatTab({ name, messages, unread, active, onClick }) {
 
 function Message({ message }) {
   const getMessageStyles = () => {
-    if (message.me) return "font-bold text-primary-600";
+    if (message?.me) return "font-bold text-primary-600";
     return "font-medium dark:text-text-400 text-text-800";
   };
 
-  const getTime = () => new Date(message.time).toLocaleTimeString();
+  const getTime = () => new Date(message?.time).toLocaleTimeString();
   return (
     <div className="flex flex-col gap-y-2 p-2">
       <header className="flex flex-row justify-between">
-        <p className={getMessageStyles()}>{message.name}</p>
+        <p className={getMessageStyles()}>{message?.name}</p>
         <p className="dark:text-text-400">{getTime()}</p>
       </header>
-      <p className="dark:text-text-400">{message.message}</p>
+      <p className="dark:text-text-400">{message?.message}</p>
     </div>
   );
 }
 
-function Chat({ sendMessage, isParticipantsOpen }) {
+function Chat({ sendMessage, isParticipantsOpen, generalMessage, onMount }) {
+  // General
   const [generalTab, setGeneralTab] = useState(true);
+  const [generalChat, setGeneralChat] = useState([]);
+  const [unreadGeneralChat, setUnreadGeneralChat] = useState(0);
+
+  // Private
   const [privateTab, setPrivateTab] = useState(false);
+  const [privateChat, setPrivateChat] = useState([]);
+  const [unreadPrivateChat, setUnreadPrivateChat] = useState(0);
+
+  // User Message (input)
   const [message, setMessage] = useState("");
   const inputRef = useRef(null);
-  const {
-    onOpenGeneralChat,
-    onOpenPrivateChat,
-    unreadGeneralChatMessages,
-    unreadPrivateChatMessages,
-    generalChat,
-    privateChat,
-  } = useChat();
+
+  const onOpenGeneralChat = () => setUnreadGeneralChat(0);
+  const onOpenPrivateChat = () => setUnreadPrivateChat(0);
 
   const handleGeneralTabClick = () => {
     setPrivateTab(false);
@@ -108,28 +111,37 @@ function Chat({ sendMessage, isParticipantsOpen }) {
 
   useEffect(() => {
     if (generalTab) onOpenGeneralChat();
-  }, [generalChat]);
+  }, [generalTab]);
 
   useEffect(() => {
     if (privateTab) onOpenPrivateChat();
   }, [privateTab]);
 
+  useEffect(() => {
+    onMount([generalChat, setGeneralChat]);
+  }, [onMount]);
+
   return (
-    <div className={"flex flex-col justify-between dark:bg-dark-900 bg-lt-50 col-span-3 " + (isParticipantsOpen ? "h-1/2" : "h-full")}>
+    <div
+      className={
+        "flex flex-col justify-between dark:bg-dark-900 bg-lt-50 col-span-3 " +
+        (isParticipantsOpen ? "h-1/2" : "h-full")
+      }
+    >
       {/* Tabs */}
       <div>
         <div className="flex flex-row justify-center items-center">
           <ChatTab
             name={"General"}
             messages={generalChat}
-            unread={unreadGeneralChatMessages}
+            unread={unreadGeneralChat}
             active={generalTab}
             onClick={handleGeneralTabClick}
           />
           <ChatTab
             name={"Private"}
             messages={privateChat}
-            unread={unreadPrivateChatMessages}
+            unread={unreadPrivateChat}
             active={privateTab}
             onClick={handlePrivateTabClick}
           />

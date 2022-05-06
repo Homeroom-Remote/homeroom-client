@@ -1,4 +1,4 @@
-import { Gmail, Github, Anonymous } from "../../utils/svgs";
+import { Gmail, Anonymous } from "../../utils/svgs";
 import { signInWithGoogle, signInAnonymously } from "../../api/auth";
 import Theme from "../Theme";
 

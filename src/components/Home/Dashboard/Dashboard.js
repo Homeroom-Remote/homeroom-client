@@ -3,8 +3,7 @@ import Header from "./Header";
 import QuickSelection from "./QuickSelection";
 import Overlay from "../../Overlay";
 import HistoryCompact from "./HistoryCompact";
-import SeeMyself from "./SeeMyself";
-
+import MediaPreview from "./MediaPreview";
 
 export default function Dashboard() {
   const [OverlayComponent, setOverlayComponent] = useState(null);
@@ -20,7 +19,7 @@ export default function Dashboard() {
       <div className="grid grid-flow-row grid-rows-2 grid-cols-2 h-full">
         <QuickSelection setOverlayComponent={setComponent} />
         <HistoryCompact setOverlayComponent={setComponent} />
-        <SeeMyself />
+        <MediaPreview />
       </div>
     </div>
   );

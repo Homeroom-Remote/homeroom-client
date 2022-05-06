@@ -32,7 +32,6 @@ export default function usePeer(myStream) {
   }, [myStream]);
 
   function createPeer(room, message, initiator) {
-    console.log(message);
     const peerExists = peers.find((peer) => peer.id === message.sessionId);
     if (!initiator && peerExists) {
       // Recieved signal
@@ -96,6 +95,7 @@ export default function usePeer(myStream) {
   }
 
   function destroyPeer(peerToRemoveId) {
+    console.log("destroy peer");
     const peerToRemove = peers.find((peer) => peer.id === peerToRemoveId);
     peerToRemove?.peer.destroy();
     setPeers((prev) => prev.filter((peer) => peer.id !== peerToRemoveId));
