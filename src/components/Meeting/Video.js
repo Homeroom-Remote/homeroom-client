@@ -6,7 +6,6 @@ function Video({ stream, name, attachedId }) {
       {shouldDisplayVideoStream ? (
         <video
           className="h-full w-full"
-          id={attachedId ? "myVideoEl" : ""}
           ref={(e) => {
             if (e) e.srcObject = stream;
           }}

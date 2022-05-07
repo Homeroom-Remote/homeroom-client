@@ -1,5 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
+/////////////
+// Components
+/////////////
 import Toolbar from "./Toolbar";
 import Chat from "./Chat";
 import VideoWrapper from "./VideoWrapper";
@@ -7,10 +10,10 @@ import Participants from "./Participants";
 import Error from "./Error";
 import MeetingLoading from "./MeetingLoading";
 
-import useMeeting from "../../stores/meetingStore";
-import useVideoSettings from "../../stores/videoSettingsStore";
+//////
+// API
+//////
 import usePeer from "../../api/usePeer";
-import useUser from "../../stores/userStore";
 import { getToken } from "../../api/auth";
 import {
   CreateRoom,
@@ -18,7 +21,16 @@ import {
   LeaveRoom,
   RegisterMessages,
   SendChatMessage,
+  SendHandGesture,
 } from "../../api/room";
+import HandGestures from "./MachineLearningModules/HandGestures";
+
+////////////////
+// State & Store
+////////////////
+import useMeeting from "../../stores/meetingStore";
+import useVideoSettings from "../../stores/videoSettingsStore";
+import useUser from "../../stores/userStore";
 
 const globalStyles =
   // eslint-disable-next-line no-multi-str
@@ -36,6 +48,7 @@ export default function Meeting() {
   // Loading/Error hooks
   const [error, setError] = useState(false);
   const [isOnline, setIsOnline] = useState(false);
+  const [fingerPoseReady, setFingerPoseReady] = useState(false);
 
   // Child component hooks
   const [chat, setChat] = useState(false);
@@ -49,6 +62,10 @@ export default function Meeting() {
   // etc
   const { createPeer, destroyPeer, peers } = usePeer(myStream);
   const { user } = useUser();
+
+  // Hand recognition
+  const handIntervalTime = 1000; // Every 1s
+  var detectionInterval = useRef(null);
 
   ////////
   // Media
@@ -108,8 +125,9 @@ export default function Meeting() {
     refreshRoomCallbacks(room);
   };
 
+  ///////
   // Room
-
+  ///////
   function refreshRoomCallbacks(room) {
     if (!room) return;
     RegisterMessages(room, [
@@ -128,6 +146,10 @@ export default function Meeting() {
       {
         name: "chat-message",
         callback: (room, message) => onGeneralMessage(message),
+      },
+      {
+        name: "hand-gesture",
+        callback: (room, message) => onHandRecognition(message),
       },
     ]);
   }
@@ -175,6 +197,48 @@ export default function Meeting() {
     return () => LeaveRoom(room);
   }, [room]);
 
+  /////
+  // AI
+  /////
+  useEffect(() => {
+    if (!HandGestures.IsReady()) {
+      async function InitGestures() {
+        HandGestures.Init();
+        setFingerPoseReady(true);
+      }
+
+      InitGestures();
+    }
+
+    const hasVideoStream = !!myStream?.getVideoTracks().length > 0;
+
+    // Remove interval if stream is offline
+    if (detectionInterval.current && !hasVideoStream)
+      clearInterval(hasVideoStream);
+
+    // Add interval if stream is online
+    if (!detectionInterval.current && hasVideoStream) {
+      detectionInterval.current = setInterval(async () => {
+        const prediction = await HandGestures.Detect(
+          document.querySelector("#myVideoEl")
+        );
+        prediction && HandleGesturePrediction(prediction);
+      }, handIntervalTime);
+    }
+
+    return () =>
+      detectionInterval.current && clearInterval(detectionInterval.current);
+  }, [myStream]);
+
+  function HandleGesturePrediction(prediction) {
+    SendHandGesture(room, prediction);
+  }
+
+  // A message sent from the server (other client)
+  function onHandRecognition(message) {
+    console.log(message);
+  }
+
   ////////////
   //Components
   ////////////
@@ -182,7 +246,7 @@ export default function Meeting() {
   if (error) {
     return <Error error={error} goBack={exitMeeting} />;
   }
-  if (!isOnline) {
+  if (!isOnline || !fingerPoseReady) {
     return <MeetingLoading />;
   }
 
@@ -195,6 +259,15 @@ export default function Meeting() {
             (participants || chat ? "col-span-7" : "col-span-10")
           }
         >
+          {/* Hidden video element for hand recognition etc */}
+          <video
+            className="hidden"
+            id="myVideoEl"
+            ref={(e) => {
+              if (e) e.srcObject = myStream;
+            }}
+            autoPlay={true}
+          ></video>
           <VideoWrapper myStream={myStream} otherParticipants={peers} />
           <div className="row-span-1">
             <Toolbar

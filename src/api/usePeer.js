@@ -16,12 +16,13 @@ export default function usePeer(myStream) {
     peers.forEach((peer) => {
       if (peer.localStream) {
         peer.peer.removeStream(peer.localStream);
-        console.log("deleted stream");
+        console.log("deleted my old stream");
       }
 
       if (myStream) {
         peer.peer.addStream(myStream);
         let peerCopy = { ...peer, localStream: myStream };
+        console.log("added my new stream");
         updatePeers(peerCopy.id, peerCopy);
       }
     });
@@ -55,10 +56,12 @@ export default function usePeer(myStream) {
     initiator || peer.signal(message.data);
 
     peer.on("signal", (data) => {
+      console.log("got signal", data);
       room.send("signal", { sessionId: message.sessionId, data: data });
     });
 
     peer.on("stream", (peerStream) => {
+      console.log("new stream", peerStream);
       updatePeers(message.sessionId, {
         id: message.sessionId,
         peer: peer,

@@ -69,4 +69,16 @@ function SendChatMessage(room, message) {
   room.send("chat-message", message);
 }
 
-export { JoinRoom, LeaveRoom, CreateRoom, RegisterMessages, SendChatMessage };
+function SendHandGesture(room, prediction) {
+  if (!room) throw new Error("Send Hand Gesture -> Room is null");
+  room.send("hand-gesture", prediction);
+}
+
+export {
+  JoinRoom,
+  LeaveRoom,
+  CreateRoom,
+  RegisterMessages,
+  SendChatMessage,
+  SendHandGesture,
+};
