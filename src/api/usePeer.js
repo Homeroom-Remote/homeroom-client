@@ -1,108 +1,167 @@
 import { useState, useEffect } from "react";
 import Peer from "simple-peer";
 
-export default function usePeer(myStream) {
-  const [peers, setPeers] = useState([]);
+const maxGestureTimeInSeconds = 10;
 
-  function updatePeers(id, obj) {
-    setPeers((prev) => {
-      let filtered = prev.filter((peer) => peer.id !== id);
-      return [...filtered, obj];
-    });
-  }
+/**
+ * Updated peers given an id, new object & setter (setPeer)
+ * @param {String} id
+ * @param {Object} obj
+ * @param {Function} setter
+ */
+function updatePeers(id, obj, setter) {
+  setter((prev) => {
+    let filtered = prev.filter((peer) => peer.id !== id);
+    return [...filtered, obj];
+  });
+}
 
-  function updateStream() {
-    // Remove former stream
-    peers.forEach((peer) => {
-      if (peer.localStream) {
-        peer.peer.removeStream(peer.localStream);
-        console.log("deleted my old stream");
-      }
-
-      if (myStream) {
-        peer.peer.addStream(myStream);
-        let peerCopy = { ...peer, localStream: myStream };
-        console.log("added my new stream");
-        updatePeers(peerCopy.id, peerCopy);
-      }
-    });
-  }
-
-  useEffect(() => {
-    updateStream();
-  }, [myStream]);
-
-  function createPeer(room, message, initiator) {
-    const peerExists = peers.find((peer) => peer.id === message.sessionId);
-    if (!initiator && peerExists) {
-      // Recieved signal
-      peerExists.peer.signal(message.data);
-      return;
+/**
+ * Updates client stream in other clients
+ * @param {MediaStream} stream
+ * @param {Array} peers
+ * @param {Function} setter
+ */
+function updateStream(stream, peers, setter) {
+  // Remove former stream
+  peers.forEach((peer) => {
+    if (peer.localStream) {
+      peer.peer.removeStream(peer.localStream);
+      console.log("deleted my old stream");
     }
-    const peer = new Peer({
-      initiator: initiator,
-      trickle: true,
-      stream: myStream,
-    });
 
-    updatePeers(message.sessionId, {
+    if (stream) {
+      peer.peer.addStream(stream);
+      let peerCopy = { ...peer, localStream: stream };
+      console.log("added my new stream");
+      updatePeers(peerCopy.id, peerCopy, setter);
+    }
+  });
+}
+
+/**
+ * Creates (or negotiates signal) peer.
+ * @param {Object} room
+ * @param {Object} message
+ * @param {Boolean} initiator
+ * @param {Array} peers
+ * @param {MediaStream} myStream
+ * @param {Function} setter
+ * @returns
+ */
+function createPeer(room, message, initiator, peers, myStream, setter) {
+  const peerExists = peers.find((peer) => peer.id === message.sessionId);
+  if (!initiator && peerExists) {
+    // Recieved signal
+    peerExists.peer.signal(message.data);
+    return;
+  }
+
+  const peer = new Peer({
+    initiator: initiator,
+    trickle: true,
+    stream: myStream,
+  });
+
+  updatePeers(
+    message.sessionId,
+    {
       id: message.sessionId,
       peer: peer,
       room: room,
       name: message.name,
       stream: null,
-    });
+    },
+    setter
+  );
 
-    initiator || peer.signal(message.data);
+  initiator || peer.signal(message.data);
 
-    peer.on("signal", (data) => {
-      console.log("got signal", data);
-      room.send("signal", { sessionId: message.sessionId, data: data });
-    });
+  peer.on("signal", (data) => {
+    room.send("signal", { sessionId: message.sessionId, data: data });
+  });
 
-    peer.on("stream", (peerStream) => {
-      console.log("new stream", peerStream);
-      updatePeers(message.sessionId, {
+  peer.on("stream", (peerStream) => {
+    updatePeers(
+      message.sessionId,
+      {
         id: message.sessionId,
         peer: peer,
         room: room,
         name: message.name,
         stream: peerStream,
-      });
-    });
+      },
+      setter
+    );
+  });
 
-    peer.on("error", (err) => {
-      console.warn(err, "-> usePeer error from ", message.sessionId);
-    });
+  peer.on("error", (err) => {
+    console.warn(err, "-> usePeer error from ", message.sessionId);
+  });
 
-    peer.on("track", (track, stream) => {
-      // Mute happens when track is removed (audio and video)
-      track.addEventListener("mute", () => {
-        console.log("update -> ", message.name);
-        updatePeers(message.sessionId, {
+  peer.on("track", (track, stream) => {
+    // Mute happens when track is removed (audio and video)
+    track.addEventListener("mute", () => {
+      updatePeers(
+        message.sessionId,
+        {
           id: message.sessionId,
           peer: peer,
           room: room,
           name: message.name,
           stream: stream,
-        });
-      });
+        },
+        setter
+      );
     });
-
-    updatePeers(message.sessionId, {
+  });
+  updatePeers(
+    message.sessionId,
+    {
       id: message.sessionId,
       peer: peer,
       room: room,
       name: message.name,
-    });
-  }
-
-  function destroyPeer(peerToRemoveId) {
-    console.log("destroy peer");
-    const peerToRemove = peers.find((peer) => peer.id === peerToRemoveId);
-    peerToRemove?.peer.destroy();
-    setPeers((prev) => prev.filter((peer) => peer.id !== peerToRemoveId));
-  }
-
-  return { createPeer, destroyPeer, peers };
+    },
+    setter
+  );
 }
+
+/**
+ * Destroys a peer
+ * @param {String} peerToRemoveId
+ * @param {Array} peers
+ * @param {Function} setter
+ */
+function destroyPeer(peerToRemoveId, peers, setter) {
+  console.log("destroy peer");
+  const peerToRemove = peers.find((peer) => peer.id === peerToRemoveId);
+  peerToRemove?.peer.destroy();
+  setter((prev) => prev.filter((peer) => peer.id !== peerToRemoveId));
+}
+
+/**
+ *
+ * @param {Object} message
+ * @param {Array} peers
+ * @returns
+ */
+function onHandRecognition(message, peers) {
+  const peerExists = peers.find((peer) => peer.id === message.sender);
+  if (!peerExists) return false;
+  const gestureObject = {
+    message: message.message,
+    time: message.time,
+    sender: message.sender,
+  }; // Create object for this gesture
+
+  return gestureObject;
+}
+
+const PeerWrapper = {
+  createPeer,
+  destroyPeer,
+  onHandRecognition,
+  updateStream,
+};
+export default PeerWrapper;

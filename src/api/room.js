@@ -54,7 +54,7 @@ function LeaveRoom(room) {
 function RegisterMessages(room, messageCallbackList) {
   if (!room) {
     console.warn("Register Messages -> Room is null");
-    throw new Error("Register Messages -> Room is null");
+    return;
   }
   room.removeAllListeners();
   messageCallbackList?.forEach((mcObject) => {

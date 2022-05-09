@@ -13,7 +13,7 @@ import MeetingLoading from "./MeetingLoading";
 //////
 // API
 //////
-import usePeer from "../../api/usePeer";
+import Peer from "../../api/usePeer";
 import { getToken } from "../../api/auth";
 import {
   CreateRoom,
@@ -31,6 +31,11 @@ import HandGestures from "./MachineLearningModules/HandGestures";
 import useMeeting from "../../stores/meetingStore";
 import useVideoSettings from "../../stores/videoSettingsStore";
 import useUser from "../../stores/userStore";
+
+////////
+// Utils
+////////
+import handGestureList from "../../utils/handGestureList";
 
 const globalStyles =
   // eslint-disable-next-line no-multi-str
@@ -58,14 +63,15 @@ export default function Meeting() {
   // Room hooks
   const [room, setRoom] = useState(null);
   const { meetingID, exitMeeting } = useMeeting();
+  const [peers, setPeers] = useState([]);
 
   // etc
-  const { createPeer, destroyPeer, peers } = usePeer(myStream);
   const { user } = useUser();
 
   // Hand recognition
   const handIntervalTime = 1000; // Every 1s
   var detectionInterval = useRef(null);
+  const handGestures = useRef(new Map());
 
   ////////
   // Media
@@ -133,15 +139,15 @@ export default function Meeting() {
     RegisterMessages(room, [
       {
         name: "join",
-        callback: (room, message) => createPeer(room, message, true),
+        callback: (room, message) => onPeerJoin(room, message),
       },
       {
         name: "leave",
-        callback: (room, message) => destroyPeer(message.sessionId),
+        callback: (room, message) => onPeerLeave(room, message),
       },
       {
         name: "signal",
-        callback: (room, message) => createPeer(room, message, false),
+        callback: (room, message) => onPeerSignal(room, message),
       },
       {
         name: "chat-message",
@@ -197,6 +203,61 @@ export default function Meeting() {
     return () => LeaveRoom(room);
   }, [room]);
 
+  ////////
+  // Peers
+  ////////
+  useEffect(() => {
+    Peer.updateStream(myStream, peers, setPeers);
+  }, [myStream]);
+
+  useEffect(() => {
+    // Closure hell - the callbacks can't figure out who peers are so I just update them naivly.
+    refreshRoomCallbacks(room);
+  }, [peers]);
+
+  function onPeerJoin(room, message) {
+    Peer.createPeer(room, message, true, peers, myStream, setPeers);
+  }
+
+  function onPeerLeave(room, message) {
+    Peer.destroyPeer(message.sessionId, peers, setPeers);
+  }
+
+  function onPeerSignal(room, message) {
+    Peer.createPeer(room, message, false, peers, myStream, setPeers);
+  }
+
+  function addGestureToVideo(gestureObject, id) {
+    const gestureTTL = 10000; // for timeout - show gesture on video object
+
+    // Gesture exists = timeout to remove it also exists - need to abort first
+    if (handGestures.current.has(id)) {
+      clearTimeout(handGestures.current.get(id).removeTimeout);
+    }
+
+    // Set new gesture object
+    handGestures.current.set(id, {
+      ...gestureObject,
+      removeTimeout: setTimeout(() => {
+        document.getElementById(`hand-gesture-${id}`).innerText = "";
+      }, gestureTTL),
+    });
+
+    // Place the corresponding gesture
+    document.getElementById(`hand-gesture-${id}`).innerText =
+      handGestureList[gestureObject.message];
+  }
+
+  function onHandRecognition(message) {
+    const gestureObject = Peer.onHandRecognition(message, peers);
+    if (!gestureObject) {
+      console.warn("onHandRecognition warning: gestureObject is null");
+      return;
+    }
+
+    addGestureToVideo(gestureObject, gestureObject.sender);
+  }
+
   /////
   // AI
   /////
@@ -220,7 +281,7 @@ export default function Meeting() {
     if (!detectionInterval.current && hasVideoStream) {
       detectionInterval.current = setInterval(async () => {
         const prediction = await HandGestures.Detect(
-          document.querySelector("#myVideoEl")
+          document.querySelector("#hiddenVideoEl")
         );
         prediction && HandleGesturePrediction(prediction);
       }, handIntervalTime);
@@ -231,12 +292,13 @@ export default function Meeting() {
   }, [myStream]);
 
   function HandleGesturePrediction(prediction) {
+    // Send to room (other participants)
     SendHandGesture(room, prediction);
-  }
 
-  // A message sent from the server (other client)
-  function onHandRecognition(message) {
-    console.log(message);
+    // Display on my video object
+    const id = "me";
+    const gestureObject = { message: prediction };
+    addGestureToVideo(gestureObject, id);
   }
 
   ////////////
@@ -262,7 +324,7 @@ export default function Meeting() {
           {/* Hidden video element for hand recognition etc */}
           <video
             className="hidden"
-            id="myVideoEl"
+            id="hiddenVideoEl"
             ref={(e) => {
               if (e) e.srcObject = myStream;
             }}
