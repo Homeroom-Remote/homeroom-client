@@ -1,7 +1,9 @@
 import components from "./nav";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
+import useSettings from "../../stores/settingsStore"
+import useVideoSettings from "../../stores/videoSettingsStore";
 const globalStyles =
   // eslint-disable-next-line no-multi-str
   "bg-lt-100 text-text-900 \
@@ -16,6 +18,46 @@ export default function Home() {
     setMainComponent(components[index]);
   };
 
+
+ /////////////////////////////////////////////
+  // load settings
+  /////////////////////////////////////////////
+  const { defaultVideo, defaultAudio, toggleVideo, toggleAudio } = useVideoSettings();
+  const { askBeforeVideo, askBeforeAudio, autoCopyLink, showConnectionTime, toggleAskBeforeVideo, toggleAskBeforeAudio, toggleAutoCopyLink, toggleShowConnectionTime } = useSettings()
+
+    useEffect(() => {
+      console.log(localStorage)
+      var inputs = JSON.parse(localStorage.getItem('inputs'));
+      inputs?.forEach(function(input) {
+        if(input.id === "defaultVideoID" && input.checked === defaultVideo) {
+          toggleVideo()
+          return
+        }
+        if(input.id === "option2" && input.checked === defaultAudio) {
+          toggleAudio()
+          return
+        }
+        if(input.id === "option3" && input.checked !== askBeforeVideo) {
+          toggleAskBeforeVideo()
+          return
+        }
+        if(input.id === "option4" && input.checked !== askBeforeAudio) {
+          toggleAskBeforeAudio()
+          return
+        }
+        if(input.id === "option5" && input.checked !== autoCopyLink) {
+          toggleAutoCopyLink()
+          return
+        }
+        if(input.id === "option6" && input.checked !== showConnectionTime) {
+          toggleShowConnectionTime()
+          return
+        }
+      });
+    }, []);
+  ////////////////////////////////////////////
+
+
   return (
     <div className={globalStyles}>
       <Header />
@@ -25,7 +67,7 @@ export default function Home() {
           MainComponent={MainComponent}
         />
         <div className="col-span-8 bg-lt-100 dark:bg-dark-900">
-          <MainComponent.Component />
+          <MainComponent.Component changeMainComponent={changeMainComponent}/>
         </div>
       </section>
     </div>
