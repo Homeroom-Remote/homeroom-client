@@ -31,6 +31,8 @@ import HandGestures from "./MachineLearningModules/HandGestures";
 import useMeeting from "../../stores/meetingStore";
 import useVideoSettings from "../../stores/videoSettingsStore";
 import useUser from "../../stores/userStore";
+import useSettings from "../../stores/settingsStore"
+
 
 ////////
 // Utils
@@ -50,6 +52,8 @@ export default function Meeting() {
   const [microphone, setMicrophone] = useState(defaultAudio);
   const [camera, setCamera] = useState(defaultVideo);
   const [myStream, setMyStream] = useState(null);
+  const { askBeforeVideo, askBeforeAudio } = useSettings()
+
 
   // Loading/Error hooks
   const [error, setError] = useState(false);
