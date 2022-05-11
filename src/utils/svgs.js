@@ -280,6 +280,7 @@ export const Send = (props) => (
     fill="none"
     viewBox="0 0 24 24"
     stroke="currentColor"
+    id={props.id}
     className={props.className}
     strokeWidth={2}
   >
@@ -316,7 +317,6 @@ export const PrevPageArrow = (props) => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
   </svg>
 );
-
 
 export const Reactions = (props) => (
   <svg
