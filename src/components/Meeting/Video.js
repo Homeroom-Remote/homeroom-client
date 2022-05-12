@@ -1,6 +1,9 @@
 function Video({ stream, name, id, me = false }) {
   const shouldDisplayVideoStream =
-    stream && stream.active && stream.getVideoTracks().length > 0;
+    stream &&
+    stream.active &&
+    stream.getVideoTracks().length > 0 &&
+    stream.getVideoTracks()[0].enabled;
 
   const getHandGestureStyles = () => {
     if (!me) return "absolute top-2 right-2 text-3xl";
@@ -8,7 +11,7 @@ function Video({ stream, name, id, me = false }) {
   };
 
   return (
-    <div className="h-full w-full dark:bg-dark-900 bg-lt-300 place-items-center justify-center flex border p-1 shadow-lg dark:border-dark-200 border-lt-400 rounded-lg relative">
+    <div className="h-full w-full dark:bg-dark-800 bg-lt-300 place-items-center justify-center flex border p-1 shadow-lg dark:border-dark-600 border-lt-400 rounded-lg relative">
       <p id={`hand-gesture-${id}`} className={getHandGestureStyles()}></p>
       {shouldDisplayVideoStream ? (
         <video

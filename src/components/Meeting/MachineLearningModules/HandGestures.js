@@ -5,9 +5,30 @@ import * as handpose from "@tensorflow-models/handpose";
 var net = null;
 var ThumbsDownGesture = null;
 var RaiseHandGesture = null;
+var FistGesture = null;
 
 function IsReady() {
   return !!net;
+}
+
+function InitFist() {
+  FistGesture = new fp.GestureDescription("fist");
+
+  // thumb: half curled
+  // accept no curl with a bit lower confidence
+  FistGesture.addCurl(fp.Finger.Thumb, fp.FingerCurl.HalfCurl, 1.0);
+  FistGesture.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 0.5);
+
+  // all other fingers: curled
+  for (let finger of [
+    fp.Finger.Index,
+    fp.Finger.Middle,
+    fp.Finger.Ring,
+    fp.Finger.Pinky,
+  ]) {
+    FistGesture.addCurl(finger, fp.FingerCurl.FullCurl, 1.0);
+    FistGesture.addCurl(finger, fp.FingerCurl.HalfCurl, 0.9);
+  }
 }
 
 function InitRaiseHand() {
@@ -21,8 +42,8 @@ function InitRaiseHand() {
     fp.Finger.Pinky,
     fp.Finger.Thumb,
   ]) {
-    RaiseHandGesture.addCurl(finger, fp.FingerCurl.NoCurl); // Stretched out (nocurl)
-    RaiseHandGesture.addDirection(finger, fp.FingerDirection.VeritcalUp, 1.0); // Straight up = 1.0 confidence.
+    RaiseHandGesture.addCurl(finger, fp.FingerCurl.NoCurl, 1.0); // Stretched out (nocurl)
+    // RaiseHandGesture.addDirection(finger, fp.FingerDirection.VeritcalUp, 1.0); // Straight up = 1.0 confidence.
   }
 }
 
@@ -62,18 +83,21 @@ async function Init() {
   net = await handpose.load();
   InitThumbsDown();
   InitRaiseHand();
+  InitFist();
   console.log("Handpose model loaded.");
 }
 
 async function Detect(video) {
+  if (video.paused) return;
   const hand = await net.estimateHands(video);
   if (hand.length > 0) {
     const GestureEstimator = new fp.GestureEstimator([
       fp.Gestures.ThumbsUpGesture, // Came with package
       ThumbsDownGesture, // Manually constructed (InitThumbsDown())
       RaiseHandGesture, // Manually constructed (InitRaiseHand())
+      FistGesture, // Manually constructed (InitFist())
     ]);
-    const gesture = await GestureEstimator.estimate(hand[0].landmarks, 4);
+    const gesture = await GestureEstimator.estimate(hand[0].landmarks, 8.5);
 
     if (gesture.gestures?.length > 0) {
       const confidence = gesture.gestures.map((prediction) => prediction.score);
