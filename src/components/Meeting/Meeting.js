@@ -36,7 +36,7 @@ import useMeeting from "../../stores/meetingStore";
 import useVideoSettings from "../../stores/videoSettingsStore";
 import useUser from "../../stores/userStore";
 import usePopup from "../../stores/popupStore";
-import useSettings from "../../stores/settingsStore"
+import useSettings from "../../stores/settingsStore";
 
 ////////
 // Utils
@@ -56,8 +56,7 @@ export default function Meeting() {
   const [microphone, setMicrophone] = useState(defaultAudio);
   const [camera, setCamera] = useState(defaultVideo);
   const [myStream, setMyStream] = useState(null);
-  const { askBeforeVideo, askBeforeAudio } = useSettings()
-
+  const { askBeforeVideo, askBeforeAudio } = useSettings();
 
   // Loading/Error hooks
   const [error, setError] = useState(false);
@@ -182,7 +181,7 @@ export default function Meeting() {
       },
       {
         name: "question-queue-update", // broadcasted (if someone was added/removed)
-        callback: (room, message) => onQuestionQueueUpdate(message),
+        callback: (room, message) => onQuestionQueueUpdate(room, message),
       },
     ]);
   }
@@ -191,7 +190,7 @@ export default function Meeting() {
   // Socket messages handlers
   ///////////////////////////
 
-  function onQuestionQueueUpdate({ event, data }) {
+  function onQuestionQueueUpdate(room, { event, data }) {
     if (event === "remove") GetQuestionQueue(room);
     else if (event === "add") setQuestionQueue((oq) => oq.concat(data));
   }
