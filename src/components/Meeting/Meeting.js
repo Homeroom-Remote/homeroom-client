@@ -22,6 +22,10 @@ import {
   RegisterMessages,
   SendChatMessage,
   SendHandGesture,
+  RegisterToMessageQueue,
+  RemoveFromMessageQueue,
+  GetOwner,
+  GetQuestionQueue,
 } from "../../api/room";
 import HandGestures from "./MachineLearningModules/HandGestures";
 
@@ -31,8 +35,8 @@ import HandGestures from "./MachineLearningModules/HandGestures";
 import useMeeting from "../../stores/meetingStore";
 import useVideoSettings from "../../stores/videoSettingsStore";
 import useUser from "../../stores/userStore";
+import usePopup from "../../stores/popupStore";
 import useSettings from "../../stores/settingsStore"
-
 
 ////////
 // Utils
@@ -67,11 +71,12 @@ export default function Meeting() {
 
   // Room hooks
   const [room, setRoom] = useState(null);
-  const { meetingID, exitMeeting } = useMeeting();
+  const { meetingID, exitMeeting, setOwner } = useMeeting();
   const [peers, setPeers] = useState([]);
 
   // etc
   const { user } = useUser();
+  const { setShow, setOpts } = usePopup();
 
   // Hand recognition
   const handIntervalTime = 1000; // Every 1s
@@ -80,17 +85,8 @@ export default function Meeting() {
 
   // Question queue
   const [questionQueue, setQuestionQueue] = useState([]);
-  const removeQuestionByID = (idToRemove) =>
-    setQuestionQueue((oldQueue) =>
-      oldQueue.filter(({ id }) => id !== idToRemove)
-    );
-  const addQuestion = (id, displayName) => {
-    setQuestionQueue((oldQueue) => {
-      const exists = oldQueue.find((qo) => qo.id === id);
-      if (exists) return oldQueue;
-      else return oldQueue.concat({ id: id, displayName: displayName });
-    });
-  };
+
+  const removeQuestionByID = (id) => RemoveFromMessageQueue(room, id);
 
   ////////
   // Media
@@ -141,10 +137,6 @@ export default function Meeting() {
     SendChatMessage(room, message);
   };
 
-  const onGeneralMessage = (msg) => {
-    generalChatSetter && generalChatSetter((c) => [...c, msg]);
-  };
-
   const onChatMount = (dataFromChat) => {
     generalChatSetter = dataFromChat[1];
     refreshRoomCallbacks(room);
@@ -176,8 +168,80 @@ export default function Meeting() {
         name: "hand-gesture",
         callback: (room, message) => onHandRecognition(message),
       },
+      {
+        name: "get-owner",
+        callback: (room, message) => onGetOwner(message),
+      },
+      {
+        name: "get-question-queue",
+        callback: (room, message) => onQuestionQueue(message),
+      },
+      {
+        name: "question-queue-status", // personal (if succeded/failed to add/remove from queue)
+        callback: (room, message) => onQuestionQueueStatus(message),
+      },
+      {
+        name: "question-queue-update", // broadcasted (if someone was added/removed)
+        callback: (room, message) => onQuestionQueueUpdate(message),
+      },
     ]);
   }
+
+  ///////////////////////////
+  // Socket messages handlers
+  ///////////////////////////
+
+  function onQuestionQueueUpdate({ event, data }) {
+    if (event === "remove") GetQuestionQueue(room);
+    else if (event === "add") setQuestionQueue((oq) => oq.concat(data));
+  }
+
+  function onQuestionQueueStatus({ event, status, message }) {
+    console.log("question queue status", event, status, message);
+    if (event === "add" && status === true) {
+      setOpts({
+        type: "success",
+        title: "Added To Queue",
+        body: "You are now registered to ask a question",
+      });
+      setShow(true);
+    }
+  }
+
+  function onQuestionQueue({ queue }) {
+    setQuestionQueue(queue);
+  }
+
+  function onGetOwner({ owner }) {
+    setOwner(owner);
+  }
+
+  function onPeerJoin(room, message) {
+    Peer.createPeer(room, message, true, peers, myStream, setPeers);
+  }
+
+  function onPeerLeave(room, message) {
+    Peer.destroyPeer(message.sessionId, peers, setPeers);
+  }
+
+  function onPeerSignal(room, message) {
+    Peer.createPeer(room, message, false, peers, myStream, setPeers);
+  }
+
+  const onGeneralMessage = (msg) => {
+    generalChatSetter && generalChatSetter((c) => [...c, msg]);
+  };
+
+  function onHandRecognition(message) {
+    const gestureObject = Peer.onHandRecognition(message, peers);
+    if (!gestureObject) {
+      console.warn("onHandRecognition warning: gestureObject is null");
+      return;
+    }
+
+    addGestureToVideo(gestureObject, gestureObject.sender);
+  }
+
   useEffect(() => {
     console.log("Meeting.js -> rerender");
     // Join room
@@ -234,18 +298,6 @@ export default function Meeting() {
     refreshRoomCallbacks(room);
   }, [peers]);
 
-  function onPeerJoin(room, message) {
-    Peer.createPeer(room, message, true, peers, myStream, setPeers);
-  }
-
-  function onPeerLeave(room, message) {
-    Peer.destroyPeer(message.sessionId, peers, setPeers);
-  }
-
-  function onPeerSignal(room, message) {
-    Peer.createPeer(room, message, false, peers, myStream, setPeers);
-  }
-
   function addGestureToVideo(gestureObject, id) {
     const gestureTTL = 10000; // for timeout - show gesture on video object
 
@@ -267,22 +319,6 @@ export default function Meeting() {
       handGestureList[gestureObject.message];
   }
 
-  function onHandRecognition(message) {
-    const gestureObject = Peer.onHandRecognition(message, peers);
-    if (!gestureObject) {
-      console.warn("onHandRecognition warning: gestureObject is null");
-      return;
-    }
-
-    const gesture = gestureObject.message;
-    if (gesture === "raise_hand") {
-      const userName = Peer.getNameFromID(gestureObject.sender, peers);
-      addQuestion(gestureObject.sender, userName);
-    }
-
-    addGestureToVideo(gestureObject, gestureObject.sender);
-  }
-
   /////
   // AI
   /////
@@ -299,8 +335,10 @@ export default function Meeting() {
     const hasVideoStream = !!myStream?.getVideoTracks().length > 0;
 
     // Remove interval if stream is offline
-    if (detectionInterval.current && !hasVideoStream)
-      clearInterval(hasVideoStream);
+    if (detectionInterval.current && !hasVideoStream) {
+      clearInterval(detectionInterval.current);
+      detectionInterval.current = null;
+    }
 
     // Add interval if stream is online
     if (!detectionInterval.current && hasVideoStream) {
@@ -312,13 +350,18 @@ export default function Meeting() {
       }, handIntervalTime);
     }
 
-    return () =>
+    return () => {
       detectionInterval.current && clearInterval(detectionInterval.current);
+      detectionInterval.current = null;
+    };
   }, [myStream]);
 
   function HandleGesturePrediction(prediction) {
     // Send to room (other participants)
     SendHandGesture(room, prediction);
+
+    if (prediction === "raise_hand") RegisterToMessageQueue(room);
+    else if (prediction === "fist") RemoveFromMessageQueue(room);
 
     // Display on my video object
     const id = "me";
