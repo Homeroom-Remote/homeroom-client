@@ -251,6 +251,18 @@ async function getMeetingHistory() {
 
   return getMeetingHistoryPromise;
 }
+
+async function getMeetingFavorite() {
+  const getMeetingFavoritePromise = new Promise((resolve, reject) => {
+    isLoggedIn()
+      .then((user) => db.collection(USERS_COLLECTION).doc(user.uid).get())
+      .then((snapshot) => snapshot.data())
+      .then((data) => resolve(data))
+      .catch((e) => reject(e));
+  });
+
+  return getMeetingFavoritePromise;
+}
 export {
   create,
   openMeeting,
@@ -263,4 +275,5 @@ export {
   getMyMeetingId,
   closeMeetingIfLastPerson,
   getMeetingHistory,
+  getMeetingFavorite,
 };

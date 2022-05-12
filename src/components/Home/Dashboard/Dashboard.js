@@ -4,6 +4,7 @@ import QuickSelection from "./QuickSelection";
 import Overlay from "../../Overlay";
 import HistoryCompact from "./HistoryCompact";
 import MediaPreview from "./MediaPreview";
+import FavoriteCompact from "./FavoriteCompact";
 
 export default function Dashboard() {
   const [OverlayComponent, setOverlayComponent] = useState(null);
@@ -20,6 +21,8 @@ export default function Dashboard() {
         <QuickSelection setOverlayComponent={setComponent} />
         <HistoryCompact setOverlayComponent={setComponent} />
         <MediaPreview />
+        <FavoriteCompact setOverlayComponent={setComponent} />
+
       </div>
     </div>
   );
