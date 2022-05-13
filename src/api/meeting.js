@@ -252,6 +252,44 @@ async function getMeetingHistory() {
   return getMeetingHistoryPromise;
 }
 
+async function isMeetingInFavorite(meeting_id) {
+  const getMeetingHistoryPromise = new Promise((resolve, reject) => {
+    isLoggedIn()
+      .then((user) => db.collection(USERS_COLLECTION).doc(user.uid).get())
+      .then((snapshot) => snapshot.data())
+      .then((data) => {
+        console.log("favorite with meeting")
+        const array = data.meeting_favorite
+        const isInFavoriteArray = array.filter(
+          (meet) => meet.id === meeting_id
+        );
+        if (isInFavoriteArray === undefined || isInFavoriteArray.length == 0) {
+          resolve(true)
+        }
+        else {
+          resolve(false)
+        }
+      })
+      .catch((e) => resolve(true));
+  });
+
+  return getMeetingHistoryPromise;
+}
+
+async function handleAddToFavorite(meeting) {
+  isLoggedIn()
+    .then((user) => {
+      db.collection(USERS_COLLECTION)
+        .doc(user.uid)
+        .set({
+          meeting_favorite: firebase.firestore.FieldValue.arrayUnion({
+            id: meeting.id,
+            at: meeting.created_at,
+          }),
+        }, { merge: true });
+    });
+}
+
 async function getMeetingFavorite() {
   const getMeetingFavoritePromise = new Promise((resolve, reject) => {
     isLoggedIn()
@@ -276,4 +314,6 @@ export {
   closeMeetingIfLastPerson,
   getMeetingHistory,
   getMeetingFavorite,
+  handleAddToFavorite,
+  isMeetingInFavorite,
 };

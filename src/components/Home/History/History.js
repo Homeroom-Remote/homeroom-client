@@ -21,7 +21,7 @@ export default function History() {
   const parseTime = (firebaseTimeObject) => {
     const fireBaseTime = new Date(
       firebaseTimeObject.seconds * 1000 +
-        firebaseTimeObject.nanoseconds / 1000000
+      firebaseTimeObject.nanoseconds / 1000000
     );
     return fireBaseTime.toDateString();
   };
@@ -102,8 +102,8 @@ export default function History() {
           </tr>
         </thead>
         <tbody>
-          {history.map((meeting) => (
-            <tr key={`meeting-${meeting.id}`}>
+          {history.map((meeting, index) => (
+            <tr key={`meeting-${meeting.id}-${index}`}>
               <td className={styles.body_td + "border-r"}>
                 {meeting.owner_name}
               </td>

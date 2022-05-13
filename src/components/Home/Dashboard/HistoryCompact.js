@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
-import { getMeetingHistory, get } from "../../../api/meeting";
+import { getMeetingHistory, get, handleAddToFavorite, isMeetingInFavorite } from "../../../api/meeting";
 import NoHistorySVG from "../../../utils/tissue.svg";
 import LoadingSVG from "../../../utils/seo.svg";
 import useMeeting from "../../../stores/meetingStore";
 import usePopup from "../../../stores/popupStore";
 
 import Button from "../../Button";
+import StarButton from "../../StarButton"
+
+
+
 
 function NoHistoryComponent() {
   return (
@@ -32,7 +36,7 @@ function LoadingComponent() {
   );
 }
 
-function HistoryComponent({ history }) {
+function HistoryComponent({ history, isFavoriteClicked, setIsFavoriteClicked }) {
   const { joinMeeting } = useMeeting();
   const { setShow, setOpts } = usePopup();
   const styles = {
@@ -45,7 +49,7 @@ function HistoryComponent({ history }) {
   const parseTime = (firebaseTimeObject) => {
     const fireBaseTime = new Date(
       firebaseTimeObject.seconds * 1000 +
-        firebaseTimeObject.nanoseconds / 1000000
+      firebaseTimeObject.nanoseconds / 1000000
     );
     return fireBaseTime.toDateString();
   };
@@ -74,8 +78,8 @@ function HistoryComponent({ history }) {
           </tr>
         </thead>
         <tbody>
-          {history.map((meeting) => (
-            <tr key={`meeting-${meeting.id}`}>
+          {history.map((meeting, index) => (
+            <tr key={`meeting-${meeting.id}-${index}`}>
               <td className={styles.body_td + "border-r"}>
                 {meeting.owner_name}
               </td>
@@ -85,6 +89,14 @@ function HistoryComponent({ history }) {
                   text="Join"
                   onClick={() => handleJoinMeeting(meeting)}
                 />
+                {meeting.isMeetingInFavorite == true &&
+                  <StarButton
+                    text="Fav"
+                    onClick={() => handleAddToFavorite(meeting).then((data) => {
+                      setIsFavoriteClicked((value) => value + 1)
+                    })
+                    }
+                  />}
               </td>
             </tr>
           ))}
@@ -93,9 +105,10 @@ function HistoryComponent({ history }) {
     </>
   );
 }
-export default function HistoryCompact({ setOverlayComponent }) {
+export default function HistoryCompact({ setOverlayComponent, isFavoriteClicked, setIsFavoriteClicked }) {
   const [loading, setLoading] = useState(true);
   const [history, setHistory] = useState([]);
+
 
   useEffect(() => {
     setLoading(true);
@@ -108,10 +121,16 @@ export default function HistoryCompact({ setOverlayComponent }) {
               data.meeting_history.map(async (meeting) => {
                 return get(meeting.id)
                   .then((data) => {
-                    return {
-                      ...data,
-                      ...meeting, // id + time
-                    };
+                    return isMeetingInFavorite(meeting.id).then((isMeetingInFavorite) => {
+                      console.log("isMeetingInFavorite")
+
+                      console.log(isMeetingInFavorite)
+                      return {
+                        ...data,
+                        ...meeting, // id + time
+                        isMeetingInFavorite,
+                      };
+                    })
                   })
                   .catch(() => false);
               })
@@ -127,7 +146,7 @@ export default function HistoryCompact({ setOverlayComponent }) {
           console.warn(e, "<- getting history");
         });
     }, [1000]);
-  }, []);
+  }, [isFavoriteClicked]);
 
   return (
     <div className="flex flex-row items-center h-full gap-x-2 justify-center">
@@ -139,7 +158,7 @@ export default function HistoryCompact({ setOverlayComponent }) {
         {loading ? (
           <LoadingComponent />
         ) : history ? (
-          <HistoryComponent history={history} />
+          <HistoryComponent history={history} isFavoriteClicked={isFavoriteClicked} setIsFavoriteClicked={setIsFavoriteClicked} />
         ) : (
           <NoHistoryComponent />
         )}

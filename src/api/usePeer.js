@@ -1,7 +1,4 @@
-import { useState, useEffect } from "react";
 import Peer from "simple-peer";
-
-const maxGestureTimeInSeconds = 10;
 
 /**
  * Updated peers given an id, new object & setter (setPeer)
@@ -158,10 +155,17 @@ function onHandRecognition(message, peers) {
   return gestureObject;
 }
 
+function getNameFromID(id, peers) {
+  const peerExists = peers.find((peer) => peer.id === id);
+  if (!peerExists) return false;
+  return peerExists.name;
+}
+
 const PeerWrapper = {
   createPeer,
   destroyPeer,
   onHandRecognition,
   updateStream,
+  getNameFromID,
 };
 export default PeerWrapper;
