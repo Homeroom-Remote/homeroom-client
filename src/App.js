@@ -15,7 +15,7 @@ function App() {
   const { theme } = useTheme();
   const { setUser, isLoggedIn } = useUser();
   const { isInMeeting } = useMeeting();
-  const { show, setShow, opts } = usePopup();
+  const { show } = usePopup();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -47,6 +47,7 @@ function App() {
   if (isInMeeting) {
     return (
       <div className={theme}>
+        {show && <PopupOverlay />}
         <Meeting />
       </div>
     );
@@ -54,9 +55,8 @@ function App() {
 
   return (
     <div className={theme}>
-      <PopupOverlay {...opts} show={show} setShow={setShow} />
+      {/* <PopupOverlay /> */}
       <Home />
-      {/* <Meeting /> */}
     </div>
   );
 }

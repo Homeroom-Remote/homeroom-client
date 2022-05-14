@@ -74,6 +74,22 @@ function SendHandGesture(room, prediction) {
   room.send("hand-gesture", prediction);
 }
 
+function RegisterToMessageQueue(room) {
+  room.send("add-to-question-queue", {});
+}
+
+function RemoveFromMessageQueue(room, id = null) {
+  room.send("remove-from-question-queue", { id: id });
+}
+
+function GetOwner(room) {
+  room.send("get-owner", {});
+}
+
+function GetQuestionQueue(room) {
+  room.send("get-question-queue");
+}
+
 export {
   JoinRoom,
   LeaveRoom,
@@ -81,4 +97,8 @@ export {
   RegisterMessages,
   SendChatMessage,
   SendHandGesture,
+  RegisterToMessageQueue,
+  RemoveFromMessageQueue,
+  GetOwner,
+  GetQuestionQueue,
 };

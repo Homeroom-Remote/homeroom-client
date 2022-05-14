@@ -5,7 +5,6 @@ import Overlay from "../../Overlay";
 import HistoryCompact from "./HistoryCompact";
 import MediaPreview from "./MediaPreview";
 import FavoriteCompact from "./FavoriteCompact";
-
 import useSettings from "../../../stores/settingsStore"
 import useVideoSettings from "../../../stores/videoSettingsStore";
 

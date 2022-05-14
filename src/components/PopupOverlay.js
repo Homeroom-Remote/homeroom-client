@@ -1,22 +1,22 @@
 import { useEffect } from "react";
+import usePopup from "../stores/popupStore";
 
-export default function PopupOverlay({
-  type,
-  title,
-  body,
-  timeout = 4000,
-  show = false,
-  setShow,
-}) {
+export default function PopupOverlay() {
+  const { opts, show, setShow } = usePopup();
+  const type = opts?.type;
+  const title = opts?.title;
+  const body = opts?.body;
+  const timeout = opts?.timeout || 4000;
   useEffect(() => {
-    var removePopupInterval = null;
-    if (setShow) {
-      removePopupInterval = setInterval(() => {
-        setShow(false);
-      }, [timeout]);
-    }
+    var removePopupTimeout = null;
+    removePopupTimeout = setTimeout(() => {
+      setShow(false);
+    }, timeout);
 
-    return () => removePopupInterval && clearInterval(removePopupInterval);
+    return () => {
+      setShow(false);
+      removePopupTimeout && clearTimeout(removePopupTimeout);
+    };
   }, [timeout, setShow]);
 
   const getBackgroundColor = () => {
@@ -37,7 +37,7 @@ export default function PopupOverlay({
   };
 
   const getStyles = () =>
-    `absolute w-74 h-20 ${getBackgroundColor()} rounded-lg p-2 ${getPosition()} transition-all delay-200`;
+    `absolute w-74 h-20 ${getBackgroundColor()} rounded-lg p-2 ${getPosition()} transition-all delay-200 z-50`;
 
   return (
     <div className={getStyles()}>
