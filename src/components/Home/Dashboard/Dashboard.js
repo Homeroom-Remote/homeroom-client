@@ -13,6 +13,7 @@ import useVideoSettings from "../../../stores/videoSettingsStore";
 export default function Dashboard({ changeMainComponent }) {
   const [OverlayComponent, setOverlayComponent] = useState(null);
   const [isFavoriteClicked, setIsFavoriteClicked] = useState(0);
+  const [isRemoveFavoriteClicked, setIsRemoveFavoriteClicked] = useState(0);
 
   const closeOverlay = () => setOverlayComponent(null);
   const setComponent = (Component) =>
@@ -25,9 +26,11 @@ export default function Dashboard({ changeMainComponent }) {
       <Header />
       <div className="grid grid-flow-row grid-rows-2 grid-cols-2 h-full">
         <QuickSelection setOverlayComponent={setComponent} changeMainComponent={changeMainComponent} />
-        <HistoryCompact setOverlayComponent={setComponent} isFavoriteClicked={isFavoriteClicked} setIsFavoriteClicked={setIsFavoriteClicked} />
+        <HistoryCompact setOverlayComponent={setComponent} isFavoriteClicked={isFavoriteClicked} setIsFavoriteClicked={setIsFavoriteClicked}
+          isRemoveFavoriteClicked={isRemoveFavoriteClicked} />
         <MediaPreview />
-        <FavoriteCompact setOverlayComponent={setComponent} isFavoriteClicked={isFavoriteClicked} setIsFavoriteClicked={setIsFavoriteClicked} />
+        <FavoriteCompact setOverlayComponent={setComponent} isFavoriteClicked={isFavoriteClicked} setIsFavoriteClicked={setIsFavoriteClicked}
+          isRemoveFavoriteClicked={isRemoveFavoriteClicked} setIsRemoveFavoriteClicked={setIsRemoveFavoriteClicked} />
 
       </div>
     </div>

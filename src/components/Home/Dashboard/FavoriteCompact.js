@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
-import { getMeetingFavorite, get, handleAddToFavorite } from "../../../api/meeting";
+import { getMeetingFavorite, get, handleRemoveFromFavorite } from "../../../api/meeting";
 import NoHistorySVG from "../../../utils/tissue.svg";
 import LoadingSVG from "../../../utils/seo.svg";
 import useMeeting from "../../../stores/meetingStore";
 import usePopup from "../../../stores/popupStore";
 import Button from "../../Button";
-import StarButton from "../../StarButton"
+import RemoveButton from "../../RemoveButton"
 
 
 function NoFavoriteComponent() {
     return (
         <div className="w-full h-full flex items-center justify-center p-2">
             <div className="flex flex-col max-h-full items-center justify-center">
-                <h1 className="text-4xl font-medium text-primary-400">No History.</h1>
+                <h1 className="text-4xl font-medium text-primary-400">No Favorites.</h1>
                 <object data={NoHistorySVG} type="image/svg+xml">
                     <img src="" alt="no history" />
                 </object>
@@ -33,7 +33,7 @@ function LoadingComponent() {
     );
 }
 
-function FavoriteComponent({ favorite }) {
+function FavoriteComponent({ favorite, isRemoveFavoriteClicked, setIsRemoveFavoriteClicked }) {
     const { joinMeeting } = useMeeting();
     const { setShow, setOpts } = usePopup();
     const styles = {
@@ -63,12 +63,6 @@ function FavoriteComponent({ favorite }) {
             setShow(true);
         }
     };
-
-    // if (favorite) {
-    //     console.log("favorite")
-
-    //     console.log(favorite[0].isMeetingInFavorite)
-    // }
     return (
         <>
             <table className="items-center w-full bg-transparent border-collapse table-auto">
@@ -91,15 +85,14 @@ function FavoriteComponent({ favorite }) {
                                     text="Join"
                                     onClick={() => handleJoinMeeting(meeting)}
                                 />
-                                {meeting.isMeetingInFavorite == true &&
-                                    <StarButton
-                                        text="Fav"
-                                        onClick={() => handleAddToFavorite(meeting).then((data) => {
-                                            console.log("data")
-                                            console.log(data)
-                                        })
-                                        }
-                                    />}
+
+                                <RemoveButton
+                                    text="Fav"
+                                    onClick={() => handleRemoveFromFavorite(meeting).then((data) => {
+                                        setIsRemoveFavoriteClicked((value) => value + 1)
+                                    })
+                                    }
+                                />
                             </td>
                         </tr>
                     ))}
@@ -110,7 +103,7 @@ function FavoriteComponent({ favorite }) {
 }
 
 
-export default function FavoriteCompact({ setOverlayComponent, isFavoriteClicked }) {
+export default function FavoriteCompact({ setOverlayComponent, isFavoriteClicked, isRemoveFavoriteClicked, setIsRemoveFavoriteClicked }) {
     const [loading, setLoading] = useState(true);
     const [favorite, setFavorite] = useState([]);
 
@@ -119,8 +112,6 @@ export default function FavoriteCompact({ setOverlayComponent, isFavoriteClicked
         setTimeout(() => {
             getMeetingFavorite()
                 .then((data) => {
-                    // console.log("data")
-                    // console.log(data.meeting_favorite)
                     if (!data?.meeting_favorite) setFavorite(null);
                     else {
                         Promise.all(
@@ -134,8 +125,8 @@ export default function FavoriteCompact({ setOverlayComponent, isFavoriteClicked
                                     })
                                     .catch(() => false);
                             })
-                        ).then((combinedHistory) => {
-                            setFavorite(combinedHistory);
+                        ).then((combinedFavorite) => {
+                            setFavorite(combinedFavorite);
                         });
                     }
                     setFavorite(data?.meeting_favorite?.map((meeting) => ({ ...meeting })));
@@ -143,10 +134,10 @@ export default function FavoriteCompact({ setOverlayComponent, isFavoriteClicked
                 })
                 .catch((e) => {
                     setLoading(false);
-                    console.warn(e, "<- getting history");
+                    console.warn(e, "<- getting favorite");
                 });
         }, [1000]);
-    }, [isFavoriteClicked]);
+    }, [isFavoriteClicked, isRemoveFavoriteClicked]);
 
     return (
         <div className="flex flex-row items-center h-full gap-x-2 justify-center">
@@ -158,7 +149,7 @@ export default function FavoriteCompact({ setOverlayComponent, isFavoriteClicked
                 {loading ? (
                     <LoadingComponent />
                 ) : favorite ? (
-                    <FavoriteComponent favorite={favorite} />
+                    <FavoriteComponent favorite={favorite} isRemoveFavoriteClicked={isRemoveFavoriteClicked} setIsRemoveFavoriteClicked={setIsRemoveFavoriteClicked} />
                 ) : (
                     <NoFavoriteComponent />
                 )}

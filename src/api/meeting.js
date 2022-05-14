@@ -258,7 +258,6 @@ async function isMeetingInFavorite(meeting_id) {
       .then((user) => db.collection(USERS_COLLECTION).doc(user.uid).get())
       .then((snapshot) => snapshot.data())
       .then((data) => {
-        console.log("favorite with meeting")
         const array = data.meeting_favorite
         const isInFavoriteArray = array.filter(
           (meet) => meet.id === meeting_id
@@ -275,6 +274,19 @@ async function isMeetingInFavorite(meeting_id) {
 
   return getMeetingHistoryPromise;
 }
+
+
+async function handleRemoveFromFavorite(meeting) {
+  isLoggedIn()
+    .then((user) => {
+      db.collection(USERS_COLLECTION)
+        .doc(user.uid)
+        .update({
+          "meeting_favorite": firebase.firestore.FieldValue.arrayRemove({ "at": meeting.at, "id": meeting.id })
+        });
+    });
+}
+
 
 async function handleAddToFavorite(meeting) {
   isLoggedIn()
@@ -316,4 +328,5 @@ export {
   getMeetingFavorite,
   handleAddToFavorite,
   isMeetingInFavorite,
+  handleRemoveFromFavorite,
 };

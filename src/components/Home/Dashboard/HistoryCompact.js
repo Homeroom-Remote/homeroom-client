@@ -105,7 +105,7 @@ function HistoryComponent({ history, isFavoriteClicked, setIsFavoriteClicked }) 
     </>
   );
 }
-export default function HistoryCompact({ setOverlayComponent, isFavoriteClicked, setIsFavoriteClicked }) {
+export default function HistoryCompact({ setOverlayComponent, isFavoriteClicked, setIsFavoriteClicked, isRemoveFavoriteClicked }) {
   const [loading, setLoading] = useState(true);
   const [history, setHistory] = useState([]);
 
@@ -122,13 +122,10 @@ export default function HistoryCompact({ setOverlayComponent, isFavoriteClicked,
                 return get(meeting.id)
                   .then((data) => {
                     return isMeetingInFavorite(meeting.id).then((isMeetingInFavorite) => {
-                      console.log("isMeetingInFavorite")
-
-                      console.log(isMeetingInFavorite)
                       return {
                         ...data,
                         ...meeting, // id + time
-                        isMeetingInFavorite,
+                        isMeetingInFavorite, // when returns- true: can add to favorite. false: disable
                       };
                     })
                   })
@@ -146,7 +143,7 @@ export default function HistoryCompact({ setOverlayComponent, isFavoriteClicked,
           console.warn(e, "<- getting history");
         });
     }, [1000]);
-  }, [isFavoriteClicked]);
+  }, [isFavoriteClicked, isRemoveFavoriteClicked]);
 
   return (
     <div className="flex flex-row items-center h-full gap-x-2 justify-center">

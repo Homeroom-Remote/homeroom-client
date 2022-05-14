@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { getMeetingHistory, get } from "../../../api/meeting";
+import { getMeetingHistory, get, handleAddToFavorite, isMeetingInFavorite } from "../../../api/meeting";
 import LoadingSVG from "../../../utils/seo.svg";
 import NoHistorySVG from "../../../utils/tissue.svg";
 import Button from "../../Button";
 import OnlineIndicator from "../../OnlineIndicator";
 import useMeeting from "../../../stores/meetingStore";
+import StarButton from "../../StarButton"
 
 export default function History() {
   const [loading, setLoading] = useState(true);
@@ -40,15 +41,18 @@ export default function History() {
               data.meeting_history.map(async (meeting) => {
                 return get(meeting.id)
                   .then((data) => {
-                    return {
-                      ...data,
-                      ...meeting, // id + time
-                    };
+                    return isMeetingInFavorite(meeting.id).then((isMeetingInFavorite) => {
+                      // console.log("isMeetingInFavorite")
+                      return {
+                        ...data,
+                        ...meeting, // id + time
+                        isMeetingInFavorite,
+                      };
+                    })
                   })
                   .catch(() => false);
               })
             ).then((combinedHistory) => {
-              console.log(combinedHistory);
               setHistory(combinedHistory);
             });
           }
@@ -124,11 +128,21 @@ export default function History() {
                 </p>
               </td>
               <td className={styles.body_td}>{parseTime(meeting.at)}</td>
-              {meeting.status === "online" && (
-                <td className={styles.body_td + "border-l"}>
+              <td className={styles.body_td + "border-l"}>
+
+                {meeting.status === "online" && (
                   <Button text="Join" onClick={() => joinMeeting(meeting.id)} />
-                </td>
-              )}
+                )}
+                {meeting.isMeetingInFavorite == true && (
+                  <StarButton
+                    text="Fav"
+                    onClick={() => handleAddToFavorite(meeting).then((data) => {
+
+                    })
+                    }
+                  />)}
+              </td>
+
             </tr>
           ))}
         </tbody>
