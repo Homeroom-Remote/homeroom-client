@@ -69,6 +69,7 @@ function HistoryComponent({ history, isFavoriteClicked, setIsFavoriteClicked }) 
 
   return (
     <>
+    <div className=" overflow-auto">
       <table className="items-center w-full bg-transparent border-collapse table-auto">
         <thead>
           <tr>
@@ -102,6 +103,7 @@ function HistoryComponent({ history, isFavoriteClicked, setIsFavoriteClicked }) 
           ))}
         </tbody>
       </table>
+      </div>
     </>
   );
 }

@@ -100,8 +100,24 @@ export default function Meeting() {
   ////////
   // Media
   ////////
-  const toggleCamera = () => setCamera(!camera);
-  const toggleMicrophone = () => setMicrophone(!microphone);
+  const toggleCamera = () => {
+    if(camera)
+      setCamera(!camera);
+    else {
+      if(window.confirm("Are you sure you want to turn on the camera?")) {
+        setCamera(!camera);
+      }
+    }
+  }
+  const toggleMicrophone = () => {
+    if(microphone)
+      setMicrophone(!microphone);
+    else {
+      if(window.confirm("Are you sure you want to turn on the microphone?")) {
+        setMicrophone(!microphone);
+      }
+    }
+  }
 
   const stopStream = (streamToStop) => {
     streamToStop.getTracks().forEach((track) => track.stop());

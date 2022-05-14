@@ -65,6 +65,7 @@ function FavoriteComponent({ favorite, isRemoveFavoriteClicked, setIsRemoveFavor
     };
     return (
         <>
+            <div className=" overflow-auto">
             <table className="items-center w-full bg-transparent border-collapse table-auto">
                 <thead>
                     <tr>
@@ -98,6 +99,7 @@ function FavoriteComponent({ favorite, isRemoveFavoriteClicked, setIsRemoveFavor
                     ))}
                 </tbody>
             </table>
+            </div>
         </>
     );
 }
