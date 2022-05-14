@@ -64,6 +64,7 @@ function createPeer(room, message, initiator, peers, myStream, setter) {
     message.sessionId,
     {
       id: message.sessionId,
+      uid: message.uid,
       peer: peer,
       room: room,
       name: message.name,
@@ -83,6 +84,7 @@ function createPeer(room, message, initiator, peers, myStream, setter) {
       message.sessionId,
       {
         id: message.sessionId,
+        uid: message.uid,
         peer: peer,
         room: room,
         name: message.name,
@@ -103,6 +105,7 @@ function createPeer(room, message, initiator, peers, myStream, setter) {
         message.sessionId,
         {
           id: message.sessionId,
+          uid: message.uid,
           peer: peer,
           room: room,
           name: message.name,
@@ -116,6 +119,7 @@ function createPeer(room, message, initiator, peers, myStream, setter) {
     message.sessionId,
     {
       id: message.sessionId,
+      uid: message.uid,
       peer: peer,
       room: room,
       name: message.name,

@@ -38,7 +38,6 @@ import useUser from "../../stores/userStore";
 import usePopup from "../../stores/popupStore";
 import useSettings from "../../stores/settingsStore";
 
-
 ////////
 // Utils
 ////////
@@ -57,8 +56,7 @@ export default function Meeting() {
   const [microphone, setMicrophone] = useState(defaultAudio);
   const [camera, setCamera] = useState(defaultVideo);
   const [myStream, setMyStream] = useState(null);
-  const { askBeforeVideo, askBeforeAudio } = useSettings()
-
+  const { askBeforeVideo, askBeforeAudio } = useSettings();
 
   // Loading/Error hooks
   const [error, setError] = useState(false);
@@ -86,6 +84,8 @@ export default function Meeting() {
 
   // Question queue
   const [questionQueue, setQuestionQueue] = useState([]);
+  const [showQuestionQueue, setShowQuestionQueue] = useState(false);
+  const toggleQuestionQueue = () => setShowQuestionQueue((val) => !val);
 
   const removeQuestionByID = (id) => RemoveFromMessageQueue(room, id);
 
@@ -96,7 +96,6 @@ export default function Meeting() {
       else return oldQueue.concat({ id: id, displayName: displayName });
     });
   };
-
 
   ////////
   // Media
@@ -329,7 +328,6 @@ export default function Meeting() {
       handGestureList[gestureObject.message];
   }
 
-
   function onHandRecognition(message) {
     const gestureObject = Peer.onHandRecognition(message, peers);
     if (!gestureObject) {
@@ -410,10 +408,12 @@ export default function Meeting() {
   return (
     <div className={globalStyles}>
       <div className="h-full grid grid-flow-col grid-cols-10 grid-rows-1 relative">
-        <QuestionQueue
-          questions={questionQueue}
-          removeQuestionByID={removeQuestionByID}
-        />
+        {showQuestionQueue && (
+          <QuestionQueue
+            questions={questionQueue}
+            removeQuestionByID={removeQuestionByID}
+          />
+        )}
         <div
           className={
             "grid grid-rows-10 grid-flow-row bg-red-200 h-full " +
@@ -441,6 +441,8 @@ export default function Meeting() {
               toggleChat={toggleChat}
               participants={participants}
               toggleParticipants={toggleParticipants}
+              questionQueue={showQuestionQueue}
+              toggleQuestionQueue={toggleQuestionQueue}
             />
           </div>
         </div>
