@@ -11,11 +11,14 @@ import OnlineIndicator from "../../OnlineIndicator";
 import Button from "../../Button";
 
 import Tooltip from "react-tooltip";
+import useSettings from "../../../stores/settingsStore"
 
-export default function QuickSelection({ setOverlayComponent }) {
+
+export default function QuickSelection({ setOverlayComponent, changeMainComponent }) {
   const { joinMeeting } = useMeeting();
   const [online, setOnline] = useState(false);
   const [copyMeetingTip, setCopyMeetingTip] = useState(false);
+  const { autoCopyLink } = useSettings()
 
   const handleJoinRoom = () => {
     setOverlayComponent(JoinRoomOverlay);
@@ -61,6 +64,7 @@ export default function QuickSelection({ setOverlayComponent }) {
   }, []);
 
   function openRoom() {
+    if(autoCopyLink) copyMeetingIDToClipboard()
     create()
       .then(() => getMyMeetingId())
       .then((meetingID) => joinMeeting(meetingID))
@@ -162,7 +166,7 @@ export default function QuickSelection({ setOverlayComponent }) {
           <Button
             text="Go To Settings"
             onClick={() => {
-              console.log("todo");
+              changeMainComponent(1)
             }}
           />
         </div>

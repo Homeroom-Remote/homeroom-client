@@ -31,11 +31,14 @@ import HandGestures from "./MachineLearningModules/HandGestures";
 import useMeeting from "../../stores/meetingStore";
 import useVideoSettings from "../../stores/videoSettingsStore";
 import useUser from "../../stores/userStore";
+import useSettings from "../../stores/settingsStore"
+
 
 ////////
 // Utils
 ////////
 import handGestureList from "../../utils/handGestureList";
+import QuestionQueue from "./QuestionQueue";
 
 const globalStyles =
   // eslint-disable-next-line no-multi-str
@@ -49,6 +52,8 @@ export default function Meeting() {
   const [microphone, setMicrophone] = useState(defaultAudio);
   const [camera, setCamera] = useState(defaultVideo);
   const [myStream, setMyStream] = useState(null);
+  const { askBeforeVideo, askBeforeAudio } = useSettings()
+
 
   // Loading/Error hooks
   const [error, setError] = useState(false);
@@ -72,6 +77,20 @@ export default function Meeting() {
   const handIntervalTime = 1000; // Every 1s
   var detectionInterval = useRef(null);
   const handGestures = useRef(new Map());
+
+  // Question queue
+  const [questionQueue, setQuestionQueue] = useState([]);
+  const removeQuestionByID = (idToRemove) =>
+    setQuestionQueue((oldQueue) =>
+      oldQueue.filter(({ id }) => id !== idToRemove)
+    );
+  const addQuestion = (id, displayName) => {
+    setQuestionQueue((oldQueue) => {
+      const exists = oldQueue.find((qo) => qo.id === id);
+      if (exists) return oldQueue;
+      else return oldQueue.concat({ id: id, displayName: displayName });
+    });
+  };
 
   ////////
   // Media
@@ -255,6 +274,12 @@ export default function Meeting() {
       return;
     }
 
+    const gesture = gestureObject.message;
+    if (gesture === "raise_hand") {
+      const userName = Peer.getNameFromID(gestureObject.sender, peers);
+      addQuestion(gestureObject.sender, userName);
+    }
+
     addGestureToVideo(gestureObject, gestureObject.sender);
   }
 
@@ -314,7 +339,11 @@ export default function Meeting() {
 
   return (
     <div className={globalStyles}>
-      <div className="h-full grid grid-flow-col grid-cols-10 grid-rows-1">
+      <div className="h-full grid grid-flow-col grid-cols-10 grid-rows-1 relative">
+        <QuestionQueue
+          questions={questionQueue}
+          removeQuestionByID={removeQuestionByID}
+        />
         <div
           className={
             "grid grid-rows-10 grid-flow-row bg-red-200 h-full " +
@@ -330,6 +359,7 @@ export default function Meeting() {
             }}
             autoPlay={true}
           ></video>
+
           <VideoWrapper myStream={myStream} otherParticipants={peers} />
           <div className="row-span-1">
             <Toolbar
