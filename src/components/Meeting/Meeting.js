@@ -103,20 +103,25 @@ export default function Meeting() {
   const toggleCamera = () => {
     if(camera)
       setCamera(!camera);
-    else {
-      if(window.confirm("Are you sure you want to turn on the camera?")) {
-        setCamera(!camera);
-      }
+    else if(askBeforeVideo) {
+        if(window.confirm("Are you sure you want to turn on the camera?")) {
+          setCamera(!camera);
+        }
     }
+    else
+      setCamera(!camera);
   }
+
   const toggleMicrophone = () => {
     if(microphone)
       setMicrophone(!microphone);
-    else {
-      if(window.confirm("Are you sure you want to turn on the microphone?")) {
-        setMicrophone(!microphone);
-      }
+    else if(askBeforeAudio) {
+        if(window.confirm("Are you sure you want to turn on the microphone?")) {
+          setMicrophone(!microphone);
+        }
     }
+    else
+      setMicrophone(!microphone);
   }
 
   const stopStream = (streamToStop) => {
