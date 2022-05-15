@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import Swal from "sweetalert2"
 
 /////////////
 // Components
@@ -56,7 +57,8 @@ export default function Meeting() {
   const [microphone, setMicrophone] = useState(defaultAudio);
   const [camera, setCamera] = useState(defaultVideo);
   const [myStream, setMyStream] = useState(null);
-  const { askBeforeVideo, askBeforeAudio } = useSettings();
+  const { askBeforeVideo, askBeforeAudio, toggleAskBeforeAudio } = useSettings();
+
 
   // Loading/Error hooks
   const [error, setError] = useState(false);
@@ -104,9 +106,25 @@ export default function Meeting() {
     if(camera)
       setCamera(!camera);
     else if(askBeforeVideo) {
-        if(window.confirm("Are you sure you want to turn on the camera?")) {
-          setCamera(!camera);
-        }
+        // if(window.confirm("Are you sure you want to turn on the camera?")) {
+        //   setCamera(!camera);
+        // }
+        Swal.fire({
+          title: 'Are you sure you want to turn on the camera?',
+          color: 'green',
+          background: '#fff url(/images/trees.png)',
+          showCancelButton: true,
+          confirmButtonColor: "blue",
+          confirmButtonText: "yes, turn on my camera",
+          cancelButtonColor: "red",
+          cancelButtonText: "no, keep my camera off",
+          icon: 'question',
+          // backdrop: 'rgba(0,0,123,0.4)'
+        }).then((result) => {
+          if(result.isConfirmed) {
+            setCamera(!camera);
+          }
+        })
     }
     else
       setCamera(!camera);
@@ -116,9 +134,25 @@ export default function Meeting() {
     if(microphone)
       setMicrophone(!microphone);
     else if(askBeforeAudio) {
-        if(window.confirm("Are you sure you want to turn on the microphone?")) {
-          setMicrophone(!microphone);
-        }
+        // if(window.confirm("Are you sure you want to turn on the microphone?")) {
+        //   setMicrophone(!microphone);
+        // }
+        Swal.fire({
+          title: 'Are you sure you want to turn on the microphone?',
+          color: 'green',
+          background: '#fff url(/images/trees.png)',
+          showCancelButton: true,
+          confirmButtonColor: "blue",
+          confirmButtonText: "yes, turn on my microphone",
+          cancelButtonColor: "red",
+          cancelButtonText: "no, keep my microphone off",
+          icon: 'question',
+          // backdrop: 'rgba(0,0,123,0.4)'
+        }).then((result) => {
+          if(result.isConfirmed) {
+            setMicrophone(!microphone);
+          }
+        })
     }
     else
       setMicrophone(!microphone);
@@ -452,6 +486,8 @@ export default function Meeting() {
           ></video>
 
           <VideoWrapper myStream={myStream} otherParticipants={peers} />
+
+
           <div className="row-span-1">
             <Toolbar
               camera={camera}
