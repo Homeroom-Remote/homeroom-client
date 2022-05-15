@@ -25,6 +25,8 @@ export default function Home() {
   const { defaultVideo, defaultAudio, toggleVideo, toggleAudio } = useVideoSettings();
   const { askBeforeVideo, askBeforeAudio, autoCopyLink, showConnectionTime, toggleAskBeforeVideo, toggleAskBeforeAudio, toggleAutoCopyLink, toggleShowConnectionTime } = useSettings()
 
+  
+
     useEffect(() => {
       console.log(localStorage)
       var inputs = JSON.parse(localStorage.getItem('inputs'));
