@@ -31,11 +31,11 @@ export default function Home() {
       console.log(localStorage)
       var inputs = JSON.parse(localStorage.getItem('inputs'));
       inputs?.forEach(function(input) {
-        if(input.id === "defaultVideoID" && input.checked === defaultVideo) {
+        if(input.id === "defaultVideoID" && input.checked !== defaultVideo) {
           toggleVideo()
           return
         }
-        if(input.id === "option2" && input.checked === defaultAudio) {
+        if(input.id === "option2" && input.checked !== defaultAudio) {
           toggleAudio()
           return
         }
