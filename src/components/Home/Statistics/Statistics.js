@@ -13,13 +13,18 @@ export default function Statistics() {
       const options = {
         curveType: "function",
         legend: { position: "bottom" },
+        colors: ['rgb(192, 132, 252)', 'rgb(74, 222, 128)'],
+        backgroundColor: 'white',
+        lineWidth: 4,
+
       };
+      const grade = 81;
 
   return (
-    <div className="px-6 pt-6 2xl:container">
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+    <div className="px-6 pt-6 py-16 2xl:container h-full">
+        <div className="grid gap-6 grid-cols-2 h-full ">
             <LectureResults data={data} options={options} />
-            <LectureGrade />
+            <LectureGrade grade={grade}/>
         </div>
     </div>
   );

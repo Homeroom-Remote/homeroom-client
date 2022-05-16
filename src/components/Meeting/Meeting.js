@@ -1,5 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import Swal from "sweetalert2"
+import Timer from "../Home/Settings/Timer";
+
 
 /////////////
 // Components
@@ -57,7 +59,7 @@ export default function Meeting() {
   const [microphone, setMicrophone] = useState(defaultAudio);
   const [camera, setCamera] = useState(defaultVideo);
   const [myStream, setMyStream] = useState(null);
-  const { askBeforeVideo, askBeforeAudio, toggleAskBeforeAudio } = useSettings();
+  const { askBeforeVideo, askBeforeAudio, showConnectionTime } = useSettings();
 
 
   // Loading/Error hooks
@@ -521,6 +523,9 @@ export default function Meeting() {
             />
           )}
         </div>
+        {showConnectionTime && <div className="absolute w-full">
+          <div className="justify-center text-center self-center flex flex-col items-center content-center "><Timer /></div>
+        </div>}
       </div>
     </div>
   );
