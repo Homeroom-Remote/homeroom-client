@@ -471,7 +471,7 @@ export default function Meeting() {
         )}
         <div
           className={
-            "grid grid-rows-10 grid-flow-row bg-red-200 h-full " +
+            "grid grid-rows-10 grid-flow-row h-full " +
             (participants || chat ? "col-span-7" : "col-span-10")
           }
         >

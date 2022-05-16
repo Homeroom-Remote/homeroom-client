@@ -14,6 +14,7 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: true,
     },
+    icon: path.join(__dirname, "apple-icon-72x72.png"),
   });
 
   let appUrl = `file://${path.join(__dirname, "../build/index.html")}`;
