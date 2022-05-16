@@ -5,6 +5,20 @@ module.exports = {
   darkMode: "class",
   theme: {
     extend: {
+      animation: {
+        "border-horizontal": "left-right-border 1s linear",
+        "border-vertical": "top-bottom-border 1s linear",
+      },
+      keyframes: {
+        "left-right-border": {
+          "0%": { transform: "scaleX(0)", "transform-origin": "left" },
+          "100%": { transform: "scaleX(1)", "transform-origin": "left" },
+        },
+        "top-bottom-border": {
+          "0%": { transform: "scaleY(0)", "transform-origin": "top" },
+          "100%": { transform: "scaleY(1)", "transform-origin": "top" },
+        },
+      },
       colors: {
         primary: colors.purple,
         secondary: colors.green,

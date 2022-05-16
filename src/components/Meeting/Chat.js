@@ -124,7 +124,7 @@ function Chat({ sendMessage, isParticipantsOpen, generalMessage, onMount }) {
   return (
     <div
       className={
-        "flex flex-col justify-between dark:bg-dark-900 bg-lt-50 col-span-3 " +
+        "flex flex-col justify-between py-5 dark:bg-dark-900 bg-lt-50 shadow-md dark:shadow-dark-800 shadow-lt-600 border dark:border-dark-600 border-lt-200 rounded-lg m-4 col-span-3 " +
         (isParticipantsOpen ? "h-1/2" : "h-full")
       }
     >

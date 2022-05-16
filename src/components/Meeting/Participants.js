@@ -57,7 +57,7 @@ export default function Participants({
   return (
     <div
       className={
-        "flex flex-col text-center dark:bg-dark-900 bg-lt-50 col-span-3 py-5 shadow-md shadow-dark-800 border border-dark-600 rounded-lg m-4 " +
+        "flex flex-col text-center col-span-3 py-5 dark:bg-dark-900 bg-lt-50 shadow-md dark:shadow-dark-800 shadow-lt-600 border dark:border-dark-600 border-lt-200 rounded-lg m-4 " +
         (isChatOpen ? "h-1/2" : "h-full")
       }
     >
