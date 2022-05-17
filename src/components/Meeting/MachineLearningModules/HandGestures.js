@@ -11,6 +11,8 @@ function IsReady() {
   return !!net;
 }
 
+function Destroy() {}
+
 function InitFist() {
   FistGesture = new fp.GestureDescription("fist");
 
@@ -80,7 +82,7 @@ function InitThumbsDown() {
 }
 
 async function Init() {
-  net = await handpose.load();
+  if (!net) net = await handpose.load();
   InitThumbsDown();
   InitRaiseHand();
   InitFist();
@@ -115,6 +117,7 @@ const HandGestures = {
   IsReady,
   Init,
   Detect,
+  Destroy,
 };
 
 export default HandGestures;
