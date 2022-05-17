@@ -1,7 +1,4 @@
 import { useEffect, useState, useRef } from "react";
-import Swal from "sweetalert2"
-import Timer from "../Home/Settings/Timer";
-
 
 /////////////
 // Components
@@ -12,6 +9,8 @@ import VideoWrapper from "./VideoWrapper";
 import Participants from "./Participants";
 import Error from "./Error";
 import MeetingLoading from "./MeetingLoading";
+import Timer from "../Home/Settings/Timer";
+import Swal from "sweetalert2";
 
 //////
 // API
@@ -61,7 +60,6 @@ export default function Meeting() {
   const [myStream, setMyStream] = useState(null);
   const { askBeforeVideo, askBeforeAudio, showConnectionTime } = useSettings();
 
-
   // Loading/Error hooks
   const [error, setError] = useState(false);
   const [isOnline, setIsOnline] = useState(false);
@@ -105,60 +103,54 @@ export default function Meeting() {
   // Media
   ////////
   const toggleCamera = () => {
-    if(camera)
-      setCamera(!camera);
-    else if(askBeforeVideo) {
-        // if(window.confirm("Are you sure you want to turn on the camera?")) {
-        //   setCamera(!camera);
-        // }
-        Swal.fire({
-          title: 'Are you sure you want to turn on the camera?',
-          color: 'green',
-          background: '#fff url(/images/trees.png)',
-          showCancelButton: true,
-          confirmButtonColor: "blue",
-          confirmButtonText: "yes, turn on my camera",
-          cancelButtonColor: "red",
-          cancelButtonText: "no, keep my camera off",
-          icon: 'question',
-          // backdrop: 'rgba(0,0,123,0.4)'
-        }).then((result) => {
-          if(result.isConfirmed) {
-            setCamera(!camera);
-          }
-        })
-    }
-    else
-      setCamera(!camera);
-  }
+    if (camera) setCamera(!camera);
+    else if (askBeforeVideo) {
+      // if(window.confirm("Are you sure you want to turn on the camera?")) {
+      //   setCamera(!camera);
+      // }
+      Swal.fire({
+        title: "Are you sure you want to turn on the camera?",
+        color: "green",
+        background: "#fff url(/images/trees.png)",
+        showCancelButton: true,
+        confirmButtonColor: "blue",
+        confirmButtonText: "yes, turn on my camera",
+        cancelButtonColor: "red",
+        cancelButtonText: "no, keep my camera off",
+        icon: "question",
+        // backdrop: 'rgba(0,0,123,0.4)'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          setCamera(!camera);
+        }
+      });
+    } else setCamera(!camera);
+  };
 
   const toggleMicrophone = () => {
-    if(microphone)
-      setMicrophone(!microphone);
-    else if(askBeforeAudio) {
-        // if(window.confirm("Are you sure you want to turn on the microphone?")) {
-        //   setMicrophone(!microphone);
-        // }
-        Swal.fire({
-          title: 'Are you sure you want to turn on the microphone?',
-          color: 'green',
-          background: '#fff url(/images/trees.png)',
-          showCancelButton: true,
-          confirmButtonColor: "blue",
-          confirmButtonText: "yes, turn on my microphone",
-          cancelButtonColor: "red",
-          cancelButtonText: "no, keep my microphone off",
-          icon: 'question',
-          // backdrop: 'rgba(0,0,123,0.4)'
-        }).then((result) => {
-          if(result.isConfirmed) {
-            setMicrophone(!microphone);
-          }
-        })
-    }
-    else
-      setMicrophone(!microphone);
-  }
+    if (microphone) setMicrophone(!microphone);
+    else if (askBeforeAudio) {
+      // if(window.confirm("Are you sure you want to turn on the microphone?")) {
+      //   setMicrophone(!microphone);
+      // }
+      Swal.fire({
+        title: "Are you sure you want to turn on the microphone?",
+        color: "green",
+        background: "#fff url(/images/trees.png)",
+        showCancelButton: true,
+        confirmButtonColor: "blue",
+        confirmButtonText: "yes, turn on my microphone",
+        cancelButtonColor: "red",
+        cancelButtonText: "no, keep my microphone off",
+        icon: "question",
+        // backdrop: 'rgba(0,0,123,0.4)'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          setMicrophone(!microphone);
+        }
+      });
+    } else setMicrophone(!microphone);
+  };
 
   const stopStream = (streamToStop) => {
     streamToStop.getTracks().forEach((track) => track.stop());
@@ -407,12 +399,12 @@ export default function Meeting() {
   useEffect(() => {
     if (!HandGestures.IsReady()) {
       async function InitGestures() {
-        HandGestures.Init();
-        setFingerPoseReady(true);
+        await HandGestures.Init();
       }
 
       InitGestures();
     }
+    setFingerPoseReady(true);
 
     const hasVideoStream = !!myStream?.getVideoTracks().length > 0;
 
@@ -489,7 +481,6 @@ export default function Meeting() {
 
           <VideoWrapper myStream={myStream} otherParticipants={peers} />
 
-
           <div className="row-span-1">
             <Toolbar
               camera={camera}
@@ -523,9 +514,13 @@ export default function Meeting() {
             />
           )}
         </div>
-        {showConnectionTime && <div className="absolute w-full">
-          <div className="justify-center text-center self-center flex flex-col items-center content-center "><Timer /></div>
-        </div>}
+        {showConnectionTime && (
+          <div className="absolute w-full">
+            <div className="justify-center text-center self-center flex flex-col items-center content-center ">
+              <Timer />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
