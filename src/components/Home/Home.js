@@ -11,7 +11,8 @@ const globalStyles =
                       transition-colors max-h-screen h-screen overflow-y-hidden";
 export default function Home() {
   const [MainComponent, setMainComponent] = useState(components[0]);
-
+  const [HistoryList, setHistoryList] = useState([]);
+  const [FavoriteList, setFavoriteList] = useState([]);
   const changeMainComponent = (index) => {
     if (index < 0 || index >= components.length) return;
 
@@ -19,44 +20,44 @@ export default function Home() {
   };
 
 
- /////////////////////////////////////////////
+  /////////////////////////////////////////////
   // load settings
   /////////////////////////////////////////////
   const { defaultVideo, defaultAudio, toggleVideo, toggleAudio } = useVideoSettings();
   const { askBeforeVideo, askBeforeAudio, autoCopyLink, showConnectionTime, toggleAskBeforeVideo, toggleAskBeforeAudio, toggleAutoCopyLink, toggleShowConnectionTime } = useSettings()
 
-  
 
-    useEffect(() => {
-      console.log(localStorage)
-      var inputs = JSON.parse(localStorage.getItem('inputs'));
-      inputs?.forEach(function(input) {
-        if(input.id === "defaultVideoID" && input.checked !== defaultVideo) {
-          toggleVideo()
-          return
-        }
-        if(input.id === "option2" && input.checked !== defaultAudio) {
-          toggleAudio()
-          return
-        }
-        if(input.id === "option3" && input.checked !== askBeforeVideo) {
-          toggleAskBeforeVideo()
-          return
-        }
-        if(input.id === "option4" && input.checked !== askBeforeAudio) {
-          toggleAskBeforeAudio()
-          return
-        }
-        if(input.id === "option5" && input.checked !== autoCopyLink) {
-          toggleAutoCopyLink()
-          return
-        }
-        if(input.id === "option6" && input.checked !== showConnectionTime) {
-          toggleShowConnectionTime()
-          return
-        }
-      });
-    }, []);
+
+  useEffect(() => {
+    console.log(localStorage)
+    var inputs = JSON.parse(localStorage.getItem('inputs'));
+    inputs?.forEach(function (input) {
+      if (input.id === "defaultVideoID" && input.checked !== defaultVideo) {
+        toggleVideo()
+        return
+      }
+      if (input.id === "option2" && input.checked !== defaultAudio) {
+        toggleAudio()
+        return
+      }
+      if (input.id === "option3" && input.checked !== askBeforeVideo) {
+        toggleAskBeforeVideo()
+        return
+      }
+      if (input.id === "option4" && input.checked !== askBeforeAudio) {
+        toggleAskBeforeAudio()
+        return
+      }
+      if (input.id === "option5" && input.checked !== autoCopyLink) {
+        toggleAutoCopyLink()
+        return
+      }
+      if (input.id === "option6" && input.checked !== showConnectionTime) {
+        toggleShowConnectionTime()
+        return
+      }
+    });
+  }, []);
   ////////////////////////////////////////////
 
 
@@ -69,7 +70,8 @@ export default function Home() {
           MainComponent={MainComponent}
         />
         <div className="col-span-8 bg-lt-100 dark:bg-dark-900">
-          <MainComponent.Component changeMainComponent={changeMainComponent}/>
+          <MainComponent.Component changeMainComponent={changeMainComponent} HistoryList={HistoryList} setHistoryList={setHistoryList}
+            FavoriteList={FavoriteList} setFavoriteList={setFavoriteList} />
         </div>
       </section>
     </div>
