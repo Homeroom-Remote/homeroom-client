@@ -33,7 +33,7 @@ function LoadingComponent() {
     );
 }
 
-function FavoriteComponent({ favorite, isRemoveFavoriteClicked, setIsRemoveFavoriteClicked }) {
+function FavoriteComponent({ favorite, removeMeetingFromFavoritesById }) {
     const { joinMeeting } = useMeeting();
     const { setShow, setOpts } = usePopup();
     const styles = {
@@ -66,48 +66,49 @@ function FavoriteComponent({ favorite, isRemoveFavoriteClicked, setIsRemoveFavor
     return (
         <>
             <div className=" overflow-auto">
-            <table className="items-center w-full bg-transparent border-collapse table-auto">
-                <thead>
-                    <tr>
-                        <th className={styles.head_th}>Owner</th>
-                        <th className={styles.head_th}>Last Joined</th>
-                        <th className={styles.head_th}>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {favorite.map((meeting, index) => (
-                        <tr key={`meeting-${meeting.id}-${index}`}>
-                            <td className={styles.body_td + "border-r"}>
-                                {meeting.owner_name}
-                            </td>
-                            <td className={styles.body_td}>{parseTime(meeting.at)}</td>
-                            <td className={styles.body_td}>
-                                <Button
-                                    text="Join"
-                                    onClick={() => handleJoinMeeting(meeting)}
-                                />
-
-                                <RemoveButton
-                                    text="Fav"
-                                    onClick={() => handleRemoveFromFavorite(meeting).then((data) => {
-                                        setIsRemoveFavoriteClicked((value) => value + 1)
-                                    })
-                                    }
-                                />
-                            </td>
+                <table className="items-center w-full bg-transparent border-collapse table-auto">
+                    <thead>
+                        <tr>
+                            <th className={styles.head_th}>Owner</th>
+                            <th className={styles.head_th}>Last Joined</th>
+                            <th className={styles.head_th}>Actions</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {favorite.map((meeting, index) => (
+                            <tr key={`meeting-${meeting.id}-${index}`}>
+                                <td className={styles.body_td + "border-r"}>
+                                    {meeting.owner_name}
+                                </td>
+                                <td className={styles.body_td}>{parseTime(meeting.at)}</td>
+                                <td className={styles.body_td}>
+                                    <Button
+                                        text="Join"
+                                        onClick={() => handleJoinMeeting(meeting)}
+                                    />
+
+                                    <RemoveButton
+                                        text="Fav"
+                                        onClick={() => {
+                                            handleRemoveFromFavorite(meeting).then((data) => { // remove from d.b
+                                                // setIsRemoveFavoriteClicked((value) => value + 1)
+                                            })
+                                            removeMeetingFromFavoritesById(meeting.id)
+                                        }}
+                                    />
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </div>
         </>
     );
 }
 
 
-export default function FavoriteCompact({ setOverlayComponent, isFavoriteClicked, isRemoveFavoriteClicked, setIsRemoveFavoriteClicked }) {
+export default function FavoriteCompact({ setOverlayComponent, favorite, setFavorite, removeMeetingFromFavoritesById }) {
     const [loading, setLoading] = useState(true);
-    const [favorite, setFavorite] = useState([]);
 
     useEffect(() => {
         setLoading(true);
@@ -139,7 +140,7 @@ export default function FavoriteCompact({ setOverlayComponent, isFavoriteClicked
                     console.warn(e, "<- getting favorite");
                 });
         }, [1000]);
-    }, [isFavoriteClicked, isRemoveFavoriteClicked]);
+    }, []);
 
     return (
         <div className="flex flex-row items-center h-full gap-x-2 justify-center">
@@ -151,7 +152,7 @@ export default function FavoriteCompact({ setOverlayComponent, isFavoriteClicked
                 {loading ? (
                     <LoadingComponent />
                 ) : favorite ? (
-                    <FavoriteComponent favorite={favorite} isRemoveFavoriteClicked={isRemoveFavoriteClicked} setIsRemoveFavoriteClicked={setIsRemoveFavoriteClicked} />
+                    <FavoriteComponent favorite={favorite} removeMeetingFromFavoritesById={removeMeetingFromFavoritesById} />
                 ) : (
                     <NoFavoriteComponent />
                 )}
