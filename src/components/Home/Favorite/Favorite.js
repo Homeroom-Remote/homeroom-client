@@ -9,7 +9,7 @@ import RemoveButton from "../../RemoveButton"
 import OnlineIndicator from "../../OnlineIndicator";
 
 
-export default function Favorite({ setOverlayComponent, isFavoriteClicked, isRemoveFavoriteClicked, setIsRemoveFavoriteClicked }) {
+export default function Favorite({ setOverlayComponent }) {
     const [loading, setLoading] = useState(true);
     const [favorite, setFavorite] = useState([]);
     const { joinMeeting } = useMeeting();
@@ -67,7 +67,7 @@ export default function Favorite({ setOverlayComponent, isFavoriteClicked, isRem
                     console.warn(e, "<- getting favorite");
                 });
         }, [1000]);
-    }, [isFavoriteClicked, isRemoveFavoriteClicked]);
+    }, []);
 
     if (loading) {
         return (

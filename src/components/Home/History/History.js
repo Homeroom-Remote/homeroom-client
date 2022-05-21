@@ -30,6 +30,16 @@ export default function History() {
   const hasMeetingsOnline = () =>
     history.findIndex((meeting) => meeting.status === "online") >= 0;
 
+  function removeStarMeetingFromHistory(meeting) {
+    if (!meeting) return;
+    setHistory((oldHistory) =>
+      oldHistory.map((his) => ({
+        ...his,
+        isMeetingInFavorite: his.id === meeting.id ? false : his.isMeetingInFavorite
+      }))
+    );
+  }
+
   useEffect(() => {
     setLoading(true);
     setTimeout(() => {
@@ -136,10 +146,10 @@ export default function History() {
                 {meeting.isMeetingInFavorite == true && (
                   <StarButton
                     text="Fav"
-                    onClick={() => handleAddToFavorite(meeting).then((data) => {
-
-                    })
-                    }
+                    onClick={() => {
+                      handleAddToFavorite(meeting).then((data) => { })
+                      removeStarMeetingFromHistory(meeting)
+                    }}
                   />)}
               </td>
 

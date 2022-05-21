@@ -11,8 +11,7 @@ const globalStyles =
                       transition-colors max-h-screen h-screen overflow-y-hidden";
 export default function Home() {
   const [MainComponent, setMainComponent] = useState(components[0]);
-  const [HistoryList, setHistoryList] = useState([]);
-  const [FavoriteList, setFavoriteList] = useState([]);
+
   const changeMainComponent = (index) => {
     if (index < 0 || index >= components.length) return;
 
@@ -70,8 +69,7 @@ export default function Home() {
           MainComponent={MainComponent}
         />
         <div className="col-span-8 bg-lt-100 dark:bg-dark-900">
-          <MainComponent.Component changeMainComponent={changeMainComponent} HistoryList={HistoryList} setHistoryList={setHistoryList}
-            FavoriteList={FavoriteList} setFavoriteList={setFavoriteList} />
+          <MainComponent.Component changeMainComponent={changeMainComponent} />
         </div>
       </section>
     </div>

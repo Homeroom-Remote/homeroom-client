@@ -36,7 +36,7 @@ function LoadingComponent() {
   );
 }
 
-function HistoryComponent({ history, isFavoriteClicked, setIsFavoriteClicked }) {
+function HistoryComponent({ history, addMeetingToFavorites }) {
   const { joinMeeting } = useMeeting();
   const { setShow, setOpts } = usePopup();
   const styles = {
@@ -69,47 +69,48 @@ function HistoryComponent({ history, isFavoriteClicked, setIsFavoriteClicked }) 
 
   return (
     <>
-    <div className=" overflow-auto">
-      <table className="items-center w-full bg-transparent border-collapse table-auto">
-        <thead>
-          <tr>
-            <th className={styles.head_th}>Owner</th>
-            <th className={styles.head_th}>Last Joined</th>
-            <th className={styles.head_th}>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {history.map((meeting, index) => (
-            <tr key={`meeting-${meeting.id}-${index}`}>
-              <td className={styles.body_td + "border-r"}>
-                {meeting.owner_name}
-              </td>
-              <td className={styles.body_td}>{parseTime(meeting.at)}</td>
-              <td className={styles.body_td}>
-                <Button
-                  text="Join"
-                  onClick={() => handleJoinMeeting(meeting)}
-                />
-                {meeting.isMeetingInFavorite == true &&
-                  <StarButton
-                    text="Fav"
-                    onClick={() => handleAddToFavorite(meeting).then((data) => {
-                      setIsFavoriteClicked((value) => value + 1)
-                    })
-                    }
-                  />}
-              </td>
+      <div className=" overflow-auto">
+        <table className="items-center w-full bg-transparent border-collapse table-auto">
+          <thead>
+            <tr>
+              <th className={styles.head_th}>Owner</th>
+              <th className={styles.head_th}>Last Joined</th>
+              <th className={styles.head_th}>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {history.map((meeting, index) => (
+              <tr key={`meeting-${meeting.id}-${index}`}>
+                <td className={styles.body_td + "border-r"}>
+                  {meeting.owner_name}
+                </td>
+                <td className={styles.body_td}>{parseTime(meeting.at)}</td>
+                <td className={styles.body_td}>
+                  <Button
+                    text="Join"
+                    onClick={() => handleJoinMeeting(meeting)}
+                  />
+                  {meeting.isMeetingInFavorite == true &&
+                    <StarButton
+                      text="Fav"
+                      onClick={() => {
+                        addMeetingToFavorites(meeting);
+                        handleAddToFavorite(meeting).then((data) => {
+                        })
+                      }}
+                    />}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </>
   );
 }
-export default function HistoryCompact({ setOverlayComponent, isFavoriteClicked, setIsFavoriteClicked, isRemoveFavoriteClicked }) {
+export default function HistoryCompact({ setOverlayComponent, history, setHistory, addMeetingToFavorites }) {
   const [loading, setLoading] = useState(true);
-  const [history, setHistory] = useState([]);
+  // const [history, setHistory] = useState([]);
 
 
   useEffect(() => {
@@ -145,7 +146,8 @@ export default function HistoryCompact({ setOverlayComponent, isFavoriteClicked,
           console.warn(e, "<- getting history");
         });
     }, [1000]);
-  }, [isFavoriteClicked, isRemoveFavoriteClicked]);
+  }, []);
+
 
   return (
     <div className="flex flex-row items-center h-full gap-x-2 justify-center">
@@ -157,7 +159,7 @@ export default function HistoryCompact({ setOverlayComponent, isFavoriteClicked,
         {loading ? (
           <LoadingComponent />
         ) : history ? (
-          <HistoryComponent history={history} isFavoriteClicked={isFavoriteClicked} setIsFavoriteClicked={setIsFavoriteClicked} />
+          <HistoryComponent history={history} addMeetingToFavorites={addMeetingToFavorites} />
         ) : (
           <NoHistoryComponent />
         )}
