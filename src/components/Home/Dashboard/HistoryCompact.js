@@ -96,8 +96,6 @@ function HistoryComponent({ history, addMeetingToFavorites }) {
                       onClick={() => {
                         addMeetingToFavorites(meeting);
                         handleAddToFavorite(meeting).then((data) => {
-                          console.log(data)
-                          // setIsFavoriteClicked((value) => value + 1)
                         })
                       }}
                     />}
