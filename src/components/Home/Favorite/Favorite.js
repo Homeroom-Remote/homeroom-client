@@ -86,7 +86,7 @@ export default function Favorite({ setOverlayComponent }) {
                     <h1 className="text-4xl font-medium text-primary-400">
                         No favorite meetings yet
                     </h1>
-                    <h3 className="text-2xl mt-4">
+                    <h3 className="text-md mt-4">
                         Once you click the "Star" button on a meeting in the meeting history list, it will be displayed here.
                     </h3>
                     <object data={NoHistorySVG} type="image/svg+xml">

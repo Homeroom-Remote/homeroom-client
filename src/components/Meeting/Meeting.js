@@ -105,18 +105,16 @@ export default function Meeting() {
   const toggleCamera = () => {
     if (camera) setCamera(!camera);
     else if (askBeforeVideo) {
-      // if(window.confirm("Are you sure you want to turn on the camera?")) {
-      //   setCamera(!camera);
-      // }
       Swal.fire({
+        // width: "20%",
         title: "Are you sure you want to turn on the camera?",
-        color: "green",
-        background: "#fff url(/images/trees.png)",
+        color: "rgb(74, 222, 128)",
+        background: "rgb(126, 34, 206)",
         showCancelButton: true,
-        confirmButtonColor: "blue",
-        confirmButtonText: "yes, turn on my camera",
-        cancelButtonColor: "red",
-        cancelButtonText: "no, keep my camera off",
+        confirmButtonColor: "rgb(34, 197, 94)",
+        confirmButtonText: "Yes, turn on my camera",
+        // cancelButtonColor: "rgb(168, 85, 247)",
+        cancelButtonText: "Cancel",
         icon: "question",
         // backdrop: 'rgba(0,0,123,0.4)'
       }).then((result) => {
@@ -130,18 +128,16 @@ export default function Meeting() {
   const toggleMicrophone = () => {
     if (microphone) setMicrophone(!microphone);
     else if (askBeforeAudio) {
-      // if(window.confirm("Are you sure you want to turn on the microphone?")) {
-      //   setMicrophone(!microphone);
-      // }
       Swal.fire({
+        // width: "20%",
         title: "Are you sure you want to turn on the microphone?",
-        color: "green",
-        background: "#fff url(/images/trees.png)",
+        color: "rgb(74, 222, 128)",
+        background: "rgb(126, 34, 206)",
         showCancelButton: true,
-        confirmButtonColor: "blue",
-        confirmButtonText: "yes, turn on my microphone",
-        cancelButtonColor: "red",
-        cancelButtonText: "no, keep my microphone off",
+        confirmButtonColor: "rgb(34, 197, 94)",
+        confirmButtonText: "Yes, turn on my microphone",
+        // cancelButtonColor: "rgb(168, 85, 247)",
+        cancelButtonText: "Cancel",
         icon: "question",
         // backdrop: 'rgba(0,0,123,0.4)'
       }).then((result) => {
