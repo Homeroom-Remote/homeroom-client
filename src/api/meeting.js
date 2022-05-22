@@ -289,6 +289,8 @@ async function handleRemoveFromFavorite(meeting) {
 
 
 async function handleAddToFavorite(meeting) {
+  console.log("handleAddToFavorite")
+  console.log(meeting)
   isLoggedIn()
     .then((user) => {
       db.collection(USERS_COLLECTION)

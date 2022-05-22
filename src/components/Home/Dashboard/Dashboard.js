@@ -21,7 +21,12 @@ export default function Dashboard({ changeMainComponent }) {
     setOverlayComponent({ Component: Component });
 
   function addMeetingToFavorites(meeting) {
-    setFavorite((oldFavorites) => [...oldFavorites, meeting]);
+    console.log("addMeetingTo")
+    console.log(meeting)
+    setFavorite((oldFavorites) => {
+      if (oldFavorites) return [...oldFavorites, meeting]
+      else return [meeting]
+    });
     setHistory((oldHistory) =>
       oldHistory.map((his) => ({
         ...his,
