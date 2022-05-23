@@ -89,7 +89,7 @@ function Video({ stream, name, id, me = false }) {
 
       <p id={`hand-gesture-${id}`} className={getHandGestureStyles()}></p>
       <video
-        className="h-full w-full"
+        className="h-full w-auto"
         ref={(e) => {
           if (e) e.srcObject = stream;
         }}
