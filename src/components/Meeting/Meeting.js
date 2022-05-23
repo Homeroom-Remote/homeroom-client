@@ -24,6 +24,8 @@ import {
   RegisterMessages,
   SendChatMessage,
   SendHandGesture,
+  SendConcentrationPrediction,
+  SendExpressionsPrediction,
   RegisterToMessageQueue,
   RemoveFromMessageQueue,
   GetOwner,
@@ -45,6 +47,7 @@ import useSettings from "../../stores/settingsStore";
 ////////
 import handGestureList from "../../utils/handGestureList";
 import QuestionQueue from "./QuestionQueue";
+import FaceRecognition from "./MachineLearningModules/FaceRecognition";
 
 const globalStyles =
   // eslint-disable-next-line no-multi-str
@@ -63,7 +66,7 @@ export default function Meeting() {
   // Loading/Error hooks
   const [error, setError] = useState(false);
   const [isOnline, setIsOnline] = useState(false);
-  const [fingerPoseReady, setFingerPoseReady] = useState(false);
+  const [machineLearningReady, setMachineLearningReady] = useState(false);
 
   // Child component hooks
   const [chat, setChat] = useState(false);
@@ -400,7 +403,15 @@ export default function Meeting() {
 
       InitGestures();
     }
-    setFingerPoseReady(true);
+
+    if (!FaceRecognition.IsReady()) {
+      async function InitFaceRecognition() {
+        await FaceRecognition.Init();
+      }
+
+      InitFaceRecognition();
+    }
+    setMachineLearningReady(true);
 
     const hasVideoStream = !!myStream?.getVideoTracks().length > 0;
 
@@ -413,10 +424,16 @@ export default function Meeting() {
     // Add interval if stream is online
     if (!detectionInterval.current && hasVideoStream) {
       detectionInterval.current = setInterval(async () => {
-        const prediction = await HandGestures.Detect(
+        const gesturePrediction = await HandGestures.Detect(
           document.querySelector("#hiddenVideoEl")
         );
-        prediction && HandleGesturePrediction(prediction);
+        const { score, expressions } = await FaceRecognition.Detect(
+          document.querySelector("#hiddenVideoEl")
+        );
+
+        score && HandleConcentrationPrediction(score);
+        expressions && handleExpressionsPrediction(expressions);
+        gesturePrediction && HandleGesturePrediction(gesturePrediction);
       }, handIntervalTime);
     }
 
@@ -439,6 +456,14 @@ export default function Meeting() {
     addGestureToVideo(gestureObject, id);
   }
 
+  function HandleConcentrationPrediction(score) {
+    SendConcentrationPrediction(room, score);
+  }
+
+  function handleExpressionsPrediction(expressions) {
+    SendExpressionsPrediction(room, expressions);
+  }
+
   ////////////
   //Components
   ////////////
@@ -446,7 +471,7 @@ export default function Meeting() {
   if (error) {
     return <Error error={error} goBack={exitMeeting} />;
   }
-  if (!isOnline || !fingerPoseReady) {
+  if (!isOnline || !machineLearningReady) {
     return <MeetingLoading />;
   }
 
