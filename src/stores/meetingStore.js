@@ -14,6 +14,7 @@ const useStore = create((set) => ({
     set((state) => {
       state.isInMeeting = false;
       state.meetingID = null;
+      state.owner = null;
     });
   },
   joinMeeting: (meetingID) => {

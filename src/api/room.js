@@ -74,6 +74,16 @@ function SendHandGesture(room, prediction) {
   room.send("hand-gesture", prediction);
 }
 
+function SendConcentrationPrediction(room, prediction) {
+  if (!room) throw new Error("Send Concentration Prediction -> Room is null");
+  room.send("concentration", prediction);
+}
+
+function SendExpressionsPrediction(room, prediction) {
+  if (!room) throw new Error("Send Expressions Prediction -> Room is null");
+  room.send("expressions", prediction);
+}
+
 function RegisterToMessageQueue(room) {
   room.send("add-to-question-queue", {});
 }
@@ -97,6 +107,8 @@ export {
   RegisterMessages,
   SendChatMessage,
   SendHandGesture,
+  SendConcentrationPrediction,
+  SendExpressionsPrediction,
   RegisterToMessageQueue,
   RemoveFromMessageQueue,
   GetOwner,
