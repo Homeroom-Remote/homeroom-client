@@ -47,6 +47,10 @@ function App() {
   if (isInMeeting) {
     return (
       <div className={theme}>
+        <div
+          className="hidden dark:bg-dark-800 bg-lt-500"
+          id="static-background-style"
+        ></div>
         {show && <PopupOverlay />}
         <Meeting />
       </div>

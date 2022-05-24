@@ -10,6 +10,8 @@ import Participants from "./Participants";
 import Error from "./Error";
 import MeetingLoading from "./MeetingLoading";
 import Timer from "../Home/Settings/Timer";
+import QuestionQueue from "./QuestionQueue";
+import ExpressionsChart from "./ExpressionsChart";
 import Swal from "sweetalert2";
 
 //////
@@ -46,7 +48,6 @@ import useSettings from "../../stores/settingsStore";
 // Utils
 ////////
 import handGestureList from "../../utils/handGestureList";
-import QuestionQueue from "./QuestionQueue";
 import FaceRecognition from "./MachineLearningModules/FaceRecognition";
 
 const globalStyles =
@@ -87,11 +88,24 @@ export default function Meeting() {
   var detectionInterval = useRef(null);
   const handGestures = useRef(new Map());
 
-  // Question queue
+  //////////////
+  // Expressions
+  //////////////
+  const expressionAlpha = 0.4; // How much of the new expression object affects the expression state
+  const [showExpressionsChart, setShowExpressionsChart] = useState(false);
+  let expressionsSetter = null;
+  const onExpressionsChartMount = (data) => {
+    expressionsSetter = data[1];
+    refreshRoomCallbacks(room);
+  };
+  const toggleExpressionsChart = () => setShowExpressionsChart((val) => !val);
+
+  /////////////////
+  // Question Queue
+  /////////////////
   const [questionQueue, setQuestionQueue] = useState([]);
   const [showQuestionQueue, setShowQuestionQueue] = useState(false);
   const toggleQuestionQueue = () => setShowQuestionQueue((val) => !val);
-
   const removeQuestionByID = (id) => RemoveFromMessageQueue(room, id);
 
   const addQuestion = (id, displayName) => {
@@ -241,12 +255,44 @@ export default function Meeting() {
         name: "question-queue-update", // broadcasted (if someone was added/removed)
         callback: (room, message) => onQuestionQueueUpdate(room, message),
       },
+      {
+        name: "face-recognition", // broadcasted (statistics)
+        callback: (room, message) => onFaceRecognition(message),
+      },
     ]);
   }
 
   ///////////////////////////
   // Socket messages handlers
   ///////////////////////////
+
+  function onFaceRecognition(message) {
+    function handleExpressions(newExpressions) {
+      expressionsSetter((oldExpressions) => {
+        return Object.keys(oldExpressions).length === 0
+          ? newExpressions
+          : Object.entries(oldExpressions).reduce(
+              (prev, [k, v]) => ({
+                ...prev,
+                [k]:
+                  (1 - expressionAlpha) * v +
+                  newExpressions[k] * expressionAlpha,
+              }),
+              {}
+            );
+      });
+    }
+
+    if (
+      expressionsSetter &&
+      message.expressions &&
+      message.expressions.expressions &&
+      Object.keys(message.expressions.expressions).length > 0
+    )
+      handleExpressions(message.expressions.expressions);
+
+    // setConcentration(oldConcentration => oldConcentration + concentrationAlpha * concentration)
+  }
 
   function onQuestionQueueUpdate(room, { event, data }) {
     if (event === "remove") GetQuestionQueue(room);
@@ -427,12 +473,14 @@ export default function Meeting() {
         const gesturePrediction = await HandGestures.Detect(
           document.querySelector("#hiddenVideoEl")
         );
-        const { score, expressions } = await FaceRecognition.Detect(
+        const facePrediction = await FaceRecognition.Detect(
           document.querySelector("#hiddenVideoEl")
         );
 
-        score && HandleConcentrationPrediction(score);
-        expressions && handleExpressionsPrediction(expressions);
+        facePrediction?.score &&
+          HandleConcentrationPrediction(facePrediction.score);
+        facePrediction?.expressions &&
+          handleExpressionsPrediction(facePrediction.expressions);
         gesturePrediction && HandleGesturePrediction(gesturePrediction);
       }, handIntervalTime);
     }
@@ -484,6 +532,9 @@ export default function Meeting() {
             removeQuestionByID={removeQuestionByID}
           />
         )}
+        {showExpressionsChart && (
+          <ExpressionsChart onMount={onExpressionsChartMount} />
+        )}
         <div
           className={
             "grid grid-rows-10 grid-flow-row h-full " +
@@ -514,6 +565,8 @@ export default function Meeting() {
               toggleParticipants={toggleParticipants}
               questionQueue={showQuestionQueue}
               toggleQuestionQueue={toggleQuestionQueue}
+              expressions={showExpressionsChart}
+              toggleExpressions={toggleExpressionsChart}
             />
           </div>
         </div>
