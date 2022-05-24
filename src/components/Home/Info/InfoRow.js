@@ -8,7 +8,7 @@ export default function InfoRow({ question, answer }) {
         })
     }
     return (
-        <div className="border-2 border-gray-100 rounded-lg dark:border-gray-700">
+        <div className="border-2 border-gray-100 rounded-lg dark:border-gray-700 bg-purple-700">
             <button className="flex items-center justify-between w-full p-8" onClick={btnClickHandler}>
                 <h1 className="font-semibold text-gray-700 dark:text-white">{question}</h1>
                 {active ?
