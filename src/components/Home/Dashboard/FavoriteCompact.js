@@ -151,7 +151,7 @@ export default function FavoriteCompact({ setOverlayComponent, favorite, setFavo
                 <hr className="border-2"></hr>
                 {loading ? (
                     <LoadingComponent />
-                ) : favorite ? (
+                ) : (favorite && favorite.length > 0) ? (
                     <FavoriteComponent favorite={favorite} removeMeetingFromFavoritesById={removeMeetingFromFavoritesById} />
                 ) : (
                     <NoFavoriteComponent />
