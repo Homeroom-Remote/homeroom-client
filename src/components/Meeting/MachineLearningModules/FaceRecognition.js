@@ -3,7 +3,7 @@ import * as faceapi from "@vladmandic/face-api";
 
 const modelPath = "models/";
 const optionsTinyFace = new faceapi.TinyFaceDetectorOptions({
-  scoreThreshold: 0.8,
+  scoreThreshold: 0.7,
 });
 
 var engine = null;

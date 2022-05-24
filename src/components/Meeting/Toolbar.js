@@ -9,6 +9,9 @@ import {
   ShareScreen,
   Record,
   Archive,
+  Reactions,
+  Eye,
+  EyeOff,
 } from "../../utils/svgs";
 import { useState } from "react";
 import useMeeting from "../../stores/meetingStore";
@@ -71,6 +74,12 @@ export default function Toolbar(props) {
   const questionQueue = props.questionQueue;
   const toggleQuestionQueue = props.toggleQuestionQueue;
 
+  const expressions = props.expressions;
+  const toggleExpressions = props.toggleExpressions;
+
+  const concentration = props.concentration;
+  const toggleConcentration = props.toggleConcentration;
+
   const [security, setSecurity] = useState(false);
   const toggleSecurity = () => {
     setSecurity(!security);
@@ -83,10 +92,6 @@ export default function Toolbar(props) {
   const [record, setRecord] = useState(false);
   const toggleRecord = () => {
     setRecord(!record);
-  };
-  const [reactions, setReactions] = useState(false);
-  const toggleReactions = () => {
-    setReactions(!reactions);
   };
 
   return (
@@ -109,15 +114,25 @@ export default function Toolbar(props) {
           textOff={"Unmute"}
         />
       </div>
-      <div className="flex flex-row gap-x-6">
+      <div className="flex flex-row gap-x-2 border p-2 relative border-secondary-400">
+        <p className="absolute -top-7 -left-1 text-lg text-white font-medium z-30">
+          Meeting Options
+        </p>
         <ToolbarButton
-          className="hover:text-primary-900"
           state={security}
           toggle={toggleSecurity}
           logoOn={Security}
           logoOff={Security}
           textOn={"Security"}
           textOff={"Security"}
+        />
+        <ToolbarButton
+          state={shareScreen}
+          toggle={toggleShareScreen}
+          logoOn={ShareScreen}
+          logoOff={ShareScreen}
+          textOn={"Share Screen"}
+          textOff={"Share Screen"}
         />
         <ToolbarButton
           state={participants}
@@ -135,22 +150,11 @@ export default function Toolbar(props) {
           textOn={"Chat"}
           textOff={"Chat"}
         />
-        <ToolbarButton
-          state={shareScreen}
-          toggle={toggleShareScreen}
-          logoOn={ShareScreen}
-          logoOff={ShareScreen}
-          textOn={"Share Screen"}
-          textOff={"Share Screen"}
-        />
-        <ToolbarButton
-          state={record}
-          toggle={toggleRecord}
-          logoOn={Record}
-          logoOff={Record}
-          textOn={"Record"}
-          textOff={"Record"}
-        />
+      </div>
+      <div className="flex flex-row gap-x-2 border p-2 relative border-primary-400">
+        <p className="absolute -top-7 -left-1 text-lg text-white font-medium z-30">
+          Machine Learning
+        </p>
         <ToolbarButton
           state={questionQueue}
           toggle={toggleQuestionQueue}
@@ -158,6 +162,22 @@ export default function Toolbar(props) {
           logoOff={Archive}
           textOn={"Questions"}
           textOff={"Questions"}
+        />
+        <ToolbarButton
+          state={expressions}
+          toggle={toggleExpressions}
+          logoOn={Reactions}
+          logoOff={Reactions}
+          textOn={"Expressions"}
+          textOff={"Expressions"}
+        />
+        <ToolbarButton
+          state={concentration}
+          toggle={toggleConcentration}
+          logoOn={Eye}
+          logoOff={EyeOff}
+          textOn={"Concentration"}
+          textOff={"Concentration"}
         />
       </div>
       <div className="px-2">
