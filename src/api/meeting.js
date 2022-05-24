@@ -328,6 +328,7 @@ export {
   closeMeetingIfLastPerson,
   getMeetingHistory,
   getMeetingFavorite,
+  getMeetingFromUserID,
   handleAddToFavorite,
   isMeetingInFavorite,
   handleRemoveFromFavorite,

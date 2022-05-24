@@ -79,7 +79,7 @@ export default function Favorite({ setOverlayComponent }) {
         );
     }
 
-    if (!favorite) {
+    if (!favorite || favorite.length === 0) {
         return (
             <div className="w-full h-full flex items-center justify-center p-2">
                 <div className="flex flex-col max-h-full items-center justify-center">
@@ -145,7 +145,6 @@ export default function Favorite({ setOverlayComponent }) {
                                     }}
                                 />
                             </td>
-
                         </tr>
                     ))}
                 </tbody>
