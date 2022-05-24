@@ -12,6 +12,7 @@ import MeetingLoading from "./MeetingLoading";
 import Timer from "../Home/Settings/Timer";
 import QuestionQueue from "./QuestionQueue";
 import ExpressionsChart from "./ExpressionsChart";
+import ConcentrationMeter from "./ConcentrationMeter";
 import Swal from "sweetalert2";
 
 //////
@@ -87,6 +88,19 @@ export default function Meeting() {
   const handIntervalTime = 1000; // Every 1s
   var detectionInterval = useRef(null);
   const handGestures = useRef(new Map());
+
+  ////////////////
+  // Concentration
+  ////////////////
+  const concentrationAlpha = 0.6;
+  const [showConcentrationMeter, setShowConcentrationMeter] = useState(false);
+  let concentrationSetter = null;
+  const onConcentrationMeterMount = (data) => {
+    concentrationSetter = data[1];
+    refreshRoomCallbacks(room);
+  };
+  const toggleConcentrationMeter = () =>
+    setShowConcentrationMeter((val) => !val);
 
   //////////////
   // Expressions
@@ -291,7 +305,12 @@ export default function Meeting() {
     )
       handleExpressions(message.expressions.expressions);
 
-    // setConcentration(oldConcentration => oldConcentration + concentrationAlpha * concentration)
+    if (concentrationSetter)
+      concentrationSetter(
+        (oldConcentration) =>
+          (1 - concentrationAlpha) * oldConcentration +
+          concentrationAlpha * (message?.concentration.score || 0)
+      );
   }
 
   function onQuestionQueueUpdate(room, { event, data }) {
@@ -535,6 +554,9 @@ export default function Meeting() {
         {showExpressionsChart && (
           <ExpressionsChart onMount={onExpressionsChartMount} />
         )}
+        {showConcentrationMeter && (
+          <ConcentrationMeter onMount={onConcentrationMeterMount} />
+        )}
         <div
           className={
             "grid grid-rows-10 grid-flow-row h-full " +
@@ -567,6 +589,8 @@ export default function Meeting() {
               toggleQuestionQueue={toggleQuestionQueue}
               expressions={showExpressionsChart}
               toggleExpressions={toggleExpressionsChart}
+              concentration={showConcentrationMeter}
+              toggleConcentration={toggleConcentrationMeter}
             />
           </div>
         </div>

@@ -36,14 +36,7 @@ function ChartWrapper({ expressions }) {
   useEffect(() => {
     setData([["Emotion", "Representation"], ...Object.entries(expressions)]);
   }, [expressions]);
-  return (
-    <Chart
-      chartType="PieChart"
-      data={data}
-      options={options}
-      className="dark:bg-dark-400"
-    />
-  );
+  return <Chart chartType="PieChart" data={data} options={options} />;
 }
 function Header() {
   return (
