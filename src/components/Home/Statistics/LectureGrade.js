@@ -9,7 +9,7 @@ export default function LectureGrade({grade}) {
 
 
 return (
-    <div className="h-full py-8 px-6 text-gray-600 rounded-xl border border-dark-500 dark:bg-dark-800 bg-lt-50">
+    <div className="h-full py-8 px-6 text-gray-600 rounded-xl border-2 border-dark-500 dark:bg-dark-800 bg-lt-50">
     <div className="container flex items-center justify-center content-center flex-wrap h-full relative">
     <div className="bar inline-block shadow-lg shadow-black overflow-hidden rounded-full w-[200px] h-[200px]">
         <svg className='svg h-full w-full' strokeDasharray={'630px'}>
