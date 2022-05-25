@@ -42,31 +42,21 @@ export default function Statistics() {
 
 
   const handleChange = (event) => {
-    console.log(event.target.value)
-    var str = event.target.value
+    var index = parseInt(event.target.value)
+    var graphData = data[index]
     
-    var graphData = []
-    while(true) {
-    var array = str.split(",", 3);
-    str = str.substring(str.indexOf(",") + 1);
-    str = str.substring(str.indexOf(",") + 1);
-    str = str.substring(str.indexOf(",") + 1);
-    graphData.push(array)
-    if(!str.includes(","))
-      break
-    }
-    var x = [["Minute", "Participation"]], y = [["Minute", "Concentration"]]
+    var ParticipationGraph = [["Minute", "Participation"]]
+    var ConcentrationGraph = [["Minute", "Concentration"]]
     for(var i = 1; i < graphData.length; i++) {
       graphData[i][1] = parseFloat(graphData[i][1])
       graphData[i][2] = parseFloat(graphData[i][2])
-      x.push([graphData[i][0], parseFloat(graphData[i][2])])
-      y.push([graphData[i][0], parseFloat(graphData[i][1])])
+      ParticipationGraph.push([graphData[i][0], parseFloat(graphData[i][2])])
+      ConcentrationGraph.push([graphData[i][0], parseFloat(graphData[i][1])])
     }
 
     console.log(graphData)
-    setParticipation(x)
-    setConcentration(y)
-    // setDataToShow(graphData);
+    setParticipation(ParticipationGraph)
+    setConcentration(ConcentrationGraph)
   };
   
 
@@ -138,7 +128,7 @@ export default function Statistics() {
         Choose lecture:
       <select color="red" onChange={handleChange} className=" bg-primary-700">
         {console.log(data)}
-      {data.map((meeting, index) => (<option value={data[index]}>{index}</option>))}
+      {data.map((meeting, index) => ((index == 0) ? <option value={index}>Choose meeting</option> : <option value={index}>Meeting number {index}</option>))}
       </select>
       </label>
     </div>
