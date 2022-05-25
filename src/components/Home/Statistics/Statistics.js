@@ -7,6 +7,7 @@ import { get } from "../../../api/meeting";
 import { getMeetingFromUserID, } from "../../../api/meeting";
 import useUser from "../../../stores/userStore";
 import LoadingSVG from "../../../utils/seo.svg";
+import getBackgroundColor from "../../../utils/getBackgroundColor"
 
 
 
@@ -15,6 +16,11 @@ export default function Statistics() {
   const [data, setData] = useState([])
   const [grade, setGrade] = useState(0)
   const [loading, setLoading] = useState(true);
+  const [dataToShow, setDataToShow] = useState([])
+  const [concentration, setConcentration] = useState([])
+  const [participation, setParticipation] = useState([])
+
+
 
 
 
@@ -24,31 +30,59 @@ export default function Statistics() {
     setTimeout(() => {
       get(getMeetingFromUserID(user.uid))
       .then((data) => {
-        Promise.all(
-          setData(parserData(data)),
+        // Promise.all(
+          setData(parserData(data))
           setGrade(82)
-          )
-      }).then(() => {
-        setLoading(false);
+          // )
       }).catch((e) => {
         console.log(data)
-        setLoading(false);
-    });
+    }).finally(() => setLoading(false));
     }, [1000]);
   }, []);
+
+
+  const handleChange = (event) => {
+    console.log(event.target.value)
+    var str = event.target.value
+    
+    var graphData = []
+    while(true) {
+    var array = str.split(",", 3);
+    str = str.substring(str.indexOf(",") + 1);
+    str = str.substring(str.indexOf(",") + 1);
+    str = str.substring(str.indexOf(",") + 1);
+    graphData.push(array)
+    if(!str.includes(","))
+      break
+    }
+    var x = [["Minute", "Participation"]], y = [["Minute", "Concentration"]]
+    for(var i = 1; i < graphData.length; i++) {
+      graphData[i][1] = parseFloat(graphData[i][1])
+      graphData[i][2] = parseFloat(graphData[i][2])
+      x.push([graphData[i][0], parseFloat(graphData[i][2])])
+      y.push([graphData[i][0], parseFloat(graphData[i][1])])
+    }
+
+    console.log(graphData)
+    setParticipation(x)
+    setConcentration(y)
+    // setDataToShow(graphData);
+  };
   
 
 
   function parserData(data) {
       var toReturn = []
-      toReturn.push(["Minute", "Concentration", "Participation"])
-      for(var i = 0; i < 1; i++) {
+      for(var i = 0; i < data.meeting_logs.length; i++) {
+        var arr = []
+        arr.push(["Minute", "Concentration", "Participation"])
         var size = data.meeting_logs[i].log.length
         for(var j = 0; j < size; j++) {
           console.log(data.meeting_logs[i].log[j])
           var temp = [j.toString(), data.meeting_logs[i].log[j].concentration.score, data.meeting_logs[i].log[j].expressions.participants]
-          toReturn.push(temp)
+          arr.push(temp)
         }
+        toReturn.push(arr)
       }
       return toReturn
   }
@@ -64,7 +98,7 @@ export default function Statistics() {
         curveType: "function",
         legend: { position: "bottom" },
         colors: ['rgb(192, 132, 252)', 'rgb(74, 222, 128)'],
-        backgroundColor: 'white',
+        backgroundColor: getBackgroundColor(),
         lineWidth: 4,
       };
 
@@ -99,9 +133,24 @@ export default function Statistics() {
 
   return (
     <div className="px-6 pt-6 py-16 2xl:container h-full">
-        <div className="grid gap-6 grid-cols-2 h-full ">
-            <LectureResults data={data} options={options} />
-            <LectureGrade grade={grade}/>
+     <div className="flex justify-center items-center">
+        <label>
+        Choose lecture:
+      <select color="red" onChange={handleChange} className=" bg-primary-700">
+        {console.log(data)}
+      {data.map((meeting, index) => (<option value={data[index]}>{index}</option>))}
+      </select>
+      </label>
+    </div>
+        <div className="grid gap-6 grid-cols-2 h-full">
+          {console.log(concentration)}
+          <div className=" grid grid-rows-2 h-full">
+          {concentration.length > 1 ? <LectureResults data={concentration} options={options} header={"Concentration Performance"} />: <LectureResults data={[["Minute", "Concentration"], ["0", 0]]} options={options} header={"Concentration Performance"} />}
+          {participation.length > 1 ? <LectureResults data={participation} options={options} header={"Participation Performance"} />: <LectureResults data={[["Minute", "Participation"], ["0", 0]]} options={options} header={"Participation Performance"} />}
+          </div>
+          <div>
+          <LectureGrade grade={grade}/>
+          </div>
         </div>
     </div>
   );
