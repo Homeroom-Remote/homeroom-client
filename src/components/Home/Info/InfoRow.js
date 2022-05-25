@@ -26,9 +26,9 @@ export default function InfoRow({ question, answer }) {
                 }
             </button>
 
-            {active && <hr className="border-gray-200 dark:border-gray-700" />}
+            {active && <hr className="border-gray-200 dark:border-gray-800" />}
 
-            <p className={`text-sm pl-8 text-gray-500 dark:text-gray-300 transition-[height,padding] ${active ? "h-20 p-8 visible" : "h-0 p-0 invisible"}`}
+            <p className={`text-sm pl-8 text-gray-500 dark:text-gray-300 transition-[height,padding] ${active ? "h-auto p-8 visible" : "h-0 p-0 invisible"}`}
             >
                 {answer}
             </p>

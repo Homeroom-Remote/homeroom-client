@@ -66,7 +66,7 @@ const nav = [
   },
   {
     Component: Favorite,
-    name: "Favorite",
+    name: "Favorites",
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
