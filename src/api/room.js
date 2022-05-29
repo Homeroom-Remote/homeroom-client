@@ -100,6 +100,12 @@ function GetQuestionQueue(room) {
   room.send("get-question-queue");
 }
 
+////////////////////////////////////
+function GetChat(room) {
+  room.send("get-chat", {})
+}
+////////////////////////////////////
+
 export {
   JoinRoom,
   LeaveRoom,
@@ -113,4 +119,5 @@ export {
   RemoveFromMessageQueue,
   GetOwner,
   GetQuestionQueue,
+  GetChat,
 };

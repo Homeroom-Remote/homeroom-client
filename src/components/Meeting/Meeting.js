@@ -33,6 +33,7 @@ import {
   RemoveFromMessageQueue,
   GetOwner,
   GetQuestionQueue,
+  GetChat,
 } from "../../api/room";
 import HandGestures from "./MachineLearningModules/HandGestures";
 
@@ -50,6 +51,7 @@ import useSettings from "../../stores/settingsStore";
 ////////
 import handGestureList from "../../utils/handGestureList";
 import FaceRecognition from "./MachineLearningModules/FaceRecognition";
+import { time } from "@tensorflow/tfjs";
 
 const globalStyles =
   // eslint-disable-next-line no-multi-str
@@ -79,6 +81,9 @@ export default function Meeting() {
   const [room, setRoom] = useState(null);
   const { meetingID, exitMeeting, setOwner } = useMeeting();
   const [peers, setPeers] = useState([]);
+  ///////////////
+  const [date, setDate] = useState(null)
+  ///////////////
 
   // etc
   const { user } = useUser();
@@ -184,8 +189,22 @@ export default function Meeting() {
   };
 
   useEffect(() => {
+    ////////
+    setDate(new Date())
+    ////////
     return () => myStream && stopStream(myStream);
   }, []);
+
+
+  ////////////////////////////////////
+  useEffect(() => {
+    if(chat) {
+      GetChat(room)
+      console.log(room)
+    }
+  }, [chat]);
+
+  ////////////////////////////////////
 
   const refreshMedia = (video, audio) => {
     function getMedia(constraints) {
@@ -273,6 +292,10 @@ export default function Meeting() {
         name: "face-recognition", // broadcasted (statistics)
         callback: (room, message) => onFaceRecognition(message),
       },
+      {
+        name: "get-chat",
+        callback: (room, message) => onGetChat(message),
+      },
     ]);
   }
 
@@ -349,10 +372,20 @@ export default function Meeting() {
   function onPeerSignal(room, message) {
     Peer.createPeer(room, message, false, peers, myStream, setPeers);
   }
-
   const onGeneralMessage = (msg) => {
+    console.log(msg)
     generalChatSetter && generalChatSetter((c) => [...c, msg]);
   };
+  ////////////////////
+  function onGetChat(msg) {
+    var i = 0;
+    while(msg[i]?.messageSentAt && date.getTime() > msg[i].messageSentAt?.getTime())
+      i++
+    for(; i < msg.length; i++) {
+      generalChatSetter && generalChatSetter((c) => [...c, msg[i]]);
+    }
+  };
+  ////////////////////
 
   function onHandRecognition(message) {
     const gestureObject = Peer.onHandRecognition(message, peers);

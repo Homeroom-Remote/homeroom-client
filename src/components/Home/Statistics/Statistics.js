@@ -12,13 +12,23 @@ import getBackgroundColor from "../../../utils/getBackgroundColor"
 
 
 export default function Statistics() {
+
   const { user } = useUser()
+
   const [data, setData] = useState([])
-  const [grade, setGrade] = useState(0)
-  const [loading, setLoading] = useState(true);
-  const [dataToShow, setDataToShow] = useState([])
   const [concentration, setConcentration] = useState([])
   const [participation, setParticipation] = useState([])
+
+  const [grade, setGrade] = useState([])
+  const [gradeToShow, setGradeToShow] = useState(0)
+
+  const [tips, setTips] = useState([])
+  const [tipsToShow, setTipsToShow] = useState([])
+
+
+  const [loading, setLoading] = useState(true);
+
+
 
 
 
@@ -31,8 +41,10 @@ export default function Statistics() {
       get(getMeetingFromUserID(user.uid))
       .then((data) => {
         // Promise.all(
+          console.log(data)
           setData(parserData(data))
-          setGrade(82)
+          setGrade(parserGrade(data))
+          setTips(parserTips(data))
           // )
       }).catch((e) => {
         console.log(data)
@@ -47,16 +59,26 @@ export default function Statistics() {
     
     var ParticipationGraph = [["Minute", "Participation"]]
     var ConcentrationGraph = [["Minute", "Concentration"]]
+    if(index == -1) {
+      ParticipationGraph.push(["0", 0])
+      ConcentrationGraph.push(["0", 0])
+      setParticipation(ParticipationGraph)
+      setConcentration(ConcentrationGraph)
+      setGradeToShow(0)
+      setTipsToShow([])
+      return
+    }
+    console.log(graphData)
     for(var i = 1; i < graphData.length; i++) {
       graphData[i][1] = parseFloat(graphData[i][1])
       graphData[i][2] = parseFloat(graphData[i][2])
       ParticipationGraph.push([graphData[i][0], parseFloat(graphData[i][2])])
       ConcentrationGraph.push([graphData[i][0], parseFloat(graphData[i][1])])
     }
-
-    console.log(graphData)
+    setGradeToShow(parseFloat(grade[index]))
     setParticipation(ParticipationGraph)
     setConcentration(ConcentrationGraph)
+    setTipsToShow(tips[index])
   };
   
 
@@ -68,7 +90,6 @@ export default function Statistics() {
         arr.push(["Minute", "Concentration", "Participation"])
         var size = data.meeting_logs[i].log.length
         for(var j = 0; j < size; j++) {
-          console.log(data.meeting_logs[i].log[j])
           var temp = [j.toString(), data.meeting_logs[i].log[j].concentration.score, data.meeting_logs[i].log[j].expressions.participants]
           arr.push(temp)
         }
@@ -76,6 +97,22 @@ export default function Statistics() {
       }
       return toReturn
   }
+
+  function parserGrade(data) {
+    var toReturn = []
+    for(var i = 0; i < data.meeting_logs.length; i++) {
+      toReturn.push(data.meeting_logs[i].score.score)
+    }
+    return toReturn
+}
+
+function parserTips(data) {
+  var toReturn = []
+  for(var i = 0; i < data.meeting_logs.length; i++) {
+    toReturn.push(data.meeting_logs[i].score.tips)
+  }
+  return toReturn
+}
 
     // const data = [
     //     ["Minute", "Concentration", "Participation"],
@@ -122,13 +159,13 @@ export default function Statistics() {
     }
 
   return (
-    <div className="px-6 pt-6 py-16 2xl:container h-full">
+    <div className="px-6 pt-6 py-16 2xl:container h-full absolute">
      <div className="flex justify-center items-center">
         <label>
         Choose lecture:
       <select color="red" onChange={handleChange} className=" bg-primary-700">
-        {console.log(data)}
-      {data.map((meeting, index) => ((index == 0) ? <option value={index}>Choose meeting</option> : <option value={index}>Meeting number {index}</option>))}
+        <option value={-1}>Choose meeting</option>
+      {data.map((meeting, index) => (<option value={index}>Meeting number {index + 1}</option>))}
       </select>
       </label>
     </div>
@@ -139,7 +176,7 @@ export default function Statistics() {
           {participation.length > 1 ? <LectureResults data={participation} options={options} header={"Participation Performance"} />: <LectureResults data={[["Minute", "Participation"], ["0", 0]]} options={options} header={"Participation Performance"} />}
           </div>
           <div>
-          <LectureGrade grade={grade}/>
+          {gradeToShow >= 0 && <LectureGrade grade={gradeToShow} tips={tipsToShow}/>}
           </div>
         </div>
     </div>
