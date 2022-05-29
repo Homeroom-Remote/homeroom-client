@@ -1,5 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { Reactions, Send } from "../../utils/svgs";
+import { getMeetingFromUserID, } from "../../api/meeting"
+import useUser from "../../stores/userStore";
+
+
 
 function ChatTab({ name, messages, unread, active, onClick }) {
   const handleTabClick = () => {
@@ -40,9 +44,13 @@ function ChatTab({ name, messages, unread, active, onClick }) {
   );
 }
 
-function Message({ message }) {
+function Message({ message, user }) {
   const getMessageStyles = () => {
-    if (message?.me) return "font-bold text-primary-600";
+    ////////////////
+    console.log(message)
+    if (message?.me || message.uid.startsWith(getMeetingFromUserID(user.uid))) return "font-bold text-primary-600";
+    // if (message?.me) return "font-bold text-primary-600";
+    ////////////////
     return "font-medium dark:text-text-400 text-text-800";
   };
 
@@ -75,6 +83,9 @@ function Chat({ sendMessage, isParticipantsOpen, generalMessage, onMount }) {
 
   const onOpenGeneralChat = () => setUnreadGeneralChat(0);
   const onOpenPrivateChat = () => setUnreadPrivateChat(0);
+
+  const { user } = useUser()
+
 
   const handleGeneralTabClick = () => {
     setPrivateTab(false);
@@ -150,7 +161,7 @@ function Chat({ sendMessage, isParticipantsOpen, generalMessage, onMount }) {
       {/* Chat Messages */}
       <div className="h-full overflow-auto">
         {getMessages().map((message, idx) => (
-          <Message message={message} key={`message-${idx}`} />
+          <Message message={message} key={`message-${idx}`} user={user} />
         ))}
       </div>
       {/* Message Input */}
