@@ -51,7 +51,6 @@ import useSettings from "../../stores/settingsStore";
 ////////
 import handGestureList from "../../utils/handGestureList";
 import FaceRecognition from "./MachineLearningModules/FaceRecognition";
-import { time } from "@tensorflow/tfjs";
 
 const globalStyles =
   // eslint-disable-next-line no-multi-str
@@ -569,6 +568,11 @@ export default function Meeting() {
     SendExpressionsPrediction(room, expressions);
   }
 
+  function ManuallyRegisterToMessageQueue() {
+    RegisterToMessageQueue(room)
+  }
+
+
   ////////////
   //Components
   ////////////
@@ -587,8 +591,7 @@ export default function Meeting() {
           <QuestionQueue
             questions={questionQueue}
             removeQuestionByID={removeQuestionByID}
-            RegisterToMessageQueue={RegisterToMessageQueue}
-            room={room}
+            ManuallyRegisterToMessageQueue={ManuallyRegisterToMessageQueue}
           />
         )}
         {showExpressionsChart && (
