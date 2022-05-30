@@ -128,7 +128,12 @@ export default function Meeting() {
   const removeQuestionByID = (id) => RemoveFromMessageQueue(room, id);
 
   const addQuestion = (id, displayName) => {
+    console.log(id)
+    console.log(displayName)
+
     setQuestionQueue((oldQueue) => {
+      console.log(id)
+      console.log(displayName)
       const exists = oldQueue.find((qo) => qo.id === id);
       if (exists) return oldQueue;
       else return oldQueue.concat({ id: id, displayName: displayName });
@@ -476,6 +481,7 @@ export default function Meeting() {
 
   function onHandRecognition(message) {
     const gestureObject = Peer.onHandRecognition(message, peers);
+
     if (!gestureObject) {
       console.warn("onHandRecognition warning: gestureObject is null");
       return;
@@ -486,7 +492,6 @@ export default function Meeting() {
       const userName = Peer.getNameFromID(gestureObject.sender, peers);
       addQuestion(gestureObject.sender, userName);
     }
-
     addGestureToVideo(gestureObject, gestureObject.sender);
   }
 
@@ -582,6 +587,8 @@ export default function Meeting() {
           <QuestionQueue
             questions={questionQueue}
             removeQuestionByID={removeQuestionByID}
+            RegisterToMessageQueue={RegisterToMessageQueue}
+            room={room}
           />
         )}
         {showExpressionsChart && (

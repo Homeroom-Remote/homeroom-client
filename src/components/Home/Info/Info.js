@@ -106,8 +106,13 @@ export default function Info() {
                             return <InfoRow question={question} answer={answer} key={question} />
                         })}
                     </div>
+                    <br /><br />
+                    <h2 className="text-3xl font-semibold text-center text-gray-800 dark:text-white"> --- Homeroom --- </h2>
+                    <br />
                 </div>
             </section>
+            
+            
         </div>
     );
 }

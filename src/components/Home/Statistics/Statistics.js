@@ -8,6 +8,7 @@ import { getMeetingFromUserID, } from "../../../api/meeting";
 import useUser from "../../../stores/userStore";
 import LoadingSVG from "../../../utils/seo.svg";
 import getBackgroundColor from "../../../utils/getBackgroundColor"
+import { cos } from "@tensorflow/tfjs";
 
 
 
@@ -17,6 +18,8 @@ export default function Statistics() {
 
   const [data, setData] = useState([])
   const [concentration, setConcentration] = useState([])
+
+  const [data2, setData2] = useState()
   const [participation, setParticipation] = useState([])
 
   const [grade, setGrade] = useState([])
@@ -24,6 +27,10 @@ export default function Statistics() {
 
   const [tips, setTips] = useState([])
   const [tipsToShow, setTipsToShow] = useState([])
+
+  const [maxTimeArray, setMaxTimeArray] = useState([])
+  const [maxTime2, setMaxTime2] = useState("")
+
 
 
   const [loading, setLoading] = useState(true);
@@ -41,7 +48,7 @@ export default function Statistics() {
       get(getMeetingFromUserID(user.uid))
       .then((data) => {
         // Promise.all(
-          console.log(data)
+          setData2(parserData2(data))
           setData(parserData(data))
           setGrade(parserGrade(data))
           setTips(parserTips(data))
@@ -57,10 +64,10 @@ export default function Statistics() {
     var index = parseInt(event.target.value)
     var graphData = data[index]
     
-    var ParticipationGraph = [["Minute", "Participation"]]
+    var ParticipationGraph = [["Minute", "Question", "Chat"]]
     var ConcentrationGraph = [["Minute", "Concentration"]]
     if(index == -1) {
-      ParticipationGraph.push(["0", 0])
+      ParticipationGraph.push(["0", 0, 0])
       ConcentrationGraph.push(["0", 0])
       setParticipation(ParticipationGraph)
       setConcentration(ConcentrationGraph)
@@ -68,16 +75,19 @@ export default function Statistics() {
       setTipsToShow([])
       return
     }
-    console.log(graphData)
     for(var i = 1; i < graphData.length; i++) {
       graphData[i][1] = parseFloat(graphData[i][1])
       graphData[i][2] = parseFloat(graphData[i][2])
-      ParticipationGraph.push([graphData[i][0], parseFloat(graphData[i][2])])
-      ConcentrationGraph.push([graphData[i][0], parseFloat(graphData[i][1])])
+      ConcentrationGraph.push([graphData[i][0], parseFloat(graphData[i][1]) * 100])
     }
+ 
+    console.log(data2[index])
+    console.log(ConcentrationGraph)
+
     setGradeToShow(parseFloat(grade[index]))
-    setParticipation(ParticipationGraph)
+    setParticipation(data2[index])
     setConcentration(ConcentrationGraph)
+    console.log(maxTimeArray)
     setTipsToShow(tips[index])
   };
   
@@ -85,18 +95,43 @@ export default function Statistics() {
 
   function parserData(data) {
       var toReturn = []
+      // var time = []
       for(var i = 0; i < data.meeting_logs.length; i++) {
         var arr = []
-        arr.push(["Minute", "Concentration", "Participation"])
+        // var tempTime = []
+        arr.push(["Minute", "Concentration"])
         var size = data.meeting_logs[i].log.length
         for(var j = 0; j < size; j++) {
-          var temp = [j.toString(), data.meeting_logs[i].log[j].concentration.score, data.meeting_logs[i].log[j].expressions.participants]
+          var temp = [j.toString(), data.meeting_logs[i].log[j].concentration.score]
+          // tempTime.push(new Date(data.meeting_logs[i].log[j].at))
           arr.push(temp)
         }
         toReturn.push(arr)
+        // time.push(tempTime)
       }
+      // setMaxTimeArray(time)
       return toReturn
   }
+
+  function parserData2(data) {
+    var toReturn = []
+    for(var i = 0; i < data.meeting_logs.length; i++) {
+      var arr =[]
+      arr.push(["Minute", "Questions", "Chat"])
+      var size = data.meeting_logs[i].engagementLogs.length
+      var questionSum = 0, chatSum = 0;
+      for(var j = 0; j < size; j++) {
+        if(data.meeting_logs[i].engagementLogs[j].event == "message")
+          chatSum++
+        else if(data.meeting_logs[i].engagementLogs[j].event == "question")
+          questionSum++
+        var temp = [j.toString(), questionSum, chatSum]
+        arr.push(temp)
+      }
+      toReturn.push(arr)
+    }
+    return toReturn
+}
 
   function parserGrade(data) {
     var toReturn = []
@@ -121,13 +156,28 @@ function parserTips(data) {
     //     ["3", 660, 100],
     //     ["4", 100, 540],
     //   ];
+    // "rgb(115, 115, 115)", "rgb(203, 213, 225)"
       const options = {
         curveType: "function",
         legend: { position: "bottom" },
         colors: ['rgb(192, 132, 252)', 'rgb(74, 222, 128)'],
-        backgroundColor: getBackgroundColor(),
+        backgroundColor: "none",
+        hAxis: { title: "time", viewWindow: { min: 0, max: 20 } },
+        vAxis: { title: "Score", viewWindow: { min: 0, max: 100 } },
+        // backgroundColor: getBackgroundColor(),
         lineWidth: 4,
       };
+
+      const options2 = {
+        legend: { position: "bottom" },
+        // isStacked: true,
+        colors: ['rgb(192, 132, 252)', 'rgb(74, 222, 128)'],
+        backgroundColor: "none",
+        // backgroundColor: getBackgroundColor(),
+        lineWidth: 1,
+        rotated: true,
+      };
+      console.log(getBackgroundColor().toString())
 
   
       if (loading) {
@@ -161,19 +211,19 @@ function parserTips(data) {
   return (
     <div className="px-6 pt-6 py-16 2xl:container h-full absolute">
      <div className="flex justify-center items-center">
-        <label>
-        Choose lecture:
-      <select color="red" onChange={handleChange} className=" bg-primary-700">
+        {/* <label> */}
+        {/* Choose lecture: */}
+      <select color="red" onChange={handleChange} className=" bg-primary-700 w-fit">
         <option value={-1}>Choose meeting</option>
       {data.map((meeting, index) => (<option value={index}>Meeting number {index + 1}</option>))}
       </select>
-      </label>
+      {/* </label> */}
     </div>
         <div className="grid gap-6 grid-cols-2 h-full">
-          {console.log(concentration)}
+          {/* {console.log(concentration)} */}
           <div className=" grid grid-rows-2 h-full">
           {concentration.length > 1 ? <LectureResults data={concentration} options={options} header={"Concentration Performance"} />: <LectureResults data={[["Minute", "Concentration"], ["0", 0]]} options={options} header={"Concentration Performance"} />}
-          {participation.length > 1 ? <LectureResults data={participation} options={options} header={"Participation Performance"} />: <LectureResults data={[["Minute", "Participation"], ["0", 0]]} options={options} header={"Participation Performance"} />}
+          {participation.length > 1 ? <LectureResults data={participation} options={options2} header={"Participation Performance"} isColumn={true} />: <LectureResults data={[["Minute", "Questions", "Chat"], ["0", 0, 0]]} options={options2} header={"Participation Performance"} isColumn={true} />}
           </div>
           <div>
           {gradeToShow >= 0 && <LectureGrade grade={gradeToShow} tips={tipsToShow}/>}
