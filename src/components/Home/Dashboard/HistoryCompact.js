@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
-import { getMeetingHistory, get, handleAddToFavorite, isMeetingInFavorite } from "../../../api/meeting";
+import {
+  getMeetingHistory,
+  get,
+  handleAddToFavorite,
+  isMeetingInFavorite,
+} from "../../../api/meeting";
 import NoHistorySVG from "../../../utils/tissue.svg";
 import LoadingSVG from "../../../utils/seo.svg";
 import useMeeting from "../../../stores/meetingStore";
 import usePopup from "../../../stores/popupStore";
 
 import Button from "../../Button";
-import StarButton from "../../StarButton"
-
-
-
+import StarButton from "../../StarButton";
 
 function NoHistoryComponent() {
   return (
@@ -49,7 +51,7 @@ function HistoryComponent({ history, addMeetingToFavorites }) {
   const parseTime = (firebaseTimeObject) => {
     const fireBaseTime = new Date(
       firebaseTimeObject.seconds * 1000 +
-      firebaseTimeObject.nanoseconds / 1000000
+        firebaseTimeObject.nanoseconds / 1000000
     );
     return fireBaseTime.toDateString();
   };
@@ -90,15 +92,15 @@ function HistoryComponent({ history, addMeetingToFavorites }) {
                     text="Join"
                     onClick={() => handleJoinMeeting(meeting)}
                   />
-                  {meeting.isMeetingInFavorite == true &&
+                  {meeting.isMeetingInFavorite == true && (
                     <StarButton
                       text="Fav"
                       onClick={() => {
                         addMeetingToFavorites(meeting);
-                        handleAddToFavorite(meeting).then((data) => {
-                        })
+                        handleAddToFavorite(meeting).then((data) => {});
                       }}
-                    />}
+                    />
+                  )}
                 </td>
               </tr>
             ))}
@@ -108,10 +110,14 @@ function HistoryComponent({ history, addMeetingToFavorites }) {
     </>
   );
 }
-export default function HistoryCompact({ setOverlayComponent, history, setHistory, addMeetingToFavorites }) {
+export default function HistoryCompact({
+  setOverlayComponent,
+  history,
+  setHistory,
+  addMeetingToFavorites,
+}) {
   const [loading, setLoading] = useState(true);
   // const [history, setHistory] = useState([]);
-
 
   useEffect(() => {
     setLoading(true);
@@ -124,13 +130,15 @@ export default function HistoryCompact({ setOverlayComponent, history, setHistor
               data.meeting_history.map(async (meeting) => {
                 return get(meeting.id)
                   .then((data) => {
-                    return isMeetingInFavorite(meeting.id).then((isMeetingInFavorite) => {
-                      return {
-                        ...data,
-                        ...meeting, // id + time
-                        isMeetingInFavorite, // when returns- true: can add to favorite. false: disable
-                      };
-                    })
+                    return isMeetingInFavorite(meeting.id).then(
+                      (isMeetingInFavorite) => {
+                        return {
+                          ...data,
+                          ...meeting, // id + time
+                          isMeetingInFavorite, // when returns- true: can add to favorite. false: disable
+                        };
+                      }
+                    );
                   })
                   .catch(() => false);
               })
@@ -148,10 +156,9 @@ export default function HistoryCompact({ setOverlayComponent, history, setHistor
     }, [1000]);
   }, []);
 
-
   return (
     <div className="flex flex-row items-center h-full gap-x-2 justify-center">
-      <div className="dark:bg-dark-800 h-3/4 w-3/4 rounded-3xl p-4 dark:shadow shadow-lg flex flex-col gap-y-2 relative">
+      <div className="dark:bg-dark-800 dark:bg-opacity-50 h-3/4 w-3/4 rounded-3xl p-4 dark:shadow shadow-lg flex flex-col gap-y-2 relative">
         <h1 className="font-bold text-xl dark:text-white text-black">
           History
         </h1>
@@ -159,7 +166,10 @@ export default function HistoryCompact({ setOverlayComponent, history, setHistor
         {loading ? (
           <LoadingComponent />
         ) : history ? (
-          <HistoryComponent history={history} addMeetingToFavorites={addMeetingToFavorites} />
+          <HistoryComponent
+            history={history}
+            addMeetingToFavorites={addMeetingToFavorites}
+          />
         ) : (
           <NoHistoryComponent />
         )}

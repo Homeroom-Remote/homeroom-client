@@ -33,6 +33,7 @@ import {
   RemoveFromMessageQueue,
   GetOwner,
   GetQuestionQueue,
+  GetChat,
 } from "../../api/room";
 import HandGestures from "./MachineLearningModules/HandGestures";
 
@@ -79,6 +80,9 @@ export default function Meeting() {
   const [room, setRoom] = useState(null);
   const { meetingID, exitMeeting, setOwner } = useMeeting();
   const [peers, setPeers] = useState([]);
+  ///////////////
+  const [date, setDate] = useState(null);
+  ///////////////
 
   // etc
   const { user } = useUser();
@@ -184,8 +188,20 @@ export default function Meeting() {
   };
 
   useEffect(() => {
+    ////////
+    setDate(new Date());
+    ////////
     return () => myStream && stopStream(myStream);
   }, []);
+
+  ////////////////////////////////////
+  useEffect(() => {
+    if (chat) {
+      GetChat(room);
+    }
+  }, [chat]);
+
+  ////////////////////////////////////
 
   const refreshMedia = (video, audio) => {
     function getMedia(constraints) {
@@ -273,6 +289,10 @@ export default function Meeting() {
         name: "face-recognition", // broadcasted (statistics)
         callback: (room, message) => onFaceRecognition(message),
       },
+      {
+        name: "get-chat",
+        callback: (room, message) => onGetChat(message),
+      },
     ]);
   }
 
@@ -319,7 +339,6 @@ export default function Meeting() {
   }
 
   function onQuestionQueueStatus({ event, status, message }) {
-    console.log("question queue status", event, status, message);
     if (event === "add" && status === true) {
       setOpts({
         type: "success",
@@ -349,10 +368,22 @@ export default function Meeting() {
   function onPeerSignal(room, message) {
     Peer.createPeer(room, message, false, peers, myStream, setPeers);
   }
-
   const onGeneralMessage = (msg) => {
     generalChatSetter && generalChatSetter((c) => [...c, msg]);
   };
+  ////////////////////
+  function onGetChat(msg) {
+    var i = 0;
+    while (
+      msg[i]?.messageSentAt &&
+      date.getTime() > msg[i].messageSentAt?.getTime()
+    )
+      i++;
+    for (; i < msg.length; i++) {
+      generalChatSetter && generalChatSetter((c) => [...c, msg[i]]);
+    }
+  }
+  ////////////////////
 
   function onHandRecognition(message) {
     const gestureObject = Peer.onHandRecognition(message, peers);
@@ -365,7 +396,6 @@ export default function Meeting() {
   }
 
   useEffect(() => {
-    console.log("Meeting.js -> rerender");
     // Join room
     if (!room) {
       // This is last - Either we joined after creating the room or after joining it regularly.
@@ -381,12 +411,10 @@ export default function Meeting() {
         CreateRoom(token, displayName, meetingID)
           .then((room) => {
             // Create also joins room
-            console.log("Create room -> Success", room);
             RegisterRoom(room);
           })
           .catch((e) => {
             // Maybe the room is not empty (rejoining) or isn't our room, just join it.
-            console.log("Create room -> Failed", e);
             Join();
           });
       }
@@ -398,7 +426,7 @@ export default function Meeting() {
             RegisterRoom(newRoom);
           })
           .catch((e) => {
-            console.log(e);
+            console.error("Join():", e);
             setError(e);
           });
       }
@@ -443,6 +471,7 @@ export default function Meeting() {
 
   function onHandRecognition(message) {
     const gestureObject = Peer.onHandRecognition(message, peers);
+
     if (!gestureObject) {
       console.warn("onHandRecognition warning: gestureObject is null");
       return;
@@ -453,7 +482,6 @@ export default function Meeting() {
       const userName = Peer.getNameFromID(gestureObject.sender, peers);
       addQuestion(gestureObject.sender, userName);
     }
-
     addGestureToVideo(gestureObject, gestureObject.sender);
   }
 
@@ -531,6 +559,10 @@ export default function Meeting() {
     SendExpressionsPrediction(room, expressions);
   }
 
+  function ManuallyRegisterToMessageQueue() {
+    RegisterToMessageQueue(room);
+  }
+
   ////////////
   //Components
   ////////////
@@ -549,6 +581,7 @@ export default function Meeting() {
           <QuestionQueue
             questions={questionQueue}
             removeQuestionByID={removeQuestionByID}
+            ManuallyRegisterToMessageQueue={ManuallyRegisterToMessageQueue}
           />
         )}
         {showExpressionsChart && (

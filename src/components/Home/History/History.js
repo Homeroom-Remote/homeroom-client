@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
-import { getMeetingHistory, get, handleAddToFavorite, isMeetingInFavorite } from "../../../api/meeting";
+import {
+  getMeetingHistory,
+  get,
+  handleAddToFavorite,
+  isMeetingInFavorite,
+} from "../../../api/meeting";
 import LoadingSVG from "../../../utils/seo.svg";
 import NoHistorySVG from "../../../utils/tissue.svg";
 import Button from "../../Button";
 import OnlineIndicator from "../../OnlineIndicator";
 import useMeeting from "../../../stores/meetingStore";
-import StarButton from "../../StarButton"
+import StarButton from "../../StarButton";
 
 export default function History() {
   const [loading, setLoading] = useState(true);
@@ -22,7 +27,7 @@ export default function History() {
   const parseTime = (firebaseTimeObject) => {
     const fireBaseTime = new Date(
       firebaseTimeObject.seconds * 1000 +
-      firebaseTimeObject.nanoseconds / 1000000
+        firebaseTimeObject.nanoseconds / 1000000
     );
     return fireBaseTime.toDateString();
   };
@@ -35,7 +40,8 @@ export default function History() {
     setHistory((oldHistory) =>
       oldHistory.map((his) => ({
         ...his,
-        isMeetingInFavorite: his.id === meeting.id ? false : his.isMeetingInFavorite
+        isMeetingInFavorite:
+          his.id === meeting.id ? false : his.isMeetingInFavorite,
       }))
     );
   }
@@ -51,14 +57,15 @@ export default function History() {
               data.meeting_history.map(async (meeting) => {
                 return get(meeting.id)
                   .then((data) => {
-                    return isMeetingInFavorite(meeting.id).then((isMeetingInFavorite) => {
-                      // console.log("isMeetingInFavorite")
-                      return {
-                        ...data,
-                        ...meeting, // id + time
-                        isMeetingInFavorite,
-                      };
-                    })
+                    return isMeetingInFavorite(meeting.id).then(
+                      (isMeetingInFavorite) => {
+                        return {
+                          ...data,
+                          ...meeting, // id + time
+                          isMeetingInFavorite,
+                        };
+                      }
+                    );
                   })
                   .catch(() => false);
               })
@@ -96,7 +103,11 @@ export default function History() {
           <h3 className="text-2xl mt-4">
             Once you join your first meeting it will be displayed here.
           </h3>
-          <object data={NoHistorySVG} type="image/svg+xml">
+          <object
+            data={NoHistorySVG}
+            type="image/svg+xml"
+            className="w-80 xl:w-auto"
+          >
             <img src="" alt="no history" />
           </object>
         </div>
@@ -139,7 +150,6 @@ export default function History() {
               </td>
               <td className={styles.body_td}>{parseTime(meeting.at)}</td>
               <td className={styles.body_td + "border-l"}>
-
                 {meeting.status === "online" && (
                   <Button text="Join" onClick={() => joinMeeting(meeting.id)} />
                 )}
@@ -147,12 +157,12 @@ export default function History() {
                   <StarButton
                     text="Fav"
                     onClick={() => {
-                      handleAddToFavorite(meeting).then((data) => { })
-                      removeStarMeetingFromHistory(meeting)
+                      handleAddToFavorite(meeting).then((data) => {});
+                      removeStarMeetingFromHistory(meeting);
                     }}
-                  />)}
+                  />
+                )}
               </td>
-
             </tr>
           ))}
         </tbody>
