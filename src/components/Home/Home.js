@@ -68,12 +68,12 @@ export default function Home() {
   return (
     <div className={globalStyles}>
       <Header />
-      <section className="gap-1 grid grid-flow-row grid-cols-10 dark:bg-dark-800 bg-lt-50 grid-rows-1 h-full">
+      <section className="grid grid-flow-row grid-cols-10 dark:bg-dark-800 bg-lt-300 grid-rows-1 h-full mt-[.5px]">
         <Sidebar
           changeMainComponent={changeMainComponent}
           MainComponent={MainComponent}
         />
-        <div className="col-span-8 bg-lt-100 dark:bg-dark-900">
+        <div className="col-span-8 bg-lt-200 dark:bg-dark-900">
           <MainComponent.Component changeMainComponent={changeMainComponent} />
         </div>
       </section>
