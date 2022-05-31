@@ -26,7 +26,7 @@ function LogoutButton() {
   );
 }
 
-function SidebarColumn({ components, changeMainComponent, MainComponent }) {
+function SidebarColumn({ bottom, changeMainComponent, MainComponent }) {
   const getTextStyles = (index) => {
     const mainComponentIndex = components.findIndex(
       (component) => component?.name === MainComponent?.name
@@ -48,16 +48,19 @@ function SidebarColumn({ components, changeMainComponent, MainComponent }) {
   };
   return (
     <div className="gap-y-3 flex flex-col">
-      {components.map((component, index) => (
-        <button
-          className="flex flex-row gap-x-3 items-center"
-          onClick={() => changeMainComponent(index)}
-          key={`sidebar-link-${index}`}
-        >
-          <span className={getIconStyles(index)}>{component.icon}</span>
-          <span className={getTextStyles(index)}>{component.name}</span>
-        </button>
-      ))}
+      {components.map(
+        (component, index) =>
+          component.bottom === bottom && (
+            <button
+              className="flex flex-row gap-x-3 items-center"
+              onClick={() => changeMainComponent(index)}
+              key={`sidebar-link-${index}`}
+            >
+              <span className={getIconStyles(index)}>{component.icon}</span>
+              <span className={getTextStyles(index)}>{component.name}</span>
+            </button>
+          )
+      )}
     </div>
   );
 }
@@ -67,14 +70,14 @@ export default function Sidebar({ changeMainComponent, MainComponent }) {
     <nav className="col-span-2 h-full justify-between flex flex-col text-xl p-2 shadow-lg shadow-primary-200">
       <article>
         <SidebarColumn
-          components={components.filter(({ bottom }) => bottom === false)}
+          bottom={false}
           changeMainComponent={changeMainComponent}
           MainComponent={MainComponent}
         />
       </article>
       <article className="gap-y-3 flex flex-col">
         <SidebarColumn
-          components={components.filter(({ bottom }) => bottom === true)}
+          bottom={true}
           changeMainComponent={changeMainComponent}
           MainComponent={MainComponent}
         />
