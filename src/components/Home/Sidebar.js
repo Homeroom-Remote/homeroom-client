@@ -5,7 +5,7 @@ function LogoutButton() {
   return (
     <button
       onClick={logout}
-      className="mb-12 flex flex-row items-center gap-x-3 dark:text-white text-text-600"
+      className="mb-12 flex flex-row items-center gap-x-3 dark:text-white text-text-600 outline-0"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"

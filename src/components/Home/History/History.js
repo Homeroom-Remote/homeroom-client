@@ -103,7 +103,11 @@ export default function History() {
           <h3 className="text-2xl mt-4">
             Once you join your first meeting it will be displayed here.
           </h3>
-          <object data={NoHistorySVG} type="image/svg+xml">
+          <object
+            data={NoHistorySVG}
+            type="image/svg+xml"
+            className="w-80 xl:w-auto"
+          >
             <img src="" alt="no history" />
           </object>
         </div>
