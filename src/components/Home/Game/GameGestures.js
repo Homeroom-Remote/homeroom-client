@@ -324,8 +324,8 @@ export default function Game() {
   }, []);
 
   return (
-    <div className="game center overflow-none">
-      <div className="video absolute w-80 h-80 left-10 bottom-0">
+    <div className="game center relative flex flex-col items-center justify-start gap-y-4 h-full overflow-none">
+      <div className="video absolute w-64 h-64 left-10 bottom-0">
         <div id="video-container border ">
           <video
             id="pose-video"
@@ -337,28 +337,31 @@ export default function Game() {
           <div id="pose-result" className="layer"></div>
         </div>
       </div>
-      <div className="">
+      <header>
         <p className=" text-center text-primary-400 text-2xl">
           Play the game while waiting for your meeting to start!
         </p>
-      </div>
-      <div className="text-center text-secondary-500 text-lg">
-        <p id="score">
-          Your score: <span id="current-score">{result.current}</span>. Best
-          Score: <span id="best-score">{bestResult.current}</span>
-        </p>
-      </div>
-      <div className="canvas-wrapper border-4 border-primary-400">
-        <canvas id="canvas-top" className="w-full"></canvas>
-      </div>
-      <div className="">
-        <p className=" text-center text-secondary-500 text-md">
-          Collect the red squares and watch out from the blue squares.
-        </p>
-        <p className=" text-center text-secondary-500 text-md">
-          Move with the right, left, up and down arrows.
-        </p>
-      </div>
+        <article className="text-center text-secondary-500 text-lg">
+          <p id="score">
+            Your score: <span id="current-score">{result.current}</span>. Best
+            Score: <span id="best-score">{bestResult.current}</span>
+          </p>
+        </article>
+      </header>
+
+      <article className="w-full flex flex-col items-center">
+        <div className="canvas-wrapper border-4 border-primary-400 w-11/12">
+          <canvas id="canvas-top" className="w-full"></canvas>
+        </div>
+        <div className="">
+          <p className=" text-center text-secondary-500 text-md">
+            Collect the red squares and watch out from the blue squares.
+          </p>
+          <p className=" text-center text-secondary-500 text-md">
+            Move with the right, left, up and down arrows.
+          </p>
+        </div>
+      </article>
     </div>
   );
 }

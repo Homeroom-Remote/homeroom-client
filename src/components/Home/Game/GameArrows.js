@@ -177,28 +177,31 @@ export default function Game() {
   }, []);
 
   return (
-    <div className="game center relative">
-      <div className="">
-        <p className=" text-center text-primary-400 text-2xl">
+    <div className="game center relative flex flex-col items-center justify-center gap-y-4 h-full">
+      <header>
+        <p className="text-center text-primary-400 text-2xl">
           Play the game while waiting for your meeting to start!
         </p>
-      </div>
-      <div className="text-center text-secondary-500 text-lg">
-        <p id="score">
-          Your score: {result}. Best Score: {bestResult}
-        </p>
-      </div>
-      <div className="canvas-wrapper  border-8 border-primary-400 ">
-        <canvas id="canvas-top" className="w-full"></canvas>
-      </div>
-      <div className="">
-        <p className=" text-center text-secondary-500 text-md">
-          Collect the red squares and watch out from the blue squares.
-        </p>
-        <p className=" text-center text-secondary-500 text-md">
-          Move with the right, left, up and down arrows.
-        </p>
-      </div>
+        <article className="text-center text-secondary-500 text-lg">
+          <p id="score">
+            Your score: {result}. Best Score: {bestResult}
+          </p>
+        </article>
+      </header>
+
+      <article className="w-full flex flex-col items-center">
+        <div className="canvas-wrapper border-8 border-primary-400 w-11/12">
+          <canvas id="canvas-top" className="w-full"></canvas>
+        </div>
+        <div className="">
+          <p className=" text-center text-secondary-500 text-md">
+            Collect the red squares and watch out from the blue squares.
+          </p>
+          <p className=" text-center text-secondary-500 text-md">
+            Move with the right, left, up and down arrows.
+          </p>
+        </div>
+      </article>
     </div>
   );
 }
