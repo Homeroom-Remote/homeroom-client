@@ -14,6 +14,7 @@ import QuestionQueue from "./QuestionQueue";
 import ExpressionsChart from "./ExpressionsChart";
 import ConcentrationMeter from "./ConcentrationMeter";
 import Swal from "sweetalert2";
+import Survey from "./Survey";
 
 //////
 // API
@@ -84,6 +85,9 @@ export default function Meeting() {
   ///////////////
   const [date, setDate] = useState(null)
   ///////////////
+
+  // Survey
+  const [survey, setSurvey] = useState(false);
 
   // etc
   const { user } = useUser();
@@ -198,7 +202,7 @@ export default function Meeting() {
 
   ////////////////////////////////////
   useEffect(() => {
-    if(chat) {
+    if (chat) {
       GetChat(room)
       console.log(room)
     }
@@ -309,14 +313,14 @@ export default function Meeting() {
         return Object.keys(oldExpressions).length === 0
           ? newExpressions
           : Object.entries(oldExpressions).reduce(
-              (prev, [k, v]) => ({
-                ...prev,
-                [k]:
-                  (1 - expressionAlpha) * v +
-                  newExpressions[k] * expressionAlpha,
-              }),
-              {}
-            );
+            (prev, [k, v]) => ({
+              ...prev,
+              [k]:
+                (1 - expressionAlpha) * v +
+                newExpressions[k] * expressionAlpha,
+            }),
+            {}
+          );
       });
     }
 
@@ -379,9 +383,9 @@ export default function Meeting() {
   ////////////////////
   function onGetChat(msg) {
     var i = 0;
-    while(msg[i]?.messageSentAt && date.getTime() > msg[i].messageSentAt?.getTime())
+    while (msg[i]?.messageSentAt && date.getTime() > msg[i].messageSentAt?.getTime())
       i++
-    for(; i < msg.length; i++) {
+    for (; i < msg.length; i++) {
       generalChatSetter && generalChatSetter((c) => [...c, msg[i]]);
     }
   };
@@ -565,6 +569,13 @@ export default function Meeting() {
   }
 
   ////////////
+  // Survey
+  ////////////
+  const toggleSurvey = () => {
+    setSurvey(!survey);
+  };
+
+  ////////////
   //Components
   ////////////
 
@@ -589,6 +600,9 @@ export default function Meeting() {
         )}
         {showConcentrationMeter && (
           <ConcentrationMeter onMount={onConcentrationMeterMount} />
+        )}
+        {survey && (
+          <Survey />
         )}
         <div
           className={
@@ -616,6 +630,8 @@ export default function Meeting() {
               toggleMicrophone={toggleMicrophone}
               chat={chat}
               toggleChat={toggleChat}
+              survey={survey}
+              toggleSurvey={toggleSurvey}
               participants={participants}
               toggleParticipants={toggleParticipants}
               questionQueue={showQuestionQueue}

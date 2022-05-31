@@ -68,6 +68,9 @@ export default function Toolbar(props) {
   const chat = props.chat;
   const toggleChat = props.toggleChat;
 
+  const survey = props.survey;
+  const toggleSurvey = props.toggleSurvey;
+
   const participants = props.participants;
   const toggleParticipants = props.toggleParticipants;
 
@@ -149,6 +152,14 @@ export default function Toolbar(props) {
           logoOff={Chat}
           textOn={"Chat"}
           textOff={"Chat"}
+        />
+        <ToolbarButton
+          state={survey}
+          toggle={toggleSurvey}
+          logoOn={Chat}
+          logoOff={Chat}
+          textOn={"Survey"}
+          textOff={"Survey"}
         />
       </div>
       <div className="flex flex-row gap-x-2 border p-2 relative border-primary-400">
