@@ -1,4 +1,3 @@
-import { Chart } from "react-google-charts";
 import { useEffect, useState } from "react";
 import NoHistorySVG from "../../../utils/tissue.svg";
 import LectureResults from "./LectureResults";
@@ -7,8 +6,6 @@ import { get } from "../../../api/meeting";
 import { getMeetingFromUserID } from "../../../api/meeting";
 import useUser from "../../../stores/userStore";
 import LoadingSVG from "../../../utils/seo.svg";
-import getBackgroundColor from "../../../utils/getBackgroundColor";
-import { cos } from "@tensorflow/tfjs";
 
 export default function Statistics() {
   const { user } = useUser();
@@ -24,9 +21,6 @@ export default function Statistics() {
 
   const [tips, setTips] = useState([]);
   const [tipsToShow, setTipsToShow] = useState([]);
-
-  const [maxTimeArray, setMaxTimeArray] = useState([]);
-  const [maxTime2, setMaxTime2] = useState("");
 
   const [loading, setLoading] = useState(true);
 
@@ -190,8 +184,12 @@ export default function Statistics() {
             Once you join your meeting and a participant will turn on his camera
             it will be displayed here.
           </h3>
-          <object data={NoHistorySVG} type="image/svg+xml">
-            <img src="" alt="no favorite" />
+          <object
+            data={NoHistorySVG}
+            type="image/svg+xml"
+            className="w-80 xl:w-auto"
+          >
+            <img src="" alt="no statistics" />
           </object>
         </div>
       </div>
