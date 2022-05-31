@@ -16,6 +16,7 @@ import {
 import { useState } from "react";
 import useMeeting from "../../stores/meetingStore";
 import Button from "../Button";
+import useUser from "../../stores/userStore";
 
 function ToolbarButton(props) {
   const active = props.state;
@@ -58,6 +59,15 @@ function ToolbarButton(props) {
 
 export default function Toolbar(props) {
   const { exitMeeting } = useMeeting();
+
+
+
+
+  const { owner } = useMeeting();
+  const { user } = useUser();
+
+
+
 
   const camera = props.camera;
   const toggleCamera = props.toggleCamera;
@@ -153,14 +163,14 @@ export default function Toolbar(props) {
           textOn={"Chat"}
           textOff={"Chat"}
         />
-        <ToolbarButton
+        {user.uid === owner && <ToolbarButton
           state={survey}
           toggle={toggleSurvey}
           logoOn={Chat}
           logoOff={Chat}
           textOn={"Survey"}
           textOff={"Survey"}
-        />
+        />}
       </div>
       <div className="flex flex-row gap-x-2 border p-2 relative border-primary-400">
         <p className="absolute -top-7 -left-1 text-lg text-white font-medium z-30">

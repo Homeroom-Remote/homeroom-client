@@ -201,12 +201,7 @@ export default function Meeting() {
   ////////////////////////////////////
   useEffect(() => {
     if (chat) {
-<<<<<<< HEAD
-      GetChat(room)
-      console.log(room)
-=======
       GetChat(room);
->>>>>>> 81efe66609fe2313c9413cdc00108457f928a8e2
     }
   }, [chat]);
 
@@ -383,16 +378,11 @@ export default function Meeting() {
   ////////////////////
   function onGetChat(msg) {
     var i = 0;
-<<<<<<< HEAD
-    while (msg[i]?.messageSentAt && date.getTime() > msg[i].messageSentAt?.getTime())
-      i++
-=======
     while (
       msg[i]?.messageSentAt &&
       date.getTime() > msg[i].messageSentAt?.getTime()
     )
       i++;
->>>>>>> 81efe66609fe2313c9413cdc00108457f928a8e2
     for (; i < msg.length; i++) {
       generalChatSetter && generalChatSetter((c) => [...c, msg[i]]);
     }
@@ -612,7 +602,7 @@ export default function Meeting() {
           <ConcentrationMeter onMount={onConcentrationMeterMount} />
         )}
         {survey && (
-          <Survey />
+          <Survey setSurvey={setSurvey} />
         )}
         <div
           className={

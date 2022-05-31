@@ -10,22 +10,38 @@ function Header() {
     );
 }
 
-export default function Survey() {
+export default function Survey({ setSurvey }) {
     const [questionText, setQuestionText] = useState("");
+    const [windowTimer, setWindowTimer] = useState(true);
+
+
+    const [countdown, setCountdown] = useState(9);
+    const [timer, setTimer] = useState();
+
+
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        console.log(questionText)
+        const interval = setInterval(() => {
+            setCountdown(it => it - 1);
+        }, 1000);
+        setTimer(interval);
     }
 
-    const handleTypeQuestion = (event) => {
-        setQuestionText(event.target.value)
-    }
+    useEffect(() => {
+        if (countdown === 0) {
+            clearInterval(timer);
+            setWindowTimer(false)
+            setSurvey(false)
+        }
+    }, [countdown]);
+
 
     return (
-        <Draggable defaultPosition={{ x: window.innerWidth / 2, y: window.innerHeight / 2 }}>
+        windowTimer && <Draggable defaultPosition={{ x: window.innerWidth / 2, y: window.innerHeight / 2 }}>
             <div className="absolute z-10 cursor-move w-[350px] h-[300px] border dark:border-dark-700 shadow-lg rounded-t-lg border-lt-600">
                 <Header />
+                <label>{countdown}</label>
                 <form onSubmit={handleSubmit}>
                     <label>Enter your question: <br />
                         <input
