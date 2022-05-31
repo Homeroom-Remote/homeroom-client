@@ -53,7 +53,6 @@ export default function Participants({
       typeof stream?.getVideoTracks()[0] === "undefined" ||
       stream?.getVideoTracks()[0]?.muted
     );
-  console.log(peers);
   return (
     <div
       className={

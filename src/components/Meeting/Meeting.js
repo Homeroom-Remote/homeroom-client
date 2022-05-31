@@ -52,7 +52,6 @@ import useSettings from "../../stores/settingsStore";
 ////////
 import handGestureList from "../../utils/handGestureList";
 import FaceRecognition from "./MachineLearningModules/FaceRecognition";
-import { time } from "@tensorflow/tfjs";
 
 const globalStyles =
   // eslint-disable-next-line no-multi-str
@@ -83,7 +82,7 @@ export default function Meeting() {
   const { meetingID, exitMeeting, setOwner } = useMeeting();
   const [peers, setPeers] = useState([]);
   ///////////////
-  const [date, setDate] = useState(null)
+  const [date, setDate] = useState(null);
   ///////////////
 
   // Survey
@@ -194,17 +193,20 @@ export default function Meeting() {
 
   useEffect(() => {
     ////////
-    setDate(new Date())
+    setDate(new Date());
     ////////
     return () => myStream && stopStream(myStream);
   }, []);
 
-
   ////////////////////////////////////
   useEffect(() => {
     if (chat) {
+<<<<<<< HEAD
       GetChat(room)
       console.log(room)
+=======
+      GetChat(room);
+>>>>>>> 81efe66609fe2313c9413cdc00108457f928a8e2
     }
   }, [chat]);
 
@@ -346,7 +348,6 @@ export default function Meeting() {
   }
 
   function onQuestionQueueStatus({ event, status, message }) {
-    console.log("question queue status", event, status, message);
     if (event === "add" && status === true) {
       setOpts({
         type: "success",
@@ -377,18 +378,25 @@ export default function Meeting() {
     Peer.createPeer(room, message, false, peers, myStream, setPeers);
   }
   const onGeneralMessage = (msg) => {
-    console.log(msg)
     generalChatSetter && generalChatSetter((c) => [...c, msg]);
   };
   ////////////////////
   function onGetChat(msg) {
     var i = 0;
+<<<<<<< HEAD
     while (msg[i]?.messageSentAt && date.getTime() > msg[i].messageSentAt?.getTime())
       i++
+=======
+    while (
+      msg[i]?.messageSentAt &&
+      date.getTime() > msg[i].messageSentAt?.getTime()
+    )
+      i++;
+>>>>>>> 81efe66609fe2313c9413cdc00108457f928a8e2
     for (; i < msg.length; i++) {
       generalChatSetter && generalChatSetter((c) => [...c, msg[i]]);
     }
-  };
+  }
   ////////////////////
 
   function onHandRecognition(message) {
@@ -402,7 +410,6 @@ export default function Meeting() {
   }
 
   useEffect(() => {
-    console.log("Meeting.js -> rerender");
     // Join room
     if (!room) {
       // This is last - Either we joined after creating the room or after joining it regularly.
@@ -418,12 +425,10 @@ export default function Meeting() {
         CreateRoom(token, displayName, meetingID)
           .then((room) => {
             // Create also joins room
-            console.log("Create room -> Success", room);
             RegisterRoom(room);
           })
           .catch((e) => {
             // Maybe the room is not empty (rejoining) or isn't our room, just join it.
-            console.log("Create room -> Failed", e);
             Join();
           });
       }
@@ -435,7 +440,7 @@ export default function Meeting() {
             RegisterRoom(newRoom);
           })
           .catch((e) => {
-            console.log(e);
+            console.error("Join():", e);
             setError(e);
           });
       }
@@ -480,6 +485,7 @@ export default function Meeting() {
 
   function onHandRecognition(message) {
     const gestureObject = Peer.onHandRecognition(message, peers);
+
     if (!gestureObject) {
       console.warn("onHandRecognition warning: gestureObject is null");
       return;
@@ -490,7 +496,6 @@ export default function Meeting() {
       const userName = Peer.getNameFromID(gestureObject.sender, peers);
       addQuestion(gestureObject.sender, userName);
     }
-
     addGestureToVideo(gestureObject, gestureObject.sender);
   }
 
@@ -568,6 +573,10 @@ export default function Meeting() {
     SendExpressionsPrediction(room, expressions);
   }
 
+  function ManuallyRegisterToMessageQueue() {
+    RegisterToMessageQueue(room);
+  }
+
   ////////////
   // Survey
   ////////////
@@ -593,6 +602,7 @@ export default function Meeting() {
           <QuestionQueue
             questions={questionQueue}
             removeQuestionByID={removeQuestionByID}
+            ManuallyRegisterToMessageQueue={ManuallyRegisterToMessageQueue}
           />
         )}
         {showExpressionsChart && (

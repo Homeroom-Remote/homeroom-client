@@ -9,9 +9,9 @@ export default function Header() {
     return "Welcome back";
   };
   return (
-    <h1 className="text-3xl p-2">
+    <h1 className="text-3xl p-2 self-center">
       {getGreeting()}{" "}
-      <span className="text-primary-400">{user?.displayName}</span>
+      <span className="text-primary-400">{user?.displayName}🎉</span>
     </h1>
   );
 }

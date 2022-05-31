@@ -13,12 +13,10 @@ const loginStyles = "flex flex-col justify-between";
 const wrapperStyles = "h-screen flex justify-center items-center";
 export default function Welcome(props) {
   const handleGoogleButtonClick = () => {
-    console.log("Trying to sign in with google");
     signInWithGoogle();
   };
 
   const handleAnonymousButtonClick = () => {
-    console.log("Trying to sign in anonymously");
     signInAnonymously();
   };
   return (
