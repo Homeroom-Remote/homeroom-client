@@ -11,14 +11,16 @@ import OnlineIndicator from "../../OnlineIndicator";
 import Button from "../../Button";
 
 import Tooltip from "react-tooltip";
-import useSettings from "../../../stores/settingsStore"
+import useSettings from "../../../stores/settingsStore";
 
-
-export default function QuickSelection({ setOverlayComponent, changeMainComponent }) {
+export default function QuickSelection({
+  setOverlayComponent,
+  changeMainComponent,
+}) {
   const { joinMeeting } = useMeeting();
   const [online, setOnline] = useState(false);
   const [copyMeetingTip, setCopyMeetingTip] = useState(false);
-  const { autoCopyLink } = useSettings()
+  const { autoCopyLink } = useSettings();
 
   const handleJoinRoom = () => {
     setOverlayComponent(JoinRoomOverlay);
@@ -64,7 +66,7 @@ export default function QuickSelection({ setOverlayComponent, changeMainComponen
   }, []);
 
   function openRoom() {
-    if(autoCopyLink) copyMeetingIDToClipboard()
+    if (autoCopyLink) copyMeetingIDToClipboard();
     create()
       .then(() => getMyMeetingId())
       .then((meetingID) => joinMeeting(meetingID))
@@ -75,7 +77,7 @@ export default function QuickSelection({ setOverlayComponent, changeMainComponen
     <div className="flex flex-row items-center h-full gap-x-2 justify-center">
       <Tooltip effect="solid" />
       {/* My Meeting */}
-      <div className="dark:bg-dark-800 h-60 w-48 rounded-3xl p-4 dark:shadow shadow-lg flex flex-col justify-between relative">
+      <div className="dark:bg-dark-800 dark:bg-opacity-50 h-60 w-48 rounded-3xl p-4 dark:shadow shadow-lg flex flex-col justify-between relative">
         {/* Ping indicator (if my meeting is online) */}
         {online && <OnlineIndicator online={online} />}
         {/* Header */}
@@ -120,7 +122,7 @@ export default function QuickSelection({ setOverlayComponent, changeMainComponen
       </div>
       <div className="flex flex-col w-18 h-60 gap-y-2">
         {/* Join Room  */}
-        <div className="dark:bg-dark-800 h-full rounded-3xl p-4 dark:shadow shadow-lg flex flex-col justify-between">
+        <div className="dark:bg-dark-800 dark:bg-opacity-50 h-full rounded-3xl p-4 dark:shadow shadow-lg flex flex-col justify-between">
           <div className="flex flex-row items-center gap-x-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -140,7 +142,7 @@ export default function QuickSelection({ setOverlayComponent, changeMainComponen
           </div>
           <Button text="Join" onClick={handleJoinRoom} />
         </div>
-        <div className="dark:bg-dark-800 h-full rounded-3xl p-4 dark:shadow shadow-lg flex flex-col justify-between">
+        <div className="dark:bg-dark-800 dark:bg-opacity-50 h-full rounded-3xl p-4 dark:shadow shadow-lg flex flex-col justify-between">
           <div className="flex flex-row items-center gap-x-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -166,7 +168,7 @@ export default function QuickSelection({ setOverlayComponent, changeMainComponen
           <Button
             text="Go To Settings"
             onClick={() => {
-              changeMainComponent(1)
+              changeMainComponent(1);
             }}
           />
         </div>

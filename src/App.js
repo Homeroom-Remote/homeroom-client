@@ -11,6 +11,13 @@ import Home from "./components/Home/Home";
 import Meeting from "./components/Meeting/Meeting";
 import { BallTriangle } from "./components/Spinners";
 import PopupOverlay from "./components/PopupOverlay";
+
+const globalStyles =
+  // eslint-disable-next-line no-multi-str
+  "bg-lt-100 text-text-900 \
+                      dark:bg-dark-900 dark:text-text-200 \
+                      transition-colors max-h-screen h-screen overflow-y-hidden";
+
 function App() {
   const { theme } = useTheme();
   const { setUser, isLoggedIn } = useUser();
@@ -29,8 +36,10 @@ function App() {
   if (loading) {
     return (
       <div className={theme}>
-        <div className="flex h-screen w-full items-center justify-center">
-          <BallTriangle />
+        <div className={globalStyles}>
+          <div className="flex h-screen w-full items-center justify-center">
+            <BallTriangle />
+          </div>
         </div>
       </div>
     );

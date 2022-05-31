@@ -38,8 +38,8 @@ export default function SeeMyself() {
   }, [camera]);
 
   return (
-    <div className="flex flex-row items-center h-full gap-x-2 justify-center">
-      <div className="dark:bg-dark-800 h-80 w-72 rounded-3xl p-4 dark:shadow shadow-lg flex flex-col justify-between relative">
+    <div className="flex flex-row items-center h-full gap-x-2 justify-center w-full">
+      <div className="dark:bg-dark-800 dark:bg-opacity-50 rounded-3xl p-4 dark:shadow shadow-lg flex flex-col justify-between relative">
         <div className="flex flex-col gap-y-2 h-full">
           <h2 className="font-medium text-xl border-b-2 mb-1 pb-1">
             Media Preview
