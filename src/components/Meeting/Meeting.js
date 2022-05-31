@@ -81,7 +81,7 @@ export default function Meeting() {
   const { meetingID, exitMeeting, setOwner } = useMeeting();
   const [peers, setPeers] = useState([]);
   ///////////////
-  const [date, setDate] = useState(null)
+  const [date, setDate] = useState(null);
   ///////////////
 
   // etc
@@ -127,12 +127,7 @@ export default function Meeting() {
   const removeQuestionByID = (id) => RemoveFromMessageQueue(room, id);
 
   const addQuestion = (id, displayName) => {
-    console.log(id)
-    console.log(displayName)
-
     setQuestionQueue((oldQueue) => {
-      console.log(id)
-      console.log(displayName)
       const exists = oldQueue.find((qo) => qo.id === id);
       if (exists) return oldQueue;
       else return oldQueue.concat({ id: id, displayName: displayName });
@@ -194,17 +189,15 @@ export default function Meeting() {
 
   useEffect(() => {
     ////////
-    setDate(new Date())
+    setDate(new Date());
     ////////
     return () => myStream && stopStream(myStream);
   }, []);
 
-
   ////////////////////////////////////
   useEffect(() => {
-    if(chat) {
-      GetChat(room)
-      console.log(room)
+    if (chat) {
+      GetChat(room);
     }
   }, [chat]);
 
@@ -346,7 +339,6 @@ export default function Meeting() {
   }
 
   function onQuestionQueueStatus({ event, status, message }) {
-    console.log("question queue status", event, status, message);
     if (event === "add" && status === true) {
       setOpts({
         type: "success",
@@ -377,18 +369,20 @@ export default function Meeting() {
     Peer.createPeer(room, message, false, peers, myStream, setPeers);
   }
   const onGeneralMessage = (msg) => {
-    console.log(msg)
     generalChatSetter && generalChatSetter((c) => [...c, msg]);
   };
   ////////////////////
   function onGetChat(msg) {
     var i = 0;
-    while(msg[i]?.messageSentAt && date.getTime() > msg[i].messageSentAt?.getTime())
-      i++
-    for(; i < msg.length; i++) {
+    while (
+      msg[i]?.messageSentAt &&
+      date.getTime() > msg[i].messageSentAt?.getTime()
+    )
+      i++;
+    for (; i < msg.length; i++) {
       generalChatSetter && generalChatSetter((c) => [...c, msg[i]]);
     }
-  };
+  }
   ////////////////////
 
   function onHandRecognition(message) {
@@ -402,7 +396,6 @@ export default function Meeting() {
   }
 
   useEffect(() => {
-    console.log("Meeting.js -> rerender");
     // Join room
     if (!room) {
       // This is last - Either we joined after creating the room or after joining it regularly.
@@ -418,12 +411,10 @@ export default function Meeting() {
         CreateRoom(token, displayName, meetingID)
           .then((room) => {
             // Create also joins room
-            console.log("Create room -> Success", room);
             RegisterRoom(room);
           })
           .catch((e) => {
             // Maybe the room is not empty (rejoining) or isn't our room, just join it.
-            console.log("Create room -> Failed", e);
             Join();
           });
       }
@@ -435,7 +426,7 @@ export default function Meeting() {
             RegisterRoom(newRoom);
           })
           .catch((e) => {
-            console.log(e);
+            console.error("Join():", e);
             setError(e);
           });
       }
@@ -569,9 +560,8 @@ export default function Meeting() {
   }
 
   function ManuallyRegisterToMessageQueue() {
-    RegisterToMessageQueue(room)
+    RegisterToMessageQueue(room);
   }
-
 
   ////////////
   //Components

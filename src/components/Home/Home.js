@@ -2,7 +2,7 @@ import components from "./nav";
 import React, { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
-import useSettings from "../../stores/settingsStore"
+import useSettings from "../../stores/settingsStore";
 import useVideoSettings from "../../stores/videoSettingsStore";
 const globalStyles =
   // eslint-disable-next-line no-multi-str
@@ -18,47 +18,52 @@ export default function Home() {
     setMainComponent(components[index]);
   };
 
-
   /////////////////////////////////////////////
   // load settings
   /////////////////////////////////////////////
-  const { defaultVideo, defaultAudio, toggleVideo, toggleAudio } = useVideoSettings();
-  const { askBeforeVideo, askBeforeAudio, autoCopyLink, showConnectionTime, toggleAskBeforeVideo, toggleAskBeforeAudio, toggleAutoCopyLink, toggleShowConnectionTime } = useSettings()
-
-
+  const { defaultVideo, defaultAudio, toggleVideo, toggleAudio } =
+    useVideoSettings();
+  const {
+    askBeforeVideo,
+    askBeforeAudio,
+    autoCopyLink,
+    showConnectionTime,
+    toggleAskBeforeVideo,
+    toggleAskBeforeAudio,
+    toggleAutoCopyLink,
+    toggleShowConnectionTime,
+  } = useSettings();
 
   useEffect(() => {
-    console.log(localStorage)
-    var inputs = JSON.parse(localStorage.getItem('inputs'));
+    var inputs = JSON.parse(localStorage.getItem("inputs"));
     inputs?.forEach(function (input) {
       if (input.id === "defaultVideoID" && input.checked !== defaultVideo) {
-        toggleVideo()
-        return
+        toggleVideo();
+        return;
       }
       if (input.id === "option2" && input.checked !== defaultAudio) {
-        toggleAudio()
-        return
+        toggleAudio();
+        return;
       }
       if (input.id === "option3" && input.checked !== askBeforeVideo) {
-        toggleAskBeforeVideo()
-        return
+        toggleAskBeforeVideo();
+        return;
       }
       if (input.id === "option4" && input.checked !== askBeforeAudio) {
-        toggleAskBeforeAudio()
-        return
+        toggleAskBeforeAudio();
+        return;
       }
       if (input.id === "option5" && input.checked !== autoCopyLink) {
-        toggleAutoCopyLink()
-        return
+        toggleAutoCopyLink();
+        return;
       }
       if (input.id === "option6" && input.checked !== showConnectionTime) {
-        toggleShowConnectionTime()
-        return
+        toggleShowConnectionTime();
+        return;
       }
     });
   }, []);
   ////////////////////////////////////////////
-
 
   return (
     <div className={globalStyles}>

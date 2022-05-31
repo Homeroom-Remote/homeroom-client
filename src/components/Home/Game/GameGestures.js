@@ -63,7 +63,6 @@ export default function Game() {
 
     // load handpose model
     const model = await handpose.load();
-    console.log("Handpose model loaded");
 
     // main estimation loop
     const estimateHands = async () => {
@@ -109,16 +108,13 @@ export default function Game() {
     };
 
     estimateHands();
-    console.log("Starting predictions");
   }
 
   useEffect(() => {
-    console.log("update");
     initCamera(config.video.width, config.video.height, config.video.fps).then(
       (video) => {
         video.play();
         video.addEventListener("loadeddata", (event) => {
-          console.log("Camera is ready");
           main();
         });
       },
@@ -128,7 +124,6 @@ export default function Game() {
     const canvas = document.querySelector("#pose-canvas");
     canvas.width = config.video.width;
     canvas.height = config.video.height;
-    console.log("Canvas initialized");
   });
 
   ///////////////////////

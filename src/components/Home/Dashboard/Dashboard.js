@@ -5,9 +5,8 @@ import Overlay from "../../Overlay";
 import HistoryCompact from "./HistoryCompact";
 import MediaPreview from "./MediaPreview";
 import FavoriteCompact from "./FavoriteCompact";
-import useSettings from "../../../stores/settingsStore"
+import useSettings from "../../../stores/settingsStore";
 import useVideoSettings from "../../../stores/videoSettingsStore";
-
 
 export default function Dashboard({ changeMainComponent }) {
   const [OverlayComponent, setOverlayComponent] = useState(null);
@@ -21,16 +20,15 @@ export default function Dashboard({ changeMainComponent }) {
     setOverlayComponent({ Component: Component });
 
   function addMeetingToFavorites(meeting) {
-    console.log("addMeetingTo")
-    console.log(meeting)
     setFavorite((oldFavorites) => {
-      if (oldFavorites) return [...oldFavorites, meeting]
-      else return [meeting]
+      if (oldFavorites) return [...oldFavorites, meeting];
+      else return [meeting];
     });
     setHistory((oldHistory) =>
       oldHistory.map((his) => ({
         ...his,
-        isMeetingInFavorite: his.id === meeting.id ? false : his.isMeetingInFavorite
+        isMeetingInFavorite:
+          his.id === meeting.id ? false : his.isMeetingInFavorite,
       }))
     );
   }
@@ -41,7 +39,7 @@ export default function Dashboard({ changeMainComponent }) {
     setHistory((oldHistory) =>
       oldHistory.map((his) => ({
         ...his,
-        isMeetingInFavorite: his.id === id ? true : his.isMeetingInFavorite
+        isMeetingInFavorite: his.id === id ? true : his.isMeetingInFavorite,
       }))
     );
   }
@@ -51,11 +49,23 @@ export default function Dashboard({ changeMainComponent }) {
       <Overlay close={closeOverlay} Component={OverlayComponent} />
       <Header />
       <div className="grid grid-flow-row grid-rows-2 grid-cols-2 h-full">
-        <QuickSelection setOverlayComponent={setComponent} changeMainComponent={changeMainComponent} />
-        <HistoryCompact setOverlayComponent={setComponent} history={history} setHistory={setHistory} addMeetingToFavorites={addMeetingToFavorites} />
+        <QuickSelection
+          setOverlayComponent={setComponent}
+          changeMainComponent={changeMainComponent}
+        />
+        <HistoryCompact
+          setOverlayComponent={setComponent}
+          history={history}
+          setHistory={setHistory}
+          addMeetingToFavorites={addMeetingToFavorites}
+        />
         <MediaPreview />
-        <FavoriteCompact setOverlayComponent={setComponent} favorite={favorite} setFavorite={setFavorite} removeMeetingFromFavoritesById={removeMeetingFromFavoritesById} />
-
+        <FavoriteCompact
+          setOverlayComponent={setComponent}
+          favorite={favorite}
+          setFavorite={setFavorite}
+          removeMeetingFromFavoritesById={removeMeetingFromFavoritesById}
+        />
       </div>
     </div>
   );

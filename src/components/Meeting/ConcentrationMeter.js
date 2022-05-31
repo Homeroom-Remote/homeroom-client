@@ -11,7 +11,6 @@ function Header() {
 }
 
 function ChartWrapper({ concentration }) {
-  console.log(concentration);
   const getBarColor = () => {
     if (concentration > 0.9) return "bg-primary-400";
     if (concentration > 0.8) return "bg-secondary-400";
