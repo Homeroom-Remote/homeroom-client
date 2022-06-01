@@ -100,11 +100,17 @@ function GetQuestionQueue(room) {
   room.send("get-question-queue");
 }
 
-////////////////////////////////////
-function GetChat(room) {
-  room.send("get-chat", {})
+function StartScreenShare(room) {
+  room.send("share-screen", { event: "start" });
 }
-////////////////////////////////////
+
+function StopScreenShare(room) {
+  room.send("share-screen", { event: "stop" });
+}
+
+function GetChat(room) {
+  room.send("get-chat", {});
+}
 
 export {
   JoinRoom,
@@ -120,4 +126,6 @@ export {
   GetOwner,
   GetQuestionQueue,
   GetChat,
+  StartScreenShare,
+  StopScreenShare,
 };

@@ -59,15 +59,8 @@ function ToolbarButton(props) {
 
 export default function Toolbar(props) {
   const { exitMeeting } = useMeeting();
-
-
-
-
   const { owner } = useMeeting();
   const { user } = useUser();
-
-
-
 
   const camera = props.camera;
   const toggleCamera = props.toggleCamera;
@@ -93,19 +86,8 @@ export default function Toolbar(props) {
   const concentration = props.concentration;
   const toggleConcentration = props.toggleConcentration;
 
-  const [security, setSecurity] = useState(false);
-  const toggleSecurity = () => {
-    setSecurity(!security);
-  };
-
-  const [shareScreen, setShareScreen] = useState(false);
-  const toggleShareScreen = () => {
-    setShareScreen(!shareScreen);
-  };
-  const [record, setRecord] = useState(false);
-  const toggleRecord = () => {
-    setRecord(!record);
-  };
+  const shareScreen = props.shareScreen;
+  const toggleShareScreen = props.toggleShareScreen;
 
   return (
     <div className="flex flex-row dark:bg-dark-900 bg-lt-400 items-center justify-between h-full">
@@ -132,14 +114,6 @@ export default function Toolbar(props) {
           Meeting Options
         </p>
         <ToolbarButton
-          state={security}
-          toggle={toggleSecurity}
-          logoOn={Security}
-          logoOff={Security}
-          textOn={"Security"}
-          textOff={"Security"}
-        />
-        <ToolbarButton
           state={shareScreen}
           toggle={toggleShareScreen}
           logoOn={ShareScreen}
@@ -163,14 +137,16 @@ export default function Toolbar(props) {
           textOn={"Chat"}
           textOff={"Chat"}
         />
-        {user.uid === owner && <ToolbarButton
-          state={survey}
-          toggle={toggleSurvey}
-          logoOn={Chat}
-          logoOff={Chat}
-          textOn={"Survey"}
-          textOff={"Survey"}
-        />}
+        {user.uid === owner && (
+          <ToolbarButton
+            state={survey}
+            toggle={toggleSurvey}
+            logoOn={Chat}
+            logoOff={Chat}
+            textOn={"Survey"}
+            textOff={"Survey"}
+          />
+        )}
       </div>
       <div className="flex flex-row gap-x-2 border p-2 relative border-primary-400">
         <p className="absolute -top-7 -left-1 text-lg text-white font-medium z-30">

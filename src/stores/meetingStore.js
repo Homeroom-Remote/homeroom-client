@@ -4,6 +4,10 @@ const useStore = create((set) => ({
   isInMeeting: false,
   meetingID: null,
   owner: null,
+  screenSharer: null,
+  setScreenSharer: (sharer) => {
+    set((state) => (state.screenSharer = sharer));
+  },
   setOwner: (owner) => {
     set((state) => (state.owner = owner));
   },
