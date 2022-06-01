@@ -32,9 +32,10 @@ import {
   SendExpressionsPrediction,
   RegisterToMessageQueue,
   RemoveFromMessageQueue,
-  GetOwner,
   GetQuestionQueue,
   GetChat,
+  StartScreenShare,
+  StopScreenShare,
 } from "../../api/room";
 import HandGestures from "./MachineLearningModules/HandGestures";
 
@@ -79,7 +80,8 @@ export default function Meeting() {
 
   // Room hooks
   const [room, setRoom] = useState(null);
-  const { meetingID, exitMeeting, setOwner } = useMeeting();
+  const { meetingID, exitMeeting, setOwner, screenSharer, setScreenSharer } =
+    useMeeting();
   const [peers, setPeers] = useState([]);
   ///////////////
   const [date, setDate] = useState(null);
@@ -136,6 +138,35 @@ export default function Meeting() {
       if (exists) return oldQueue;
       else return oldQueue.concat({ id: id, displayName: displayName });
     });
+  };
+
+  ///////////////
+  // Share Screen
+  ///////////////
+  const [shareScreen, setShareScreen] = useState(false);
+  const toggleShareScreen = () => {
+    if (shareScreen === false && room) {
+      if (screenSharer) {
+        setOpts({
+          type: "error",
+          title: "Can't share screen",
+          body: "There is already a user sharing his screen",
+        });
+        setShow(true);
+      } else {
+        navigator.mediaDevices
+          .getDisplayMedia({ video: true })
+          .then((stream) => {
+            console.log(stream);
+            StartScreenShare(room);
+            setShareScreen(true);
+          })
+          .catch((e) => console.log(e));
+      }
+    } else if (shareScreen === true && room) {
+      StopScreenShare(room);
+      setShareScreen(false);
+    }
   };
 
   ////////
@@ -297,6 +328,10 @@ export default function Meeting() {
         name: "get-chat",
         callback: (room, message) => onGetChat(message),
       },
+      {
+        name: "share-screen",
+        callback: (room, message) => onShareScreenEvent(message),
+      },
     ]);
   }
 
@@ -304,20 +339,37 @@ export default function Meeting() {
   // Socket messages handlers
   ///////////////////////////
 
+  function onShareScreenEvent(message) {
+    if (message.event === "denied-start") {
+      setOpts({
+        type: "error",
+        title: "Can't share screen",
+        body: message.data,
+      });
+      setShow(true);
+    } else if (message.event === "denied-stop") {
+      console.warn("stop share warning", message);
+    } else if (message.event === "start") {
+      setScreenSharer(message.user);
+    } else if (message.event === "stop") {
+      setScreenSharer(null);
+    }
+  }
+
   function onFaceRecognition(message) {
     function handleExpressions(newExpressions) {
       expressionsSetter((oldExpressions) => {
         return Object.keys(oldExpressions).length === 0
           ? newExpressions
           : Object.entries(oldExpressions).reduce(
-            (prev, [k, v]) => ({
-              ...prev,
-              [k]:
-                (1 - expressionAlpha) * v +
-                newExpressions[k] * expressionAlpha,
-            }),
-            {}
-          );
+              (prev, [k, v]) => ({
+                ...prev,
+                [k]:
+                  (1 - expressionAlpha) * v +
+                  newExpressions[k] * expressionAlpha,
+              }),
+              {}
+            );
       });
     }
 
@@ -601,9 +653,7 @@ export default function Meeting() {
         {showConcentrationMeter && (
           <ConcentrationMeter onMount={onConcentrationMeterMount} />
         )}
-        {survey && (
-          <Survey setSurvey={setSurvey} />
-        )}
+        {survey && <Survey setSurvey={setSurvey} />}
         <div
           className={
             "grid grid-rows-10 grid-flow-row h-full " +
@@ -640,6 +690,8 @@ export default function Meeting() {
               toggleExpressions={toggleExpressionsChart}
               concentration={showConcentrationMeter}
               toggleConcentration={toggleConcentrationMeter}
+              shareScreen={shareScreen}
+              toggleShareScreen={toggleShareScreen}
             />
           </div>
         </div>

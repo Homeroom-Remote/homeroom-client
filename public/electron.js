@@ -1,6 +1,6 @@
 const path = require("path");
 
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, ipcMain, desktopCapturer } = require("electron");
 const isDev = require("electron-is-dev");
 
 function createWindow() {
@@ -9,6 +9,8 @@ function createWindow() {
     minHeight: 800,
     webPreferences: {
       nodeIntegration: true,
+      contextIsolation: true,
+      preload: path.join(__dirname, "preload.js"),
     },
     icon: path.join(__dirname, "apple-icon-72x72.png"),
   });
@@ -44,3 +46,7 @@ app.on("activate", () => {
     createWindow();
   }
 });
+
+ipcMain.handle("DESKTOP_CAPTURER_GET_SOURCES", (event, opts) =>
+  desktopCapturer.getSources(opts)
+);
