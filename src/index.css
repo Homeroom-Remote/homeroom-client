@@ -20,6 +20,15 @@ code {
     monospace;
 }
 
+.desktop-capturer-close {
+  position: absolute;
+  color: white;
+  font-size: 1.5rem;
+  top: 3rem;
+  right: 3rem;
+  cursor: pointer;
+}
+
 .desktop-capturer-selection {
   position: fixed;
   top: 0;

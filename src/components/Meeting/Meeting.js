@@ -129,11 +129,11 @@ export default function Meeting() {
   /////////////////
   const [questionQueue, setQuestionQueue] = useState([]);
   const [showQuestionQueue, setShowQuestionQueue] = useState(false);
-  const [inQueue, setInQueue] = useState(false)
+  const [inQueue, setInQueue] = useState(false);
   const toggleQuestionQueue = () => setShowQuestionQueue((val) => !val);
   const removeQuestionByID = (id) => {
-    RemoveFromMessageQueue(room, id)
-      // setInQueue(false)
+    RemoveFromMessageQueue(room, id);
+    // setInQueue(false)
   };
 
   const addQuestion = (id, displayName) => {
@@ -159,7 +159,7 @@ export default function Meeting() {
         setShow(true);
       } else {
         navigator.mediaDevices
-          .getDisplayMedia({ video: true })
+          .getDisplayMedia()
           .then((stream) => {
             console.log(stream);
             StartScreenShare(room);
@@ -604,11 +604,10 @@ export default function Meeting() {
 
     if (prediction === "raise_hand") {
       RegisterToMessageQueue(room);
-      setInQueue(true)
-    }
-    else if (prediction === "fist") {
+      setInQueue(true);
+    } else if (prediction === "fist") {
       RemoveFromMessageQueue(room);
-      setInQueue(false)
+      setInQueue(false);
     }
 
     // Display on my video object
@@ -627,7 +626,7 @@ export default function Meeting() {
 
   function ManuallyRegisterToMessageQueue() {
     RegisterToMessageQueue(room);
-    setInQueue(true)
+    setInQueue(true);
   }
 
   ////////////
