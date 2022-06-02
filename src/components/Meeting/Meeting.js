@@ -133,15 +133,6 @@ export default function Meeting() {
   const toggleQuestionQueue = () => setShowQuestionQueue((val) => !val);
   const removeQuestionByID = (id) => {
     RemoveFromMessageQueue(room, id);
-    // setInQueue(false)
-  };
-
-  const addQuestion = (id, displayName) => {
-    setQuestionQueue((oldQueue) => {
-      const exists = oldQueue.find((qo) => qo.id === id);
-      if (exists) return oldQueue;
-      else return oldQueue.concat({ id: id, displayName: displayName });
-    });
   };
 
   ///////////////
@@ -168,7 +159,7 @@ export default function Meeting() {
             StartScreenShare(room);
             setShareScreen(true);
           })
-          .catch((e) => console.log(e));
+          .catch((e) => console.warn("get display media (screen share):", e));
       }
     } else if (shareScreen === true && room) {
       Peer.removeScreenShare(shareScreenStream.current, peers);
@@ -541,11 +532,6 @@ export default function Meeting() {
       return;
     }
 
-    const gesture = gestureObject.message;
-    if (gesture === "raise_hand") {
-      const userName = Peer.getNameFromID(gestureObject.sender, peers);
-      addQuestion(gestureObject.sender, userName);
-    }
     addGestureToVideo(gestureObject, gestureObject.sender);
   }
 
@@ -630,7 +616,7 @@ export default function Meeting() {
     SendExpressionsPrediction(room, expressions);
   }
 
-  function ManuallyRegisterToMessageQueue() {
+  function manuallyRegisterToMessageQueue() {
     RegisterToMessageQueue(room);
     setInQueue(true);
   }
@@ -660,7 +646,7 @@ export default function Meeting() {
           <QuestionQueue
             questions={questionQueue}
             removeQuestionByID={removeQuestionByID}
-            ManuallyRegisterToMessageQueue={ManuallyRegisterToMessageQueue}
+            manuallyRegisterToMessageQueue={manuallyRegisterToMessageQueue}
             inQueue={inQueue}
           />
         )}

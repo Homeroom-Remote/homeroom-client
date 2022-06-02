@@ -6,8 +6,6 @@ import useUser from "../../stores/userStore";
 
 import { Send } from "../../utils/svgs";
 
-
-
 function DetailedQuestionQueue({ questions, isOwner, uid }) {
   const getListItemStyle = (id) => {
     const baseStyles =
@@ -41,10 +39,15 @@ function DetailedQuestionQueue({ questions, isOwner, uid }) {
     </ol>
   );
 }
-function QuestionQueueHeader({ length, minimzed, ManuallyRegisterToMessageQueue, inQueue, isOwner }) {
-
+function QuestionQueueHeader({
+  length,
+  minimzed,
+  manuallyRegisterToMessageQueue,
+  inQueue,
+  isOwner,
+}) {
   function handleClick() {
-    ManuallyRegisterToMessageQueue()
+    manuallyRegisterToMessageQueue();
   }
 
   return (
@@ -53,7 +56,14 @@ function QuestionQueueHeader({ length, minimzed, ManuallyRegisterToMessageQueue,
       <span className="rounded-full w-6 h-6 flex items-center justify-center dark:bg-dark-800 bg-lt-300  bg-opacity-60">
         {length}
       </span>
-      {!isOwner && !inQueue && <button onClick={handleClick} className="rounded-full w-6 h-6 flex items-center justify-center dark:bg-dark-800 bg-lt-300 bg-opacity-60 text-3xl">+</button>}
+      {!isOwner && !inQueue && (
+        <button
+          onClick={handleClick}
+          className="rounded-full w-6 h-6 flex items-center justify-center dark:bg-dark-800 bg-lt-300 bg-opacity-60 text-3xl"
+        >
+          +
+        </button>
+      )}
       <Send
         id="toggle_minimized"
         className={
@@ -65,13 +75,17 @@ function QuestionQueueHeader({ length, minimzed, ManuallyRegisterToMessageQueue,
   );
 }
 
-export default function QuestionQueue({ questions, removeQuestionByID, ManuallyRegisterToMessageQueue, inQueue }) {
+export default function QuestionQueue({
+  questions,
+  removeQuestionByID,
+  manuallyRegisterToMessageQueue,
+  inQueue,
+}) {
+  console.log(questions);
   const [minimzed, setMinimzed] = useState(false);
 
   const { owner } = useMeeting();
   const { user } = useUser();
-
-
 
   const isOwner = owner === user.uid;
   const toggleMinimzed = () => setMinimzed((oldValue) => !oldValue);
@@ -86,7 +100,13 @@ export default function QuestionQueue({ questions, removeQuestionByID, ManuallyR
   return (
     <Draggable defaultPosition={{ x: 50, y: 50 }} onMouseDown={handleMouseDown}>
       <div className="absolute z-10 cursor-move">
-        <QuestionQueueHeader length={questions.length} minimzed={minimzed} ManuallyRegisterToMessageQueue={ManuallyRegisterToMessageQueue} inQueue={inQueue} isOwner={isOwner} />
+        <QuestionQueueHeader
+          length={questions.length}
+          minimzed={minimzed}
+          manuallyRegisterToMessageQueue={manuallyRegisterToMessageQueue}
+          inQueue={inQueue}
+          isOwner={isOwner}
+        />
         {!minimzed && (
           <DetailedQuestionQueue
             questions={questions}
@@ -95,7 +115,6 @@ export default function QuestionQueue({ questions, removeQuestionByID, ManuallyR
           />
         )}
       </div>
-
     </Draggable>
   );
 }
