@@ -129,25 +129,17 @@ export default function Meeting() {
   /////////////////
   const [questionQueue, setQuestionQueue] = useState([]);
   const [showQuestionQueue, setShowQuestionQueue] = useState(false);
-  const [inQueue, setInQueue] = useState(false)
+  const [inQueue, setInQueue] = useState(false);
   const toggleQuestionQueue = () => setShowQuestionQueue((val) => !val);
   const removeQuestionByID = (id) => {
-    RemoveFromMessageQueue(room, id)
-      // setInQueue(false)
-  };
-
-  const addQuestion = (id, displayName) => {
-    setQuestionQueue((oldQueue) => {
-      const exists = oldQueue.find((qo) => qo.id === id);
-      if (exists) return oldQueue;
-      else return oldQueue.concat({ id: id, displayName: displayName });
-    });
+    RemoveFromMessageQueue(room, id);
   };
 
   ///////////////
   // Share Screen
   ///////////////
   const [shareScreen, setShareScreen] = useState(false);
+  const shareScreenStream = useRef(null);
   const toggleShareScreen = () => {
     if (shareScreen === false && room) {
       if (screenSharer) {
@@ -159,15 +151,18 @@ export default function Meeting() {
         setShow(true);
       } else {
         navigator.mediaDevices
-          .getDisplayMedia({ video: true })
+          .getDisplayMedia()
           .then((stream) => {
-            console.log(stream);
+            stream.screenShare = true;
+            shareScreenStream.current = stream;
+            Peer.addScreenShare(shareScreenStream.current, peers);
             StartScreenShare(room);
             setShareScreen(true);
           })
-          .catch((e) => console.log(e));
+          .catch((e) => console.warn("get display media (screen share):", e));
       }
     } else if (shareScreen === true && room) {
+      Peer.removeScreenShare(shareScreenStream.current, peers);
       StopScreenShare(room);
       setShareScreen(false);
     }
@@ -537,11 +532,6 @@ export default function Meeting() {
       return;
     }
 
-    const gesture = gestureObject.message;
-    if (gesture === "raise_hand") {
-      const userName = Peer.getNameFromID(gestureObject.sender, peers);
-      addQuestion(gestureObject.sender, userName);
-    }
     addGestureToVideo(gestureObject, gestureObject.sender);
   }
 
@@ -577,18 +567,20 @@ export default function Meeting() {
     // Add interval if stream is online
     if (!detectionInterval.current && hasVideoStream) {
       detectionInterval.current = setInterval(async () => {
-        const gesturePrediction = await HandGestures.Detect(
-          document.querySelector("#hiddenVideoEl")
-        );
-        const facePrediction = await FaceRecognition.Detect(
-          document.querySelector("#hiddenVideoEl")
-        );
-
-        facePrediction?.score &&
-          HandleConcentrationPrediction(facePrediction.score);
-        facePrediction?.expressions &&
-          handleExpressionsPrediction(facePrediction.expressions);
-        gesturePrediction && HandleGesturePrediction(gesturePrediction);
+        const vidEl = document.querySelector("#hiddenVideoEl");
+        HandGestures.Detect(vidEl)
+          .then((handPrediction) => {
+            handPrediction && HandleGesturePrediction(handPrediction);
+          })
+          .catch();
+        FaceRecognition.Detect(vidEl)
+          .then((facePrediction) => {
+            facePrediction?.score &&
+              HandleConcentrationPrediction(facePrediction.score);
+            facePrediction?.expressions &&
+              handleExpressionsPrediction(facePrediction.expressions);
+          })
+          .catch(() => {});
       }, handIntervalTime);
     }
 
@@ -604,11 +596,10 @@ export default function Meeting() {
 
     if (prediction === "raise_hand") {
       RegisterToMessageQueue(room);
-      setInQueue(true)
-    }
-    else if (prediction === "fist") {
+      setInQueue(true);
+    } else if (prediction === "fist") {
       RemoveFromMessageQueue(room);
-      setInQueue(false)
+      setInQueue(false);
     }
 
     // Display on my video object
@@ -625,9 +616,9 @@ export default function Meeting() {
     SendExpressionsPrediction(room, expressions);
   }
 
-  function ManuallyRegisterToMessageQueue() {
+  function manuallyRegisterToMessageQueue() {
     RegisterToMessageQueue(room);
-    setInQueue(true)
+    setInQueue(true);
   }
 
   ////////////
@@ -655,7 +646,7 @@ export default function Meeting() {
           <QuestionQueue
             questions={questionQueue}
             removeQuestionByID={removeQuestionByID}
-            ManuallyRegisterToMessageQueue={ManuallyRegisterToMessageQueue}
+            manuallyRegisterToMessageQueue={manuallyRegisterToMessageQueue}
             inQueue={inQueue}
           />
         )}

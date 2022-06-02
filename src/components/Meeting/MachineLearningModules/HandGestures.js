@@ -6,7 +6,7 @@ var net = null;
 var ThumbsDownGesture = null;
 var RaiseHandGesture = null;
 var FistGesture = null;
-
+var GestureEstimator = null;
 function IsReady() {
   return !!net;
 }
@@ -86,30 +86,35 @@ async function Init() {
   InitThumbsDown();
   InitRaiseHand();
   InitFist();
+  GestureEstimator = new fp.GestureEstimator([
+    fp.Gestures.ThumbsUpGesture, // Came with package
+    ThumbsDownGesture, // Manually constructed (InitThumbsDown())
+    RaiseHandGesture, // Manually constructed (InitRaiseHand())
+    FistGesture, // Manually constructed (InitFist())
+  ]);
   console.log("Handpose model loaded.");
 }
 
 async function Detect(video) {
-  if (video.paused) return;
-  const hand = await net.estimateHands(video);
-  if (hand.length > 0) {
-    const GestureEstimator = new fp.GestureEstimator([
-      fp.Gestures.ThumbsUpGesture, // Came with package
-      ThumbsDownGesture, // Manually constructed (InitThumbsDown())
-      RaiseHandGesture, // Manually constructed (InitRaiseHand())
-      FistGesture, // Manually constructed (InitFist())
-    ]);
-    const gesture = await GestureEstimator.estimate(hand[0].landmarks, 8.5);
+  return new Promise((resolve, reject) => {
+    if (video.paused) reject("video paused");
+    net.estimateHands(video).then(async (hand) => {
+      if (hand.length > 0) {
+        const gesture = await GestureEstimator.estimate(hand[0].landmarks, 8.5);
 
-    if (gesture.gestures?.length > 0) {
-      const confidence = gesture.gestures.map((prediction) => prediction.score);
-      const maxConfidence = confidence.indexOf(
-        Math.max.apply(null, confidence)
-      );
+        if (gesture.gestures?.length > 0) {
+          const confidence = gesture.gestures.map(
+            (prediction) => prediction.score
+          );
+          const maxConfidence = confidence.indexOf(
+            Math.max.apply(null, confidence)
+          );
 
-      return gesture.gestures[maxConfidence].name;
-    }
-  }
+          resolve(gesture.gestures[maxConfidence].name);
+        }
+      }
+    });
+  });
 }
 
 const HandGestures = {

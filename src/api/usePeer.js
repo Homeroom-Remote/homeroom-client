@@ -13,6 +13,14 @@ function updatePeers(id, obj, setter) {
   });
 }
 
+function removeScreenShare(stream, peers) {
+  peers.forEach((peer) => peer.peer.removeStream(stream));
+}
+
+function addScreenShare(stream, peers) {
+  peers.forEach((peer) => peer.peer.addStream(stream));
+}
+
 /**
  * Updates client stream in other clients
  * @param {MediaStream} stream
@@ -80,6 +88,7 @@ function createPeer(room, message, initiator, peers, myStream, setter) {
   });
 
   peer.on("stream", (peerStream) => {
+    console.log(peerStream);
     updatePeers(
       message.sessionId,
       {
@@ -171,5 +180,7 @@ const PeerWrapper = {
   onHandRecognition,
   updateStream,
   getNameFromID,
+  addScreenShare,
+  removeScreenShare,
 };
 export default PeerWrapper;
