@@ -71,21 +71,22 @@ async function Init() {
 }
 
 async function Detect(video) {
-  if (video.paused) return;
-  try {
-    const dataTinyYolo = await faceapi
-      .detectAllFaces(video, optionsTinyFace)
-      .withFaceExpressions();
+  return new Promise(async (resolve, reject) => {
+    if (video.paused) reject("video paused");
+    try {
+      const dataTinyYolo = await faceapi
+        .detectAllFaces(video, optionsTinyFace)
+        .withFaceExpressions();
+      const returnObj = {
+        score: dataTinyYolo[0]?.detection._score || 0,
+        expressions: clampThreshold(dataTinyYolo[0]?.expressions, 0.1),
+      };
 
-    const returnObj = {
-      score: dataTinyYolo[0]?.detection._score || 0,
-      expressions: clampThreshold(dataTinyYolo[0]?.expressions, 0.1),
-    };
-
-    return returnObj;
-  } catch (e) {
-    //ignore
-  }
+      resolve(returnObj);
+    } catch (e) {
+      //ignore
+    }
+  });
 }
 
 const FaceRecognition = {

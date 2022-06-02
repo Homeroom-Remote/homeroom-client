@@ -148,6 +148,7 @@ export default function Meeting() {
   // Share Screen
   ///////////////
   const [shareScreen, setShareScreen] = useState(false);
+  const shareScreenStream = useRef(null);
   const toggleShareScreen = () => {
     if (shareScreen === false && room) {
       if (screenSharer) {
@@ -161,13 +162,16 @@ export default function Meeting() {
         navigator.mediaDevices
           .getDisplayMedia()
           .then((stream) => {
-            console.log(stream);
+            stream.screenShare = true;
+            shareScreenStream.current = stream;
+            Peer.addScreenShare(shareScreenStream.current, peers);
             StartScreenShare(room);
             setShareScreen(true);
           })
           .catch((e) => console.log(e));
       }
     } else if (shareScreen === true && room) {
+      Peer.removeScreenShare(shareScreenStream.current, peers);
       StopScreenShare(room);
       setShareScreen(false);
     }
@@ -577,18 +581,20 @@ export default function Meeting() {
     // Add interval if stream is online
     if (!detectionInterval.current && hasVideoStream) {
       detectionInterval.current = setInterval(async () => {
-        const gesturePrediction = await HandGestures.Detect(
-          document.querySelector("#hiddenVideoEl")
-        );
-        const facePrediction = await FaceRecognition.Detect(
-          document.querySelector("#hiddenVideoEl")
-        );
-
-        facePrediction?.score &&
-          HandleConcentrationPrediction(facePrediction.score);
-        facePrediction?.expressions &&
-          handleExpressionsPrediction(facePrediction.expressions);
-        gesturePrediction && HandleGesturePrediction(gesturePrediction);
+        const vidEl = document.querySelector("#hiddenVideoEl");
+        HandGestures.Detect(vidEl)
+          .then((handPrediction) => {
+            handPrediction && HandleGesturePrediction(handPrediction);
+          })
+          .catch();
+        FaceRecognition.Detect(vidEl)
+          .then((facePrediction) => {
+            facePrediction?.score &&
+              HandleConcentrationPrediction(facePrediction.score);
+            facePrediction?.expressions &&
+              handleExpressionsPrediction(facePrediction.expressions);
+          })
+          .catch(() => {});
       }, handIntervalTime);
     }
 
