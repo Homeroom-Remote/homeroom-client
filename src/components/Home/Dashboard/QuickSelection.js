@@ -168,7 +168,7 @@ export default function QuickSelection({
           <Button
             text="Go To Settings"
             onClick={() => {
-              changeMainComponent(1);
+              changeMainComponent(5);
             }}
           />
         </div>

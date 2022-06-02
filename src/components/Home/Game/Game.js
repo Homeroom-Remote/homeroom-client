@@ -15,17 +15,17 @@ export default function Game() {
       background: "rgb(126, 34, 206)",
       showCancelButton: true,
       confirmButtonColor: "rgb(34, 197, 94)",
-      confirmButtonText: "Play with hand gestures",
+      confirmButtonText: "Play with Up, Down, Right and Left arrows",
       cancelButtonColor: "rgb(34, 197, 94)",
-      cancelButtonText: "Play with Up, Down, Right and Left arrows",
+      cancelButtonText: "Play with hand gestures",
       icon: "question",
       // backdrop: 'rgba(0,0,123,0.4)'
     }).then((result) => {
       if (result.isConfirmed) {
-        setGesturesGame(true);
+        setArrowGame(true);
         return;
       } else {
-        setArrowGame(true);
+        setGesturesGame(true);
         return;
       }
     });
