@@ -74,26 +74,34 @@ export default function Statistics() {
     setTipsToShow(tips[index]);
   };
 
+  function fromJToTime(j) {
+    var seconds = (j+1) * 5, minutes = 0, hours = 0;
+    while(seconds >= 60) {
+      minutes += 1
+      seconds -= 60
+    }
+    while(minutes >= 60) {
+      hours += 1
+      minutes -= 60
+    }
+    if(hours < 10) hours = `0${hours}`
+    if(minutes < 10) minutes = `0${minutes}`
+    if(seconds < 10) seconds = `0${seconds}`
+    return `${hours}:${minutes}:${seconds}`
+  }
+
   function parserData(data) {
     var toReturn = [];
-    // var time = []
     for (var i = 0; i < data.meeting_logs.length; i++) {
       var arr = [];
-      // var tempTime = []
       arr.push(["Minute", "Concentration"]);
       var size = data.meeting_logs[i].log.length;
       for (var j = 0; j < size; j++) {
-        var temp = [
-          j.toString(),
-          data.meeting_logs[i].log[j].concentration.score,
-        ];
-        // tempTime.push(new Date(data.meeting_logs[i].log[j].at))
+        var temp = [fromJToTime(j), data.meeting_logs[i].log[j].concentration.score];
         arr.push(temp);
       }
       toReturn.push(arr);
-      // time.push(tempTime)
     }
-    // setMaxTimeArray(time)
     return toReturn;
   }
 
@@ -147,7 +155,7 @@ export default function Statistics() {
     legend: { position: "bottom" },
     colors: ["rgb(192, 132, 252)", "rgb(74, 222, 128)"],
     backgroundColor: "none",
-    hAxis: { title: "time", viewWindow: { min: 0, max: 20 } },
+    hAxis: { title: "time" },
     vAxis: { title: "Score", viewWindow: { min: 0, max: 100 } },
     // backgroundColor: getBackgroundColor(),
     lineWidth: 4,
@@ -158,6 +166,8 @@ export default function Statistics() {
     // isStacked: true,
     colors: ["rgb(192, 132, 252)", "rgb(74, 222, 128)"],
     backgroundColor: "none",
+    hAxis: { title: "time" },
+    vAxis: { title: "count" },
     // backgroundColor: getBackgroundColor(),
     lineWidth: 1,
     rotated: true,
