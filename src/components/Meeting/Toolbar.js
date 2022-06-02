@@ -8,6 +8,7 @@ import {
   Chat,
   ShareScreen,
   Record,
+  Survey,
   Archive,
   Reactions,
   Eye,
@@ -141,8 +142,8 @@ export default function Toolbar(props) {
           <ToolbarButton
             state={survey}
             toggle={toggleSurvey}
-            logoOn={Chat}
-            logoOff={Chat}
+            logoOn={Survey}
+            logoOff={Survey}
             textOn={"Survey"}
             textOff={"Survey"}
           />
