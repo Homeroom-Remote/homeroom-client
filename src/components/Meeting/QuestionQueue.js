@@ -81,7 +81,6 @@ export default function QuestionQueue({
   manuallyRegisterToMessageQueue,
   inQueue,
 }) {
-  console.log(questions);
   const [minimzed, setMinimzed] = useState(false);
 
   const { owner } = useMeeting();
