@@ -68,6 +68,10 @@ function App() {
 
   return (
     <div className={theme}>
+      <div
+        className="hidden bg-dark-800 dark:bg-lt-500"
+        id="static-background-style"
+      ></div>
       {/* <PopupOverlay /> */}
       <Home />
     </div>

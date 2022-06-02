@@ -2,37 +2,38 @@ import { useEffect, useState } from "react";
 
 import Draggable from "react-draggable";
 import { Chart } from "react-google-charts";
-
-import getBackgroundColor from "../../utils/getBackgroundColor";
-
-const options = {
-  legend: { position: "none" },
-  is3D: true,
-  width: "100%",
-  height: "100%",
-  pieSliceText: "label",
-  backgroundColor: getBackgroundColor(),
-  animation: {
-    duration: 1000,
-    easing: "out",
-    startup: true,
-  },
-  tooltip: { showColorCode: true },
-  fontName: "Roboto",
-  fontSize: 20,
-  colors: [
-    "#f43f5e",
-    "#14b8a6",
-    "#d946ef",
-    "#3b82f6",
-    "#94a3b8",
-    "#fdba74",
-    "#1f2937",
-  ],
-};
+import useTheme from "../../stores/themeStore";
 
 function ChartWrapper({ expressions }) {
   const [data, setData] = useState([]);
+  const { getBgFromTheme } = useTheme();
+
+  const options = {
+    legend: { position: "none" },
+    is3D: true,
+    width: "100%",
+    height: "100%",
+    pieSliceText: "label",
+    backgroundColor: getBgFromTheme(),
+    animation: {
+      duration: 1000,
+      easing: "out",
+      startup: true,
+    },
+    tooltip: { showColorCode: true },
+    fontName: "Roboto",
+    fontSize: 20,
+    colors: [
+      "#f43f5e",
+      "#14b8a6",
+      "#d946ef",
+      "#3b82f6",
+      "#94a3b8",
+      "#fdba74",
+      "#1f2937",
+    ],
+  };
+
   useEffect(() => {
     setData([["Emotion", "Representation"], ...Object.entries(expressions)]);
   }, [expressions]);
