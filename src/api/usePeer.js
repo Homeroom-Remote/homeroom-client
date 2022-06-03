@@ -14,10 +14,16 @@ function updatePeers(id, obj, setter) {
 }
 
 function removeScreenShare(stream, peers) {
+  if (!stream) return;
   peers.forEach((peer) => peer.peer.removeStream(stream));
 }
 
 function addScreenShare(stream, peers) {
+  if (!stream) return;
+
+  peers.forEach((peer) =>
+    peer.peer.send({ event: "share-screen", id: stream.id })
+  );
   peers.forEach((peer) => peer.peer.addStream(stream));
 }
 
@@ -32,13 +38,11 @@ function updateStream(stream, peers, setter) {
   peers.forEach((peer) => {
     if (peer.localStream) {
       peer.peer.removeStream(peer.localStream);
-      console.log("deleted my old stream");
     }
 
     if (stream) {
       peer.peer.addStream(stream);
       let peerCopy = { ...peer, localStream: stream };
-      console.log("added my new stream");
       updatePeers(peerCopy.id, peerCopy, setter);
     }
   });
@@ -68,6 +72,10 @@ function createPeer(room, message, initiator, peers, myStream, setter) {
     stream: myStream,
   });
 
+  peer.on("signal", (data) => {
+    room.send("signal", { sessionId: message.sessionId, data: data });
+  });
+
   updatePeers(
     message.sessionId,
     {
@@ -83,12 +91,7 @@ function createPeer(room, message, initiator, peers, myStream, setter) {
 
   initiator || peer.signal(message.data);
 
-  peer.on("signal", (data) => {
-    room.send("signal", { sessionId: message.sessionId, data: data });
-  });
-
   peer.on("stream", (peerStream) => {
-    console.log(peerStream);
     updatePeers(
       message.sessionId,
       {
@@ -144,9 +147,8 @@ function createPeer(room, message, initiator, peers, myStream, setter) {
  * @param {Function} setter
  */
 function destroyPeer(peerToRemoveId, peers, setter) {
-  console.log("destroy peer");
   const peerToRemove = peers.find((peer) => peer.id === peerToRemoveId);
-  peerToRemove?.peer.destroy();
+  peerToRemove?.peer?.destroy();
   setter((prev) => prev.filter((peer) => peer.id !== peerToRemoveId));
 }
 

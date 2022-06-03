@@ -1,10 +1,13 @@
 import Video from "./Video";
 import { useEffect, useState } from "react";
-import { NextPageArrow, PrevPageArrow } from "../../utils/svgs";
+import { NextPageArrow, PrevPageArrow } from "../../../utils/svgs";
 
 const NUM_OF_VIDEOS = 9;
-
-export default function VideoWrapper({ otherParticipants, myStream }) {
+export default function RegularVideoDisplay({
+  otherParticipants,
+  myStream,
+  screenSharer,
+}) {
   const NUM_OF_VIDEOS_IN_PAGE = (startIndex) => {
     if (startIndex === 0) return NUM_OF_VIDEOS - 1;
     return NUM_OF_VIDEOS;
@@ -108,6 +111,18 @@ export default function VideoWrapper({ otherParticipants, myStream }) {
     return [baseStyles];
   };
 
+  const getStream = (peer) => {
+    if (!peer) return null;
+    const activeStreams = peer.peer._remoteStreams.filter(
+      (stream) => stream.active === true
+    );
+    if (activeStreams.length <= 0) {
+      return null;
+    } else {
+      return activeStreams[0];
+    }
+  };
+
   return (
     <div className="row-span-9 dark:bg-dark-900 bg-lt-500 py-6 flex flex-row justify-center relative overflow-hidden gap-y-1">
       {showPagination() && (
@@ -124,7 +139,7 @@ export default function VideoWrapper({ otherParticipants, myStream }) {
         {peersToShow.map((peer, idx) => (
           <div key={`peer-stream-${idx}-${peer.name}`} className="">
             <Video
-              stream={peer.stream}
+              stream={getStream(peer)}
               name={peer.name}
               id={peer.id}
               me={false}

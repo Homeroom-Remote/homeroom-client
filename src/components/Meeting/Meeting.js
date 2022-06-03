@@ -5,7 +5,7 @@ import { useEffect, useState, useRef } from "react";
 /////////////
 import Toolbar from "./Toolbar";
 import Chat from "./Chat";
-import VideoWrapper from "./VideoWrapper";
+import VideoWrapper from "./Video/VideoWrapper";
 import Participants from "./Participants";
 import Error from "./Error";
 import MeetingLoading from "./MeetingLoading";
@@ -156,7 +156,7 @@ export default function Meeting() {
             stream.screenShare = true;
             shareScreenStream.current = stream;
             Peer.addScreenShare(shareScreenStream.current, peers);
-            StartScreenShare(room);
+            StartScreenShare(room, stream.id);
             setShareScreen(true);
           })
           .catch((e) => console.warn("get display media (screen share):", e));
@@ -346,10 +346,11 @@ export default function Meeting() {
         body: message.data,
       });
       setShow(true);
+      setShareScreen(false);
     } else if (message.event === "denied-stop") {
       console.warn("stop share warning", message);
     } else if (message.event === "start") {
-      setScreenSharer(message.user);
+      setScreenSharer({ user: message.user, streamId: message.streamId });
     } else if (message.event === "stop") {
       setScreenSharer(null);
     }
@@ -673,9 +674,14 @@ export default function Meeting() {
             autoPlay={true}
           ></video>
 
-          <VideoWrapper myStream={myStream} otherParticipants={peers} />
+          <VideoWrapper
+            myStream={myStream}
+            myScreenShare={shareScreenStream.current}
+            otherParticipants={peers}
+            screenSharer={screenSharer}
+          />
 
-          <div className="row-span-1">
+          <div className="fixed bottom-0 w-full">
             <Toolbar
               camera={camera}
               toggleCamera={toggleCamera}

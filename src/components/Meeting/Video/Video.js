@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 
-function Video({ stream, name, id, me = false }) {
+function Video({ stream, name, id, me = false, small = false }) {
   const [isTalking, setIsTalking] = useState(false);
   const audioDetectionInterval = useRef(null);
 
@@ -53,6 +53,7 @@ function Video({ stream, name, id, me = false }) {
       }, 500);
     };
 
+    if (!hasAudio) setIsTalking(false);
     if (hasAudio && !audioDetectionInterval.current) createAudioListener();
     else if (!hasAudio && audioDetectionInterval.current) removeAudioListener();
 
@@ -62,7 +63,7 @@ function Video({ stream, name, id, me = false }) {
   return (
     <div
       className={
-        "h-full w-full dark:bg-dark-800 bg-lt-300 place-items-center justify-center flex p-1 shadow-lg rounded-lg relative box-border " +
+        "h-full max-w-max dark:bg-dark-800 bg-lt-300 place-items-center justify-center flex p-2 shadow-lg rounded-lg relative box-border " +
         audibleHandler()
       }
     >
@@ -89,7 +90,7 @@ function Video({ stream, name, id, me = false }) {
 
       <p id={`hand-gesture-${id}`} className={getHandGestureStyles()}></p>
       <video
-        className="h-full w-auto"
+        className={small ? "w-60 h-60" : "h-full w-auto"}
         ref={(e) => {
           if (e) e.srcObject = stream;
         }}
