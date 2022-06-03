@@ -91,7 +91,7 @@ export default function Toolbar(props) {
   const toggleShareScreen = props.toggleShareScreen;
 
   return (
-    <div className="flex flex-row dark:bg-dark-900 bg-lt-400 items-center justify-between h-full">
+    <div className="flex flex-row dark:bg-dark-800 bg-lt-400 items-center justify-between h-full py-3">
       <div className="flex flex-row gap-x-2 p-6">
         <ToolbarButton
           state={camera}
