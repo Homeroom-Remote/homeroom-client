@@ -46,14 +46,6 @@ function FavoriteComponent({ favorite, removeMeetingFromFavoritesById }) {
       "border-t-0 text-lg px-6 py-2 align-middle border-l-0 border-r-0 whitespace-nowrap relative ",
   };
 
-  const parseTime = (firebaseTimeObject) => {
-    const fireBaseTime = new Date(
-      firebaseTimeObject.seconds * 1000 +
-        firebaseTimeObject.nanoseconds / 1000000
-    );
-    return fireBaseTime.toDateString();
-  };
-
   const handleJoinMeeting = (meeting) => {
     if (meeting.status === "online") {
       joinMeeting(meeting.id);
@@ -73,7 +65,6 @@ function FavoriteComponent({ favorite, removeMeetingFromFavoritesById }) {
           <thead>
             <tr>
               <th className={styles.head_th}>Owner</th>
-              <th className={styles.head_th}>Last Joined</th>
               <th className={styles.head_th}>Actions</th>
             </tr>
           </thead>
@@ -83,8 +74,11 @@ function FavoriteComponent({ favorite, removeMeetingFromFavoritesById }) {
                 <td className={styles.body_td + "border-r"}>
                   {meeting.owner_name}
                 </td>
-                <td className={styles.body_td}>{parseTime(meeting.at)}</td>
-                <td className={styles.body_td}>
+                <td
+                  className={
+                    styles.body_td + "flex items-center justify-between"
+                  }
+                >
                   <Button
                     text="Join"
                     onClick={() => handleJoinMeeting(meeting)}

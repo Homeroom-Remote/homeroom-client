@@ -48,14 +48,6 @@ function HistoryComponent({ history, addMeetingToFavorites }) {
       "border-t-0 text-lg px-6 py-2 align-middle border-l-0 border-r-0 whitespace-nowrap relative ",
   };
 
-  const parseTime = (firebaseTimeObject) => {
-    const fireBaseTime = new Date(
-      firebaseTimeObject.seconds * 1000 +
-        firebaseTimeObject.nanoseconds / 1000000
-    );
-    return fireBaseTime.toDateString();
-  };
-
   const handleJoinMeeting = (meeting) => {
     if (meeting.status === "online") {
       joinMeeting(meeting.id);
@@ -76,7 +68,6 @@ function HistoryComponent({ history, addMeetingToFavorites }) {
           <thead>
             <tr>
               <th className={styles.head_th}>Owner</th>
-              <th className={styles.head_th}>Last Joined</th>
               <th className={styles.head_th}>Actions</th>
             </tr>
           </thead>
@@ -86,13 +77,16 @@ function HistoryComponent({ history, addMeetingToFavorites }) {
                 <td className={styles.body_td + "border-r"}>
                   {meeting.owner_name}
                 </td>
-                <td className={styles.body_td}>{parseTime(meeting.at)}</td>
-                <td className={styles.body_td}>
+                <td
+                  className={
+                    styles.body_td + "flex items-center justify-between"
+                  }
+                >
                   <Button
                     text="Join"
                     onClick={() => handleJoinMeeting(meeting)}
                   />
-                  {meeting.isMeetingInFavorite == true && (
+                  {meeting.isMeetingInFavorite === true && (
                     <StarButton
                       text="Fav"
                       onClick={() => {
@@ -111,13 +105,11 @@ function HistoryComponent({ history, addMeetingToFavorites }) {
   );
 }
 export default function HistoryCompact({
-  setOverlayComponent,
   history,
   setHistory,
   addMeetingToFavorites,
 }) {
   const [loading, setLoading] = useState(true);
-  // const [history, setHistory] = useState([]);
 
   useEffect(() => {
     setLoading(true);
@@ -127,7 +119,7 @@ export default function HistoryCompact({
           if (!data?.meeting_history) setHistory(null);
           else {
             Promise.all(
-              data.meeting_history.map(async (meeting) => {
+              data.meeting_history.slice(0, 5).map(async (meeting) => {
                 return get(meeting.id)
                   .then((data) => {
                     return isMeetingInFavorite(meeting.id).then(
@@ -146,7 +138,11 @@ export default function HistoryCompact({
               setHistory(combinedHistory);
             });
           }
-          setHistory(data?.meeting_history?.map((meeting) => ({ ...meeting })));
+          setHistory(
+            data?.meeting_history
+              ?.slice(0, 5)
+              .map((meeting) => ({ ...meeting }))
+          );
           setLoading(false);
         })
         .catch((e) => {

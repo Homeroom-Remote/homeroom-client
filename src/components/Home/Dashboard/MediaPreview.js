@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Button from "../../Button";
-import Video from "../../Meeting/Video";
+import Video from "../../Meeting/Video/Video";
 
 export default function SeeMyself() {
   const [myStream, setMyStream] = useState(null);

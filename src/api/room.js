@@ -100,8 +100,8 @@ function GetQuestionQueue(room) {
   room.send("get-question-queue");
 }
 
-function StartScreenShare(room) {
-  room.send("share-screen", { event: "start" });
+function StartScreenShare(room, mediaSteamId) {
+  room.send("share-screen", { event: "start", streamId: mediaSteamId });
 }
 
 function StopScreenShare(room) {
