@@ -6,8 +6,8 @@ const buttonStyles = `rounded shadow-sm py-1 px-4 text-sm  \
 
 export default function StarButton({ text, ...props }) {
   return (
-    <button className={buttonStyles} {...props}>
-      <img src={starImage} alt="star" style={{ height: 20 }} />
+    <button {...props}>
+      <img src={starImage} alt="add to favorites" style={{ height: 20 }} />
     </button>
   );
 }

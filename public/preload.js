@@ -17,15 +17,17 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 contextBridge.exposeInMainWorld("myCustomGetDisplayMedia", async () => {
-  try {
-    const sources = await desktopCapturer.getSources({
-      types: ["screen", "window"],
-    });
+  return new Promise(async (resolve, reject) => {
+    try {
+      const sources = await desktopCapturer.getSources({
+        types: ["screen", "window"],
+      });
 
-    const selectionElem = document.createElement("div");
-    selectionElem.classList = "desktop-capturer-selection";
-    selectionElem.innerHTML = `
+      const selectionElem = document.createElement("div");
+      selectionElem.classList = "desktop-capturer-selection";
+      selectionElem.innerHTML = `
         <div class="desktop-capturer-selection__scroller">
+          <span class="desktop-capturer-close">x</span>
           <ul class="desktop-capturer-selection__list">
             ${sources
               .map(
@@ -42,33 +44,24 @@ contextBridge.exposeInMainWorld("myCustomGetDisplayMedia", async () => {
           </ul>
         </div>
       `;
-    document.body.appendChild(selectionElem);
+      document.body.appendChild(selectionElem);
 
-    document
-      .querySelectorAll(".desktop-capturer-selection__btn")
-      .forEach((button) => {
-        button.addEventListener("click", async () => {
-          selectionElem.remove();
-          const id = button.getAttribute("data-id");
-          const stream = await navigator.mediaDevices.getUserMedia({
-            audio: false,
-            video: {
-              mandatory: {
-                chromeMediaSource: "desktop",
-                chromeMediaSourceId: id,
-                minWidth: 1280,
-                maxWidth: 1280,
-                minHeight: 720,
-                maxHeight: 720,
-              },
-            },
+      const removeSelectionElement = () => selectionElem.remove();
+
+      document
+        .querySelector(".desktop-capturer-close")
+        .addEventListener("click", removeSelectionElement);
+      document
+        .querySelectorAll(".desktop-capturer-selection__btn")
+        .forEach((button) => {
+          button.addEventListener("click", async () => {
+            removeSelectionElement();
+            const id = button.getAttribute("data-id");
+            resolve(id);
           });
-
-          console.log(stream);
-          return id;
         });
-      });
-  } catch (err) {
-    console.error("Error displaying desktop capture sources:", err);
-  }
+    } catch (err) {
+      reject("Error displaying desktop capture sources:", err);
+    }
+  });
 });

@@ -6,8 +6,11 @@ import { get } from "../../../api/meeting";
 import { getMeetingFromUserID } from "../../../api/meeting";
 import useUser from "../../../stores/userStore";
 import LoadingSVG from "../../../utils/seo.svg";
+import useTheme from "../../../stores/themeStore";
 
 export default function Statistics() {
+  const { getBgFromTheme } = useTheme();
+  console.log(getBgFromTheme());
   const { user } = useUser();
 
   const [data, setData] = useState([]);
@@ -74,26 +77,39 @@ export default function Statistics() {
     setTipsToShow(tips[index]);
   };
 
+  function fromJToTime(j) {
+    var seconds = (j + 1) * 5,
+      minutes = 0,
+      hours = 0;
+    while (seconds >= 60) {
+      minutes += 1;
+      seconds -= 60;
+    }
+    while (minutes >= 60) {
+      hours += 1;
+      minutes -= 60;
+    }
+    if (hours < 10) hours = `0${hours}`;
+    if (minutes < 10) minutes = `0${minutes}`;
+    if (seconds < 10) seconds = `0${seconds}`;
+    return `${hours}:${minutes}:${seconds}`;
+  }
+
   function parserData(data) {
     var toReturn = [];
-    // var time = []
     for (var i = 0; i < data.meeting_logs.length; i++) {
       var arr = [];
-      // var tempTime = []
       arr.push(["Minute", "Concentration"]);
       var size = data.meeting_logs[i].log.length;
       for (var j = 0; j < size; j++) {
         var temp = [
-          j.toString(),
+          fromJToTime(j),
           data.meeting_logs[i].log[j].concentration.score,
         ];
-        // tempTime.push(new Date(data.meeting_logs[i].log[j].at))
         arr.push(temp);
       }
       toReturn.push(arr);
-      // time.push(tempTime)
     }
-    // setMaxTimeArray(time)
     return toReturn;
   }
 
@@ -142,23 +158,23 @@ export default function Statistics() {
   //     ["4", 100, 540],
   //   ];
   // "rgb(115, 115, 115)", "rgb(203, 213, 225)"
+
   const options = {
     curveType: "function",
     legend: { position: "bottom" },
     colors: ["rgb(192, 132, 252)", "rgb(74, 222, 128)"],
-    backgroundColor: "none",
-    hAxis: { title: "time", viewWindow: { min: 0, max: 20 } },
+    hAxis: { title: "time" },
     vAxis: { title: "Score", viewWindow: { min: 0, max: 100 } },
-    // backgroundColor: getBackgroundColor(),
+    backgroundColor: getBgFromTheme(),
     lineWidth: 4,
   };
 
   const options2 = {
     legend: { position: "bottom" },
-    // isStacked: true,
     colors: ["rgb(192, 132, 252)", "rgb(74, 222, 128)"],
-    backgroundColor: "none",
-    // backgroundColor: getBackgroundColor(),
+    hAxis: { title: "time" },
+    vAxis: { title: "count" },
+    backgroundColor: getBgFromTheme(),
     lineWidth: 1,
     rotated: true,
   };
