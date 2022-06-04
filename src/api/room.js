@@ -69,6 +69,17 @@ function SendChatMessage(room, message) {
   room.send("chat-message", message);
 }
 
+function SendSurveyForm(room, question, surveyTime) {
+  if (!room) throw new Error("Send Survey -> Room is null");
+  room.send("survey-form", { "question": question, "surveyTime": surveyTime });
+}
+
+function SendSurveyAnswer(room, answer) {
+  if (!room) throw new Error("Send Survey -> Room is null");
+  console.log("SendAnswerSurvey to server")
+  room.send("survey-answer", answer);
+}
+
 function SendHandGesture(room, prediction) {
   if (!room) throw new Error("Send Hand Gesture -> Room is null");
   room.send("hand-gesture", prediction);
@@ -128,4 +139,6 @@ export {
   GetChat,
   StartScreenShare,
   StopScreenShare,
+  SendSurveyForm,
+  SendSurveyAnswer,
 };
