@@ -15,6 +15,7 @@ import ExpressionsChart from "./ExpressionsChart";
 import ConcentrationMeter from "./ConcentrationMeter";
 import Swal from "sweetalert2";
 import Survey from "./Survey";
+import SurveyQuestion from "./SurveyQuestion"
 
 //////
 // API
@@ -36,6 +37,8 @@ import {
   GetChat,
   StartScreenShare,
   StopScreenShare,
+  SendSurveyForm,
+  SendSurveyAnswer,
 } from "../../api/room";
 import HandGestures from "./MachineLearningModules/HandGestures";
 
@@ -89,6 +92,16 @@ export default function Meeting() {
 
   // Survey
   const [survey, setSurvey] = useState(false);
+  const [surveyAnswerWindow, setSurveyAnswerWindow] = useState(false);
+  const [surveyQuestion, setSurveyQuestion] = useState("");
+  const [surveyTime, setSurveyTime] = useState(60);
+
+
+  let surveyAnswerSetter = null;
+  const onSurveyMount = (data) => {
+    surveyAnswerSetter = data[1];
+    refreshRoomCallbacks(room);
+  };
 
   // etc
   const { user } = useUser();
@@ -301,6 +314,18 @@ export default function Meeting() {
         callback: (room, message) => onGeneralMessage(message),
       },
       {
+        name: "survey-form",
+        callback: (room, message) => onGeneralMessage(message),
+      },
+      {
+        name: "survey-question",
+        callback: (room, message) => onSurveyMessage(message),
+      },
+      {
+        name: "survey-answer-client",
+        callback: (room, message) => onSurveyAnswer(message),
+      },
+      {
         name: "hand-gesture",
         callback: (room, message) => onHandRecognition(message),
       },
@@ -362,14 +387,14 @@ export default function Meeting() {
         return Object.keys(oldExpressions).length === 0
           ? newExpressions
           : Object.entries(oldExpressions).reduce(
-              (prev, [k, v]) => ({
-                ...prev,
-                [k]:
-                  (1 - expressionAlpha) * v +
-                  newExpressions[k] * expressionAlpha,
-              }),
-              {}
-            );
+            (prev, [k, v]) => ({
+              ...prev,
+              [k]:
+                (1 - expressionAlpha) * v +
+                newExpressions[k] * expressionAlpha,
+            }),
+            {}
+          );
       });
     }
 
@@ -626,6 +651,29 @@ export default function Meeting() {
     setSurvey(!survey);
   };
 
+  const onSurveyMessage = (msg) => {
+    const question = msg?.message
+    const time = msg?.surveyTime
+    setSurveyQuestion(question)
+    setSurveyTime(time)
+    setSurveyAnswerWindow(!surveyAnswerWindow)
+  };
+
+  const onSurveyAnswer = (message) => {
+    const answer = message?.message
+    surveyAnswerSetter((oldAnswer) => [...oldAnswer, answer])
+
+  };
+
+  const sendMessageFromSurvey = (question, surveyTime) => {
+    SendSurveyForm(room, question, surveyTime);
+  };
+
+  const sendSurveyAnswer = (answer) => {
+    setSurveyAnswerWindow(!surveyAnswerWindow)
+    SendSurveyAnswer(room, answer);
+  };
+
   ////////////
   //Components
   ////////////
@@ -653,7 +701,8 @@ export default function Meeting() {
         {showConcentrationMeter && (
           <ConcentrationMeter onMount={onConcentrationMeterMount} />
         )}
-        {survey && <Survey setSurvey={setSurvey} />}
+        {survey && <Survey setSurvey={setSurvey} sendMessageFromSurvey={sendMessageFromSurvey} onMount={onSurveyMount} />}
+        {surveyAnswerWindow && <SurveyQuestion surveyQuestion={surveyQuestion} sendSurveyAnswer={sendSurveyAnswer} surveyTime={surveyTime} setSurveyAnswerWindow={setSurveyAnswerWindow} />}
         <div
           className={
             "grid grid-rows-10 grid-flow-row h-full " +
