@@ -36,7 +36,7 @@ export default function Home() {
 
   useEffect(() => {
     const inputs = JSON.parse(localStorage.getItem("inputs"));
-    Object.entries(inputs).forEach(([k, v]) => {
+    Object?.entries(inputs)?.forEach(([k, v]) => {
       if (k === "askBeforeAudio" && askBeforeAudio !== v)
         toggleAskBeforeAudio();
       else if (k === "askBeforeVideo" && askBeforeVideo !== v)

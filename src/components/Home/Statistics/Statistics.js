@@ -10,7 +10,6 @@ import useTheme from "../../../stores/themeStore";
 
 export default function Statistics() {
   const { getBgFromTheme } = useTheme();
-  console.log(getBgFromTheme());
   const { user } = useUser();
 
   const [data, setData] = useState([]);
