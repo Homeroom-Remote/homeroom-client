@@ -35,32 +35,18 @@ export default function Home() {
   } = useSettings();
 
   useEffect(() => {
-    var inputs = JSON.parse(localStorage.getItem("inputs"));
-    inputs?.forEach(function (input) {
-      if (input.id === "defaultVideoID" && input.checked !== defaultVideo) {
-        toggleVideo();
-        return;
-      }
-      if (input.id === "option2" && input.checked !== defaultAudio) {
-        toggleAudio();
-        return;
-      }
-      if (input.id === "option3" && input.checked !== askBeforeVideo) {
-        toggleAskBeforeVideo();
-        return;
-      }
-      if (input.id === "option4" && input.checked !== askBeforeAudio) {
+    const inputs = JSON.parse(localStorage.getItem("inputs"));
+    console.log(inputs);
+    Object.entries(inputs).forEach(([k, v]) => {
+      if (k === "askBeforeAudio" && askBeforeAudio !== v)
         toggleAskBeforeAudio();
-        return;
-      }
-      if (input.id === "option5" && input.checked !== autoCopyLink) {
-        toggleAutoCopyLink();
-        return;
-      }
-      if (input.id === "option6" && input.checked !== showConnectionTime) {
+      else if (k === "askBeforeVideo" && askBeforeVideo !== v)
+        toggleAskBeforeVideo();
+      else if (k === "autoCopyLink" && autoCopyLink !== v) toggleAutoCopyLink();
+      else if (k === "showConnectionTime" && showConnectionTime !== v)
         toggleShowConnectionTime();
-        return;
-      }
+      else if (k === "defaultVideo" && defaultVideo !== v) toggleVideo();
+      else if (k === "defaultAudio" && defaultAudio !== v) toggleAudio();
     });
   }, []);
   ////////////////////////////////////////////
