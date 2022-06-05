@@ -113,6 +113,24 @@ export default function Statistics() {
     return toReturn;
   }
 
+  function secondsToTime(seconds) {
+    var minutes = 0,
+     hours = 0;
+    while (seconds >= 60) {
+      minutes += 1
+      seconds -= 60
+    }
+    while (minutes >= 60) {
+      hours += 1
+      minutes -= 60
+    }
+    if (hours < 10) hours = `0${hours}`
+    if (minutes < 10) minutes = `0${minutes}`
+    if (seconds < 10) seconds = `0${seconds}`
+    return `${hours}:${minutes}:${seconds}`
+  }
+  
+
   function parserData2(data) {
     var toReturn = [];
     for (var i = 0; i < data.meeting_logs.length; i++) {
@@ -126,7 +144,11 @@ export default function Statistics() {
           chatSum++;
         else if (data.meeting_logs[i].engagementLogs[j].event == "question")
           questionSum++;
-        var temp = [j.toString(), questionSum, chatSum];
+        var temp = [
+          secondsToTime(parseInt(data.meeting_logs[i].engagementLogs[j].after)),
+          questionSum,
+          chatSum
+        ];
         arr.push(temp);
       }
       toReturn.push(arr);
