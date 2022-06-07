@@ -128,7 +128,7 @@ export default function Survey({ setSurvey, sendMessageFromSurvey, onMount }) {
                 <CountdownCircleTimer
                   isPlaying
                   trailColor={getBgFromTheme()}
-                  duration={parseInt(countdown) + 100000}
+                  duration={parseInt(countdown) + 10}
                   size={70}
                   colors={["#004777", "#F7B801", "#A30000", "#A30000"]}
                   colorsTime={[10, 6, 3, 0]}

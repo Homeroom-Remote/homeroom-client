@@ -53,16 +53,16 @@ export default function JoinRoomOverlay({ close }) {
     }
   }, [meetingID]);
   return (
-    <div className="bg-lt-100 dark:bg-dark-600 border dark:border-dark-800 h-max gap-y-2 pb-2 w-1/2 rounded flex flex-col">
+    <div className="bg-lt-100 dark:bg-dark-800 border dark:border-dark-800 pb-2 gap-y-2 w-max rounded flex flex-col">
       <TitleBarClose title="Join Room" close={close} />
-      <div className="px-2 flex flex-row justify-between items-center">
-        <label className="flex flex-row gap-x-2 items-center">
+      <div className="px-2 gap-x-4 flex flex-row justify-between items-end">
+        <label className="flex flex-col gap-x-2 items-start gap-y-2 text-md font-medium">
           Enter Meeting ID:
           <input
             onChange={(event) => setMeetingID(event.target.value)}
             onKeyDown={handleKeyDown}
             type="text"
-            className="rounded px-1 pointer-events-auto text-text-800"
+            className="rounded px-1 pointer-events-auto border bg-lt-50 text-text-800 dark:bg-dark-600 dark:text-white "
           />
         </label>
         <Button text="Join" onClick={handleJoinRoom} />
@@ -116,9 +116,11 @@ export default function JoinRoomOverlay({ close }) {
         </div>
       )}
       {meetingIDError && (
-        <p className="text-lg bg-red-300 px-2 max-w-max self-center rounded font-medium text-text-600">
-          {meetingIDError}
-        </p>
+        <div className="p-2">
+          <p className="text-lg border border-red-400 px-2 max-w-max self-center rounded font-medium text-text-600 dark:text-white leading-tight">
+            {meetingIDError}
+          </p>
+        </div>
       )}
     </div>
   );
