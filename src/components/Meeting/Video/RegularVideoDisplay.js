@@ -124,7 +124,7 @@ export default function RegularVideoDisplay({
   };
 
   return (
-    <div className="row-span-9 dark:bg-dark-900 bg-lt-500 py-6 flex flex-row justify-center relative overflow-hidden gap-y-1">
+    <div className="h-full w-full dark:bg-dark-900 bg-lt-500 py-6 flex flex-row justify-center relative overflow-hidden gap-y-1">
       {showPagination() && (
         <div className="absolute left-0 top-1/2 ml-2 cursor-pointer z-10 p-3 rounded-lg flex items-center justify-center dark:hover:bg-dark-600 hover:bg-lt-600">
           <button onClick={toggleBackward}>
@@ -137,7 +137,10 @@ export default function RegularVideoDisplay({
           <Video stream={myStream} name={"Me"} id={"me"} me={true} />
         )}
         {peersToShow.map((peer, idx) => (
-          <div key={`peer-stream-${idx}-${peer.name}`} className="">
+          <div
+            key={`peer-stream-${idx}-${peer.name}`}
+            className="h-full w-auto"
+          >
             <Video
               stream={getStream(peer)}
               name={peer.name}
