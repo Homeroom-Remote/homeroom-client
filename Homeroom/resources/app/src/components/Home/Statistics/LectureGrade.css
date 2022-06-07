@@ -1,0 +1,18 @@
+
+
+.bar svg circle {
+    animation: bar 1s ease forwards;
+  }
+
+   @keyframes bar {
+    0% {
+      stroke-dashoffset: 630px;
+    }
+    100% {
+      stroke-dashoffset: calc(630px - (630px *  var(--g)) / 100);
+    }
+  }
+
+
+  
+
