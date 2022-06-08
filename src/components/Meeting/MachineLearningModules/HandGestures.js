@@ -82,7 +82,7 @@ function InitThumbsDown() {
 }
 
 async function Init() {
-  if (!net) net = await handpose.load();
+  if (!net) net = await handpose.load({ maxContinuousChecks: 1 });
   InitThumbsDown();
   InitRaiseHand();
   InitFist();
@@ -97,8 +97,11 @@ async function Init() {
 
 async function Detect(video) {
   return new Promise((resolve, reject) => {
-    if (video.paused) reject("video paused");
-    net.estimateHands(video).then(async (hand) => {
+    if (video.paused) {
+      reject("video paused");
+      return;
+    }
+    net.estimateHands(video, true).then(async (hand) => {
       if (hand.length > 0) {
         const gesture = await GestureEstimator.estimate(hand[0].landmarks, 8.5);
 
@@ -111,8 +114,10 @@ async function Detect(video) {
           );
 
           resolve(gesture.gestures[maxConfidence].name);
+          return;
         }
       }
+      reject("no hands");
     });
   });
 }

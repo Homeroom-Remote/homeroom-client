@@ -104,17 +104,17 @@ export default function ScreenShareVideoDisplay({
     }
   };
 
-  const isSharerMe = () => screenSharer.user === user.uid;
+  const isSharerMe = () => screenSharer?.user === user.uid;
 
   const getSharerStream = () => {
     if (isSharerMe()) {
       return myScreenShare;
     } else {
       const peer = otherParticipants?.find(
-        (peer) => peer.uid === screenSharer.user
+        (peer) => peer.uid === screenSharer?.user
       );
       return peer?.peer._remoteStreams.find(
-        (stream) => stream.id === screenSharer.streamId
+        (stream) => stream.id === screenSharer?.streamId
       );
     }
   };

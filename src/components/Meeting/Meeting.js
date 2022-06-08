@@ -145,13 +145,14 @@ export default function Meeting() {
   const toggleQuestionQueue = () => setShowQuestionQueue((val) => !val);
   const removeQuestionByID = (id) => {
     RemoveFromMessageQueue(room, id);
-    setInQueue(false)
+    setInQueue(false);
   };
 
   ///////////////
   // Share Screen
   ///////////////
   const [shareScreen, setShareScreen] = useState(false);
+  const [shareScreenMode, setShareScreenMode] = useState(false);
   const shareScreenStream = useRef(null);
   const toggleShareScreen = () => {
     if (shareScreen === false && room) {
@@ -376,8 +377,11 @@ export default function Meeting() {
       console.warn("stop share warning", message);
     } else if (message.event === "start") {
       setScreenSharer({ user: message.user, streamId: message.streamId });
+      setShareScreenMode(true);
     } else if (message.event === "stop") {
+      setShareScreen(false);
       setScreenSharer(null);
+      setShareScreenMode(false);
     }
   }
 
@@ -522,6 +526,7 @@ export default function Meeting() {
   ////////
   useEffect(() => {
     Peer.updateStream(myStream, peers, setPeers);
+    refreshRoomCallbacks(room);
   }, [myStream]);
 
   useEffect(() => {
@@ -598,7 +603,9 @@ export default function Meeting() {
           .then((handPrediction) => {
             handPrediction && HandleGesturePrediction(handPrediction);
           })
-          .catch();
+          .catch(() => {})
+          .finally(() => {});
+
         FaceRecognition.Detect(vidEl)
           .then((facePrediction) => {
             facePrediction?.score &&
@@ -741,6 +748,7 @@ export default function Meeting() {
               myScreenShare={shareScreenStream.current}
               otherParticipants={peers}
               screenSharer={screenSharer}
+              shareScreenMode={shareScreenMode}
             />
           </div>
 
