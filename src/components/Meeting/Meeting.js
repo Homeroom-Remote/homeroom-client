@@ -141,11 +141,11 @@ export default function Meeting() {
   /////////////////
   const [questionQueue, setQuestionQueue] = useState([]);
   const [showQuestionQueue, setShowQuestionQueue] = useState(false);
-  const [inQueue, setInQueue] = useState(false);
+  // const [inQueue, setInQueue] = useState(false);
   const toggleQuestionQueue = () => setShowQuestionQueue((val) => !val);
   const removeQuestionByID = (id) => {
     RemoveFromMessageQueue(room, id);
-    setInQueue(false);
+    // setInQueue(false)
   };
 
   ///////////////
@@ -189,17 +189,14 @@ export default function Meeting() {
     if (camera) setCamera(!camera);
     else if (askBeforeVideo) {
       Swal.fire({
-        // width: "20%",
         title: "Are you sure you want to turn on the camera?",
         color: "rgb(74, 222, 128)",
         background: "rgb(126, 34, 206)",
         showCancelButton: true,
         confirmButtonColor: "rgb(34, 197, 94)",
         confirmButtonText: "Yes, turn on my camera",
-        // cancelButtonColor: "rgb(168, 85, 247)",
         cancelButtonText: "Cancel",
         icon: "question",
-        // backdrop: 'rgba(0,0,123,0.4)'
       }).then((result) => {
         if (result.isConfirmed) {
           setCamera(!camera);
@@ -629,10 +626,10 @@ export default function Meeting() {
 
     if (prediction === "raise_hand") {
       RegisterToMessageQueue(room);
-      setInQueue(true);
+      // setInQueue(true);
     } else if (prediction === "fist") {
       RemoveFromMessageQueue(room);
-      setInQueue(false);
+      // setInQueue(false);
     }
 
     // Display on my video object
@@ -651,7 +648,7 @@ export default function Meeting() {
 
   function manuallyRegisterToMessageQueue() {
     RegisterToMessageQueue(room);
-    setInQueue(true);
+    // setInQueue(true);
   }
 
   ////////////
@@ -702,7 +699,8 @@ export default function Meeting() {
             questions={questionQueue}
             removeQuestionByID={removeQuestionByID}
             manuallyRegisterToMessageQueue={manuallyRegisterToMessageQueue}
-            inQueue={inQueue}
+            // inQueue={inQueue}
+            // setInQueue={setInQueue}
           />
         )}
         {showExpressionsChart && (

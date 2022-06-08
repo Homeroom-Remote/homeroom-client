@@ -44,7 +44,7 @@ export default function Dashboard({ changeMainComponent }) {
     <div className="w-full h-full flex flex-col gap-y-2 relative overflow-auto">
       <Overlay close={closeOverlay} Component={OverlayComponent} />
       <Header />
-      <div className="grid grid-flow-row xl:grid-rows-2 grid-rows-1 grid-cols-2 h-full">
+      <div className="grid grid-flow-row xl:grid-rows-2 grid-rows-1 grid-cols-2 h-full mb-16">
         <article className="block">
           <QuickSelection
             setOverlayComponent={setComponent}

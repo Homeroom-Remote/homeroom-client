@@ -20,9 +20,9 @@ return (
         <circle cx='50%' cy='50%' r="50%" className='fill-transparent stroke-primary-400 stroke-[30px] text-right' key={g}/>
         </svg>
     </div>
-    <div class="absolute">
-        <p class="text-md font-bold text-primary-400">Your grade is</p>
-        <p class="text-4xl font-bold justify-center text-center text-primary-400">{g}</p>
+    <div className="absolute">
+        <p className="text-md font-bold text-primary-400">Your grade is</p>
+        <p className="text-4xl font-bold justify-center text-center text-primary-400">{g}</p>
     </div>
     </div>
   );
