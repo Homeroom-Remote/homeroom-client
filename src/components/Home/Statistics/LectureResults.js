@@ -1,8 +1,8 @@
 import { Chart } from "react-google-charts";
 
 
-export default function LectureResults({ data, options, header, isColumn }) {
-    if (isColumn)
+export default function LectureResults({ data, options, header, isAreaChart }) {
+    if (isAreaChart)
         return (
             <div className=" px-6 rounded-xl border-2 border-dark-500 dark:bg-dark-800 bg-lt-50 item-center content-center h-fit">
                 <div className="my-8">
