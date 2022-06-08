@@ -141,11 +141,11 @@ export default function Meeting() {
   /////////////////
   const [questionQueue, setQuestionQueue] = useState([]);
   const [showQuestionQueue, setShowQuestionQueue] = useState(false);
-  const [inQueue, setInQueue] = useState(false);
+  // const [inQueue, setInQueue] = useState(false);
   const toggleQuestionQueue = () => setShowQuestionQueue((val) => !val);
   const removeQuestionByID = (id) => {
     RemoveFromMessageQueue(room, id);
-    setInQueue(false)
+    // setInQueue(false)
   };
 
   ///////////////
@@ -619,10 +619,10 @@ export default function Meeting() {
 
     if (prediction === "raise_hand") {
       RegisterToMessageQueue(room);
-      setInQueue(true);
+      // setInQueue(true);
     } else if (prediction === "fist") {
       RemoveFromMessageQueue(room);
-      setInQueue(false);
+      // setInQueue(false);
     }
 
     // Display on my video object
@@ -641,7 +641,7 @@ export default function Meeting() {
 
   function manuallyRegisterToMessageQueue() {
     RegisterToMessageQueue(room);
-    setInQueue(true);
+    // setInQueue(true);
   }
 
   ////////////
@@ -692,7 +692,8 @@ export default function Meeting() {
             questions={questionQueue}
             removeQuestionByID={removeQuestionByID}
             manuallyRegisterToMessageQueue={manuallyRegisterToMessageQueue}
-            inQueue={inQueue}
+            // inQueue={inQueue}
+            // setInQueue={setInQueue}
           />
         )}
         {showExpressionsChart && (
