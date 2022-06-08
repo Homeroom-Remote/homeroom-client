@@ -145,6 +145,7 @@ export default function Meeting() {
   const toggleQuestionQueue = () => setShowQuestionQueue((val) => !val);
   const removeQuestionByID = (id) => {
     RemoveFromMessageQueue(room, id);
+    setInQueue(false)
   };
 
   ///////////////

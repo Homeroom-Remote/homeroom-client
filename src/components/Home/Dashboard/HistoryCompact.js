@@ -17,7 +17,7 @@ function NoHistoryComponent() {
   return (
     <div className="w-full h-full flex items-center justify-center p-2">
       <div className="flex flex-col max-h-full items-center justify-center">
-        <h1 className="text-4xl font-medium text-primary-400">No History.</h1>
+        <h1 className="text-3xl font-medium text-primary-400">No History.</h1>
         <object data={NoHistorySVG} type="image/svg+xml">
           <img src="" alt="no history" />
         </object>
