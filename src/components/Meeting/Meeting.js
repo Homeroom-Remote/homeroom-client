@@ -605,7 +605,9 @@ export default function Meeting() {
           .then((handPrediction) => {
             handPrediction && HandleGesturePrediction(handPrediction);
           })
-          .catch();
+          .catch(() => {})
+          .finally(() => console.log("xx after hand xx"));
+
         FaceRecognition.Detect(vidEl)
           .then((facePrediction) => {
             facePrediction?.score &&
