@@ -40,11 +40,11 @@ export default function SeeMyself() {
   return (
     <div className="flex flex-row items-center h-full gap-x-2 justify-center w-full">
       <div className="dark:bg-dark-800 dark:bg-opacity-50 rounded-3xl p-4 dark:shadow shadow-lg flex flex-col justify-between relative">
-        <div className="flex flex-col gap-y-2 h-full">
+        <div className="flex flex-col gap-y-2 h-full w-full">
           <h2 className="font-medium text-xl border-b-2 mb-1 pb-1">
             Media Preview
           </h2>
-          <Video stream={myStream} name={"My Video"} />
+          <div className=" max-w-full max-h-full"><Video stream={myStream} name={"My Video"} /></div>
           <div className="flex flex-row justify-center items-center gap-x-2 w-full">
             <Button onClick={toggleCamera} text={text} />
           </div>

@@ -8,6 +8,7 @@ import useUser from "../../../stores/userStore";
 import LoadingSVG from "../../../utils/seo.svg";
 import useTheme from "../../../stores/themeStore";
 
+
 export default function Statistics() {
   const { getBgFromTheme, getTextFromTheme } = useTheme();
   const { user } = useUser();
@@ -17,6 +18,9 @@ export default function Statistics() {
 
   const [data2, setData2] = useState();
   const [participation, setParticipation] = useState([]);
+
+  const [data3, setData3] = useState();
+  const [expressions, setExpressions] = useState([]);
 
   const [grade, setGrade] = useState([]);
   const [gradeToShow, setGradeToShow] = useState(0);
@@ -31,48 +35,41 @@ export default function Statistics() {
     setTimeout(() => {
       get(getMeetingFromUserID(user.uid))
         .then((data) => {
-          // Promise.all(
           setData2(parserData2(data));
+          setData3(parserData3(data))
           setData(parserData(data));
           setGrade(parserGrade(data));
           setTips(parserTips(data));
-          // )
         })
         .catch((e) => {
           console.error(e);
           console.warn("data for above warning", e);
         })
-        .finally(() => setLoading(false));
+        .finally(() => {
+          setLoading(false)
+        });
     }, [1000]);
   }, []);
 
+  useEffect(() => {
+    if(!loading && data && data.length > 0)
+      handleChange(0)
+  }, [loading])
+
   const handleChange = (event) => {
-    var index = parseInt(event.target.value);
+    console.log(event)
+    var index
+    if(event === 0)
+      index = 0
+    else
+      index = parseInt(event.target.value);
     var graphData = data[index];
 
-    var ParticipationGraph = [["Minute", "Question", "Chat"]];
-    var ConcentrationGraph = [["Minute", "Concentration"]];
-    if (index === -1) {
-      ParticipationGraph.push(["0", 0, 0]);
-      ConcentrationGraph.push(["0", 0]);
-      setParticipation(ParticipationGraph);
-      setConcentration(ConcentrationGraph);
-      setGradeToShow(0);
-      setTipsToShow([]);
-      return;
-    }
-    for (var i = 1; i < graphData.length; i++) {
-      graphData[i][1] = parseFloat(graphData[i][1]);
-      graphData[i][2] = parseFloat(graphData[i][2]);
-      ConcentrationGraph.push([
-        graphData[i][0],
-        parseFloat(graphData[i][1]) * 100,
-      ]);
-    }
 
     setGradeToShow(parseFloat(grade[index]));
     setParticipation(data2[index]);
-    setConcentration(ConcentrationGraph);
+    setConcentration(graphData);
+    setExpressions(data3[index])
     setTipsToShow(tips[index]);
   };
 
@@ -155,6 +152,29 @@ export default function Statistics() {
     return toReturn;
   }
 
+  function parserData3(data) {
+    var toReturn = [];
+    for (var i = 0; i < data.meeting_logs.length; i++) {
+      var arr = [];
+      arr.push(["Minute", "Angry", "Disgusted", "Fearful", "Happy", "Neutural", "Sad"]);
+      var size = data.meeting_logs[i].log.length;
+      for (var j = 0; j < size; j++) {
+        var temp = [
+          fromJToTime(j),
+          data.meeting_logs[i].log[j].expressions.expressions.angry,
+          data.meeting_logs[i].log[j].expressions.expressions.disgusted,
+          data.meeting_logs[i].log[j].expressions.expressions.fearful,
+          data.meeting_logs[i].log[j].expressions.expressions.happy,
+          data.meeting_logs[i].log[j].expressions.expressions.neutral,
+          data.meeting_logs[i].log[j].expressions.expressions.sad,
+        ];
+        arr.push(temp);
+      }
+      toReturn.push(arr);
+    }
+    return toReturn;
+  }
+
   function parserGrade(data) {
     var toReturn = [];
     for (var i = 0; i < data.meeting_logs.length; i++) {
@@ -171,14 +191,7 @@ export default function Statistics() {
     return toReturn;
   }
 
-  // const data = [
-  //     ["Minute", "Concentration", "Participation"],
-  //     ["1", 803, 400],
-  //     ["2", 500, 460],
-  //     ["3", 660, 100],
-  //     ["4", 100, 540],
-  //   ];
-  // "rgb(115, 115, 115)", "rgb(203, 213, 225)"
+
 
   const options = {
     curveType: "function",
@@ -191,7 +204,6 @@ export default function Statistics() {
     },
     vAxis: {
       title: "Score",
-      viewWindow: { min: 0, max: 100 },
       textStyle: { color: getTextFromTheme() },
       titleTextStyle: { color: getTextFromTheme(), bold: true } 
     },
@@ -215,6 +227,24 @@ export default function Statistics() {
     backgroundColor: getBgFromTheme(),
     lineWidth: 1,
     rotated: true,
+  };
+  const options3 = {
+    curveType: "function",
+    legend: { position: "bottom", textStyle: { color: getTextFromTheme() },},
+    // colors: ["rgb(192, 132, 252)", "rgb(74, 222, 128)"],
+    hAxis: { 
+      title: "Time",
+      textStyle: { color: getTextFromTheme()}, 
+      titleTextStyle: { color: getTextFromTheme(), bold: true } 
+    },
+    vAxis: {
+      title: "Score",
+      viewWindow: { min: 0, max: 1 },
+      textStyle: { color: getTextFromTheme() },
+      titleTextStyle: { color: getTextFromTheme(), bold: true } 
+    },
+    backgroundColor: getBgFromTheme(),
+    lineWidth: 4,
   };
 
   if (loading) {
@@ -251,24 +281,51 @@ export default function Statistics() {
   }
 
   return (
-    <div className="px-6 pt-6 py-16 2xl:container h-full">
-      <div className="flex justify-center items-center">
+    <div className="px-6 pt-6 py-16 2xl:container h-full overflow-auto">
+      <div className="flex justify-center items-center mb-4">
         {/* <label> */}
         {/* Choose lecture: */}
+        
         <select
           color="red"
           onChange={handleChange}
-          className=" bg-primary-700 w-fit"
+          className=" bg-primary-500 w-fit"
         >
-          <option value={-1}>Choose meeting</option>
+          {/* <option value={-1}>Choose meeting</option> */}
           {data.map((meeting, index) => (
             <option value={index}>Meeting number {index + 1}</option>
           ))}
         </select>
         {/* </label> */}
       </div>
-      <div className="grid gap-6 grid-cols-2 h-full">
+      <div className=" w-[50%] ml-[25%] mb-16">
+          {gradeToShow >= 0 && (
+            <LectureGrade grade={gradeToShow} tips={tipsToShow} />
+          )}
+        </div>
         <div className=" grid grid-rows-2 h-full">
+        <div className="grid grid-cols-12 h-full col-span-4">
+        <div className="  col-start-2 col-span-10 mb-4">
+          {concentration.length > 1 ? (
+            <LectureResults
+              data={expressions}
+              options={options3}
+              header={"Expressions Performance"}
+            />
+          ) : (
+            <LectureResults
+              data={[
+                ["Minute", "Expressions"],
+                ["0", 0],
+              ]}
+              options={options3}
+              header={"Expressions Performance"}
+            />
+          )}
+         
+          </div>
+
+          <div className=" col-span-5 col-start-2 w-full mb-20 gap-4 -ml-2">
           {concentration.length > 1 ? (
             <LectureResults
               data={concentration}
@@ -285,6 +342,9 @@ export default function Statistics() {
               header={"Concentration Performance"}
             />
           )}
+          
+          </div>
+          <div className=" col-start-7 col-span-5 w-full mb-20 ml-2">
           {participation.length > 1 ? (
             <LectureResults
               data={participation}
@@ -303,11 +363,10 @@ export default function Statistics() {
               isColumn={true}
             />
           )}
-        </div>
-        <div>
-          {gradeToShow >= 0 && (
-            <LectureGrade grade={gradeToShow} tips={tipsToShow} />
-          )}
+          </div>
+          {/*  */}
+          
+          <div></div>
         </div>
       </div>
     </div>

@@ -188,17 +188,14 @@ export default function Meeting() {
     if (camera) setCamera(!camera);
     else if (askBeforeVideo) {
       Swal.fire({
-        // width: "20%",
         title: "Are you sure you want to turn on the camera?",
         color: "rgb(74, 222, 128)",
         background: "rgb(126, 34, 206)",
         showCancelButton: true,
         confirmButtonColor: "rgb(34, 197, 94)",
         confirmButtonText: "Yes, turn on my camera",
-        // cancelButtonColor: "rgb(168, 85, 247)",
         cancelButtonText: "Cancel",
         icon: "question",
-        // backdrop: 'rgba(0,0,123,0.4)'
       }).then((result) => {
         if (result.isConfirmed) {
           setCamera(!camera);
