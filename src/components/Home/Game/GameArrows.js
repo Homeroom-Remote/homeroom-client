@@ -177,7 +177,7 @@ export default function Game() {
   }, []);
 
   return (
-    <div className="game center relative flex flex-col items-center justify-center gap-y-4 h-full">
+    <div className="game center relative flex flex-col items-center justify-center gap-y-4 h-full overflow-auto">
       <header>
         <p className="text-center text-primary-400 text-2xl">
           Play the game while waiting for your meeting to start!

@@ -34,6 +34,10 @@ export default function Favorite({ setOverlayComponent }) {
   const hasMeetingsOnline = () =>
     favorite.findIndex((meeting) => meeting.status === "online") >= 0;
 
+    
+  const showOptionColumn = () =>
+    favorite.findIndex((meeting) => meeting.status === "online") >= 0;
+
   function removeMeetingFromFavoritesById(id) {
     if (!id) return;
     setFavorite((oldFavorites) => oldFavorites.filter((fav) => fav.id !== id));
@@ -114,7 +118,7 @@ export default function Favorite({ setOverlayComponent }) {
             <th className={styles.head_th}>Owner</th>
             <th className={styles.head_th}>Status</th>
             <th className={styles.head_th}>Last Joined</th>
-            {hasMeetingsOnline() && <th className={styles.head_th}>Options</th>}
+            {<th className={styles.head_th}>Options</th>}
           </tr>
         </thead>
         <tbody>
