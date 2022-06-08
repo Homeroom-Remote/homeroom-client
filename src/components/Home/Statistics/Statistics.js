@@ -13,14 +13,14 @@ export default function Statistics() {
   const { getBgFromTheme, getTextFromTheme } = useTheme();
   const { user } = useUser();
 
-  const [data, setData] = useState([]);
-  const [concentration, setConcentration] = useState([]);
+  const [concentrationData, setConcentrationData] = useState();
+  const [concentrationToShow, setConcentrationToShow] = useState([]);
 
-  const [data2, setData2] = useState();
-  const [participation, setParticipation] = useState([]);
+  const [participationData, setParticipationData] = useState();
+  const [participationToShow, setParticipationToShow] = useState([]);
 
-  const [data3, setData3] = useState();
-  const [expressions, setExpressions] = useState([]);
+  const [expressionsData, setExpressionsData] = useState();
+  const [expressionsToShow, setExpressionsToShow] = useState([]);
 
   const [grade, setGrade] = useState([]);
   const [gradeToShow, setGradeToShow] = useState(0);
@@ -30,14 +30,15 @@ export default function Statistics() {
 
   const [loading, setLoading] = useState(true);
 
+
   useEffect(() => {
     setLoading(true);
     setTimeout(() => {
       get(getMeetingFromUserID(user.uid))
         .then((data) => {
-          setData2(parserData2(data));
-          setData3(parserData3(data))
-          setData(parserData(data));
+          setParticipationData(parserParticipationData(data));
+          setExpressionsData(parserExpressionsData(data))
+          setConcentrationData(parserConcentrationData(data));
           setGrade(parserGrade(data));
           setTips(parserTips(data));
         })
@@ -51,27 +52,12 @@ export default function Statistics() {
     }, [1000]);
   }, []);
 
+
   useEffect(() => {
-    if(!loading && data && data.length > 0)
+    if(!loading && participationData && participationData.length > 0)
       handleChange(0)
   }, [loading])
 
-  const handleChange = (event) => {
-    console.log(event)
-    var index
-    if(event === 0)
-      index = 0
-    else
-      index = parseInt(event.target.value);
-    var graphData = data[index];
-
-
-    setGradeToShow(parseFloat(grade[index]));
-    setParticipation(data2[index]);
-    setConcentration(graphData);
-    setExpressions(data3[index])
-    setTipsToShow(tips[index]);
-  };
 
   function fromJToTime(j) {
     var seconds = (j + 1) * 5,
@@ -91,24 +77,7 @@ export default function Statistics() {
     return `${hours}:${minutes}:${seconds}`;
   }
 
-  function parserData(data) {
-    var toReturn = [];
-    for (var i = 0; i < data.meeting_logs.length; i++) {
-      var arr = [];
-      arr.push(["Minute", "Concentration"]);
-      var size = data.meeting_logs[i].log.length;
-      for (var j = 0; j < size; j++) {
-        var temp = [
-          fromJToTime(j),
-          data.meeting_logs[i].log[j].concentration.score,
-        ];
-        arr.push(temp);
-      }
-      toReturn.push(arr);
-    }
-    return toReturn;
-  }
-
+  
   function secondsToTime(seconds) {
     var minutes = 0,
      hours = 0;
@@ -127,7 +96,17 @@ export default function Statistics() {
   }
   
 
-  function parserData2(data) {
+  function handleChange(event) {
+    var index = (event === 0 ?  0 : parseInt(event.target.value));
+    setParticipationToShow(participationData[index]);
+    setConcentrationToShow(concentrationData[index]);
+    setExpressionsToShow(expressionsData[index])
+    setGradeToShow(parseFloat(grade[index]));
+    setTipsToShow(tips[index]);
+  };
+
+
+  function parserParticipationData(data) {
     var toReturn = [];
     for (var i = 0; i < data.meeting_logs.length; i++) {
       var arr = [];
@@ -152,7 +131,27 @@ export default function Statistics() {
     return toReturn;
   }
 
-  function parserData3(data) {
+
+  function parserConcentrationData(data) {
+    var toReturn = [];
+    for (var i = 0; i < data.meeting_logs.length; i++) {
+      var arr = [];
+      arr.push(["Minute", "Concentration"]);
+      var size = data.meeting_logs[i].log.length;
+      for (var j = 0; j < size; j++) {
+        var temp = [
+          fromJToTime(j),
+          data.meeting_logs[i].log[j].concentration.score,
+        ];
+        arr.push(temp);
+      }
+      toReturn.push(arr);
+    }
+    return toReturn;
+  }
+
+
+  function parserExpressionsData(data) {
     var toReturn = [];
     for (var i = 0; i < data.meeting_logs.length; i++) {
       var arr = [];
@@ -175,6 +174,7 @@ export default function Statistics() {
     return toReturn;
   }
 
+
   function parserGrade(data) {
     var toReturn = [];
     for (var i = 0; i < data.meeting_logs.length; i++) {
@@ -182,6 +182,7 @@ export default function Statistics() {
     }
     return toReturn;
   }
+
 
   function parserTips(data) {
     var toReturn = [];
@@ -192,10 +193,12 @@ export default function Statistics() {
   }
 
 
-
-  const options = {
+  const optionsForConcentrationGraph = {
     curveType: "function",
-    legend: { position: "bottom", textStyle: { color: getTextFromTheme() },},
+    legend: { 
+      position: "bottom", 
+      textStyle: { color: getTextFromTheme() }
+    },
     colors: ["rgb(192, 132, 252)", "rgb(74, 222, 128)"],
     hAxis: { 
       title: "Time",
@@ -211,8 +214,11 @@ export default function Statistics() {
     lineWidth: 4,
   };
 
-  const options2 = {
-    legend: { position: "bottom", textStyle: { color: getTextFromTheme() }, },
+  const optionsForParticipationGraph = {
+    legend: { 
+      position: "bottom",
+      textStyle: { color: getTextFromTheme() }
+    },
     colors: ["rgb(192, 132, 252)", "rgb(74, 222, 128)"],
     hAxis: { 
       title: "Time", 
@@ -228,10 +234,12 @@ export default function Statistics() {
     lineWidth: 1,
     rotated: true,
   };
-  const options3 = {
+  const optionsForExpressionsGraph = {
     curveType: "function",
-    legend: { position: "bottom", textStyle: { color: getTextFromTheme() },},
-    // colors: ["rgb(192, 132, 252)", "rgb(74, 222, 128)"],
+    legend: { 
+      position: "bottom", 
+      textStyle: { color: getTextFromTheme() }
+    },
     hAxis: { 
       title: "Time",
       textStyle: { color: getTextFromTheme()}, 
@@ -257,7 +265,7 @@ export default function Statistics() {
     );
   }
 
-  if (!data || data.length === 0) {
+  if (!participationData || participationData.length === 0) {
     return (
       <div className="w-full h-full flex items-center justify-center p-2">
         <div className="flex flex-col max-h-full items-center justify-center">
@@ -282,21 +290,16 @@ export default function Statistics() {
 
   return (
     <div className="px-6 pt-6 py-16 2xl:container h-full overflow-auto">
-      <div className="flex justify-center items-center mb-4">
-        {/* <label> */}
-        {/* Choose lecture: */}
-        
+      <div className="flex justify-center items-center mb-4">        
         <select
-          color="red"
           onChange={handleChange}
           className=" bg-primary-500 w-fit"
         >
-          {/* <option value={-1}>Choose meeting</option> */}
-          {data.map((meeting, index) => (
+          {concentrationData.map((meeting, index) => (
             <option value={index}>Meeting number {index + 1}</option>
-          ))}
+          ))
+          }
         </select>
-        {/* </label> */}
       </div>
       <div className=" w-[50%] ml-[25%] mb-16">
           {gradeToShow >= 0 && (
@@ -306,69 +309,56 @@ export default function Statistics() {
         <div className=" grid grid-rows-2 h-full">
         <div className="grid grid-cols-12 h-full col-span-4">
         <div className="  col-start-2 col-span-10 mb-4">
-          {concentration.length > 1 ? (
             <LectureResults
-              data={expressions}
-              options={options3}
+              data={concentrationToShow.length > 1
+                ?
+                  expressionsToShow
+                :
+                  [
+                    ["Minute", "Expressions"],
+                    ["0", 0],
+                  ]
+              }
+              options={optionsForExpressionsGraph}
               header={"Expressions Performance"}
             />
-          ) : (
-            <LectureResults
-              data={[
-                ["Minute", "Expressions"],
-                ["0", 0],
-              ]}
-              options={options3}
-              header={"Expressions Performance"}
-            />
-          )}
-         
-          </div>
+        </div>
 
-          <div className=" col-span-5 col-start-2 w-full mb-20 gap-4 -ml-2">
-          {concentration.length > 1 ? (
+        <div className=" col-span-5 col-start-2 w-full mb-20 gap-4 -ml-2">
             <LectureResults
-              data={concentration}
-              options={options}
+              data={concentrationToShow.length > 1 
+                ? 
+                  concentrationToShow 
+                : 
+                  [
+                    ["Minute", "Concentration"],
+                    ["0", 0],
+                  ]
+              }
+              options={optionsForConcentrationGraph}
               header={"Concentration Performance"}
             />
-          ) : (
+        </div>
+        <div className=" col-start-7 col-span-5 w-full mb-20 ml-2">
             <LectureResults
-              data={[
-                ["Minute", "Concentration"],
-                ["0", 0],
-              ]}
-              options={options}
-              header={"Concentration Performance"}
-            />
-          )}
-          
-          </div>
-          <div className=" col-start-7 col-span-5 w-full mb-20 ml-2">
-          {participation.length > 1 ? (
-            <LectureResults
-              data={participation}
-              options={options2}
+              data={participationToShow.length > 1
+                ? 
+                  participationToShow
+                :
+                  [
+                    ["Minute", "Questions", "Chat"],
+                    ["0", 0, 0],
+                  ]
+              }
+              options={optionsForParticipationGraph}
               header={"Participation Performance"}
-              isColumn={true}
+              isAreaChart={true}
             />
-          ) : (
-            <LectureResults
-              data={[
-                ["Minute", "Questions", "Chat"],
-                ["0", 0, 0],
-              ]}
-              options={options2}
-              header={"Participation Performance"}
-              isColumn={true}
-            />
-          )}
-          </div>
-          {/*  */}
-          
-          <div></div>
+        </div>          
+        <div />
         </div>
       </div>
     </div>
   );
 }
+
