@@ -123,7 +123,7 @@ export default function History() {
             <th className={styles.head_th}>Owner</th>
             <th className={styles.head_th}>Status</th>
             <th className={styles.head_th}>Last Joined</th>
-            {hasMeetingsOnline() && <th className={styles.head_th}>Options</th>}
+            { <th className={styles.head_th}>Options</th>}
           </tr>
         </thead>
         <tbody>
@@ -162,6 +162,10 @@ export default function History() {
                     }}
                   />
                 )}
+                {meeting.status !== "online" && meeting.isMeetingInFavorite == false && (
+                  <text>no available options</text>
+                )}
+
               </td>
             </tr>
           ))}

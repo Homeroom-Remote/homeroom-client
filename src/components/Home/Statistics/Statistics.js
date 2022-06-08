@@ -9,7 +9,7 @@ import LoadingSVG from "../../../utils/seo.svg";
 import useTheme from "../../../stores/themeStore";
 
 export default function Statistics() {
-  const { getBgFromTheme } = useTheme();
+  const { getBgFromTheme, getTextFromTheme } = useTheme();
   const { user } = useUser();
 
   const [data, setData] = useState([]);
@@ -52,7 +52,7 @@ export default function Statistics() {
 
     var ParticipationGraph = [["Minute", "Question", "Chat"]];
     var ConcentrationGraph = [["Minute", "Concentration"]];
-    if (index == -1) {
+    if (index === -1) {
       ParticipationGraph.push(["0", 0, 0]);
       ConcentrationGraph.push(["0", 0]);
       setParticipation(ParticipationGraph);
@@ -139,9 +139,9 @@ export default function Statistics() {
       var questionSum = 0,
         chatSum = 0;
       for (var j = 0; j < size; j++) {
-        if (data.meeting_logs[i].engagementLogs[j].event == "message")
+        if (data.meeting_logs[i].engagementLogs[j].event === "message")
           chatSum++;
-        else if (data.meeting_logs[i].engagementLogs[j].event == "question")
+        else if (data.meeting_logs[i].engagementLogs[j].event === "question")
           questionSum++;
         var temp = [
           secondsToTime(parseInt(data.meeting_logs[i].engagementLogs[j].after)),
@@ -182,19 +182,36 @@ export default function Statistics() {
 
   const options = {
     curveType: "function",
-    legend: { position: "bottom" },
+    legend: { position: "bottom", textStyle: { color: getTextFromTheme() },},
     colors: ["rgb(192, 132, 252)", "rgb(74, 222, 128)"],
-    hAxis: { title: "time" },
-    vAxis: { title: "Score", viewWindow: { min: 0, max: 100 } },
+    hAxis: { 
+      title: "Time",
+      textStyle: { color: getTextFromTheme()}, 
+      titleTextStyle: { color: getTextFromTheme(), bold: true } 
+    },
+    vAxis: {
+      title: "Score",
+      viewWindow: { min: 0, max: 100 },
+      textStyle: { color: getTextFromTheme() },
+      titleTextStyle: { color: getTextFromTheme(), bold: true } 
+    },
     backgroundColor: getBgFromTheme(),
     lineWidth: 4,
   };
 
   const options2 = {
-    legend: { position: "bottom" },
+    legend: { position: "bottom", textStyle: { color: getTextFromTheme() }, },
     colors: ["rgb(192, 132, 252)", "rgb(74, 222, 128)"],
-    hAxis: { title: "time" },
-    vAxis: { title: "count" },
+    hAxis: { 
+      title: "Time", 
+      textStyle: { color: getTextFromTheme() },
+      titleTextStyle: { color: getTextFromTheme(), bold: true } 
+    },
+    vAxis: { 
+      title: "Count",
+      textStyle: { color: getTextFromTheme() },
+      titleTextStyle: { color: getTextFromTheme(), bold: true } 
+    },
     backgroundColor: getBgFromTheme(),
     lineWidth: 1,
     rotated: true,
@@ -234,7 +251,7 @@ export default function Statistics() {
   }
 
   return (
-    <div className="px-6 pt-6 py-16 2xl:container h-full absolute">
+    <div className="px-6 pt-6 py-16 2xl:container h-full">
       <div className="flex justify-center items-center">
         {/* <label> */}
         {/* Choose lecture: */}
