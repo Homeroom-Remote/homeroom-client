@@ -66,7 +66,6 @@ function createPeer(room, message, initiator, peers, myStream, setter) {
     return;
   }
 
-  initiator && console.log(myStream);
   const peer = new Peer({
     initiator: initiator,
     trickle: true,

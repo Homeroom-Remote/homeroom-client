@@ -379,7 +379,6 @@ export default function Meeting() {
       setScreenSharer({ user: message.user, streamId: message.streamId });
       setShareScreenMode(true);
     } else if (message.event === "stop") {
-      console.log("got stop message");
       setShareScreen(false);
       setScreenSharer(null);
       setShareScreenMode(false);
@@ -444,7 +443,6 @@ export default function Meeting() {
   }
 
   function onPeerJoin(room, message) {
-    console.log(myStream);
     Peer.createPeer(room, message, true, peers, myStream, setPeers);
   }
 
@@ -606,7 +604,7 @@ export default function Meeting() {
             handPrediction && HandleGesturePrediction(handPrediction);
           })
           .catch(() => {})
-          .finally(() => console.log("xx after hand xx"));
+          .finally(() => {});
 
         FaceRecognition.Detect(vidEl)
           .then((facePrediction) => {
