@@ -444,6 +444,7 @@ export default function Meeting() {
   }
 
   function onPeerJoin(room, message) {
+    console.log(myStream);
     Peer.createPeer(room, message, true, peers, myStream, setPeers);
   }
 
@@ -527,6 +528,7 @@ export default function Meeting() {
   ////////
   useEffect(() => {
     Peer.updateStream(myStream, peers, setPeers);
+    refreshRoomCallbacks(room);
   }, [myStream]);
 
   useEffect(() => {
