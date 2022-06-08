@@ -41,7 +41,7 @@ export default function Dashboard({ changeMainComponent }) {
   }
 
   return (
-    <div className="w-full h-full flex flex-col gap-y-2 relative overflow-hidden">
+    <div className="w-full h-full flex flex-col gap-y-2 relative overflow-auto">
       <Overlay close={closeOverlay} Component={OverlayComponent} />
       <Header />
       <div className="grid grid-flow-row xl:grid-rows-2 grid-rows-1 grid-cols-2 h-full">

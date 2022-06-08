@@ -15,7 +15,7 @@ import ExpressionsChart from "./ExpressionsChart";
 import ConcentrationMeter from "./ConcentrationMeter";
 import Swal from "sweetalert2";
 import Survey from "./Survey";
-import SurveyQuestion from "./SurveyQuestion"
+import SurveyQuestion from "./SurveyQuestion";
 
 //////
 // API
@@ -96,7 +96,6 @@ export default function Meeting() {
   const [surveyQuestion, setSurveyQuestion] = useState("");
   const [surveyTime, setSurveyTime] = useState(60);
 
-
   let surveyAnswerSetter = null;
   const onSurveyMount = (data) => {
     surveyAnswerSetter = data[1];
@@ -146,6 +145,7 @@ export default function Meeting() {
   const toggleQuestionQueue = () => setShowQuestionQueue((val) => !val);
   const removeQuestionByID = (id) => {
     RemoveFromMessageQueue(room, id);
+    setInQueue(false)
   };
 
   ///////////////
@@ -387,14 +387,14 @@ export default function Meeting() {
         return Object.keys(oldExpressions).length === 0
           ? newExpressions
           : Object.entries(oldExpressions).reduce(
-            (prev, [k, v]) => ({
-              ...prev,
-              [k]:
-                (1 - expressionAlpha) * v +
-                newExpressions[k] * expressionAlpha,
-            }),
-            {}
-          );
+              (prev, [k, v]) => ({
+                ...prev,
+                [k]:
+                  (1 - expressionAlpha) * v +
+                  newExpressions[k] * expressionAlpha,
+              }),
+              {}
+            );
       });
     }
 
@@ -655,17 +655,16 @@ export default function Meeting() {
   };
 
   const onSurveyMessage = (msg) => {
-    const question = msg?.message
-    const time = msg?.surveyTime
-    setSurveyQuestion(question)
-    setSurveyTime(time)
-    setSurveyAnswerWindow(!surveyAnswerWindow)
+    const question = msg?.message;
+    const time = msg?.surveyTime;
+    setSurveyQuestion(question);
+    setSurveyTime(time);
+    setSurveyAnswerWindow(!surveyAnswerWindow);
   };
 
   const onSurveyAnswer = (message) => {
-    const answer = message?.message
-    surveyAnswerSetter((oldAnswer) => [...oldAnswer, answer])
-
+    const answer = message?.message;
+    surveyAnswerSetter((oldAnswer) => [...oldAnswer, answer]);
   };
 
   const sendMessageFromSurvey = (question, surveyTime) => {
@@ -673,7 +672,7 @@ export default function Meeting() {
   };
 
   const sendSurveyAnswer = (answer) => {
-    setSurveyAnswerWindow(!surveyAnswerWindow)
+    setSurveyAnswerWindow(!surveyAnswerWindow);
     SendSurveyAnswer(room, answer);
   };
 
@@ -705,11 +704,24 @@ export default function Meeting() {
         {showConcentrationMeter && (
           <ConcentrationMeter onMount={onConcentrationMeterMount} />
         )}
-        {survey && <Survey setSurvey={setSurvey} sendMessageFromSurvey={sendMessageFromSurvey} onMount={onSurveyMount} />}
-        {surveyAnswerWindow && <SurveyQuestion surveyQuestion={surveyQuestion} sendSurveyAnswer={sendSurveyAnswer} surveyTime={surveyTime} setSurveyAnswerWindow={setSurveyAnswerWindow} />}
+        {survey && (
+          <Survey
+            setSurvey={setSurvey}
+            sendMessageFromSurvey={sendMessageFromSurvey}
+            onMount={onSurveyMount}
+          />
+        )}
+        {surveyAnswerWindow && (
+          <SurveyQuestion
+            surveyQuestion={surveyQuestion}
+            sendSurveyAnswer={sendSurveyAnswer}
+            surveyTime={surveyTime}
+            setSurveyAnswerWindow={setSurveyAnswerWindow}
+          />
+        )}
         <div
           className={
-            "grid grid-rows-10 grid-flow-row h-full " +
+            "grid grid-rows-12 grid-flow-row h-full " +
             (participants || chat ? "col-span-7" : "col-span-10")
           }
         >
@@ -723,14 +735,16 @@ export default function Meeting() {
             autoPlay={true}
           ></video>
 
-          <VideoWrapper
-            myStream={myStream}
-            myScreenShare={shareScreenStream.current}
-            otherParticipants={peers}
-            screenSharer={screenSharer}
-          />
+          <div className="row-span-10 row-start-1">
+            <VideoWrapper
+              myStream={myStream}
+              myScreenShare={shareScreenStream.current}
+              otherParticipants={peers}
+              screenSharer={screenSharer}
+            />
+          </div>
 
-          <div className="fixed bottom-0 w-full">
+          <div className="row-span-2 w-full">
             <Toolbar
               camera={camera}
               toggleCamera={toggleCamera}

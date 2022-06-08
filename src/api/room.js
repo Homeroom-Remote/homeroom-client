@@ -71,12 +71,11 @@ function SendChatMessage(room, message) {
 
 function SendSurveyForm(room, question, surveyTime) {
   if (!room) throw new Error("Send Survey -> Room is null");
-  room.send("survey-form", { "question": question, "surveyTime": surveyTime });
+  room.send("survey-form", { question: question, surveyTime: surveyTime });
 }
 
 function SendSurveyAnswer(room, answer) {
   if (!room) throw new Error("Send Survey -> Room is null");
-  console.log("SendAnswerSurvey to server")
   room.send("survey-answer", answer);
 }
 

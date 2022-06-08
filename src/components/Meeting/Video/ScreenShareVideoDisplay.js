@@ -120,7 +120,7 @@ export default function ScreenShareVideoDisplay({
   };
 
   return (
-    <div className="row-span-8">
+    <article className="grid grid-rows-12 grid-flow-row h-full">
       <div className="row-span-2 dark:bg-dark-800 dark:bg-opacity-50 bg-lt-500 py-2 flex flex-row justify-center relative overflow-hidden gap-y-1">
         {showPagination() && (
           <div className="absolute left-0 top-1/2 ml-2 cursor-pointer z-10 p-3 rounded-lg flex items-center justify-center dark:hover:bg-dark-600 hover:bg-lt-600">
@@ -160,9 +160,9 @@ export default function ScreenShareVideoDisplay({
           </div>
         )}
       </div>
-      <div className="px-2 row-span-6 dark:bg-dark-900 bg-lt-500 py-6 flex flex-row justify-center relative overflow-hidden gap-y-1">
+      <div className="px-2 row-span-10 dark:bg-dark-900 bg-lt-500 py-6 flex flex-row justify-center relative overflow-hidden gap-y-1">
         <ScreenShare stream={getSharerStream()} me={isSharerMe()} />
       </div>
-    </div>
+    </article>
   );
 }
