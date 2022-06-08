@@ -127,6 +127,7 @@ function createPeer(room, message, initiator, peers, myStream, setter) {
       );
     });
   });
+
   updatePeers(
     message.sessionId,
     {

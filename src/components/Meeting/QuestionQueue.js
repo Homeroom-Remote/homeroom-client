@@ -27,7 +27,8 @@ function DetailedQuestionQueue({ questions, isOwner, uid }) {
           </p>
           {(isOwner || uid === questionObject.uid) && (
             <span
-              id="remove_question"
+              id={"remove_question " + uid}
+              uid={uid}
               data-id={questionObject.id}
               className="font-medium text-red-400 cursor-pointer p-1"
             >
@@ -43,7 +44,7 @@ function QuestionQueueHeader({
   length,
   minimzed,
   manuallyRegisterToMessageQueue,
-  inQueue,
+  // inQueue,
   isOwner,
 }) {
   function handleClick() {
@@ -56,14 +57,12 @@ function QuestionQueueHeader({
       <span className="rounded-full w-6 h-6 flex items-center justify-center dark:bg-dark-800 bg-lt-300  bg-opacity-60">
         {length}
       </span>
-      {!isOwner && !inQueue && (
         <button
           onClick={handleClick}
           className="rounded-full w-6 h-6 flex items-center justify-center dark:bg-dark-800 bg-lt-300 bg-opacity-60 text-3xl"
         >
           +
         </button>
-      )}
       <Send
         id="toggle_minimized"
         className={
@@ -79,7 +78,8 @@ export default function QuestionQueue({
   questions,
   removeQuestionByID,
   manuallyRegisterToMessageQueue,
-  inQueue,
+  // inQueue,
+  // setInQueue,
 }) {
   const [minimzed, setMinimzed] = useState(false);
 
@@ -91,26 +91,32 @@ export default function QuestionQueue({
 
   const handleMouseDown = (e) => {
     if (e.target.id === "toggle_minimized") toggleMinimzed();
-    else if (e.target.id === "remove_question") {
+    else if (e.target.id.startsWith("remove_question")) {
+      // console.log(user.uid)
+      console.log(e.target.getAttribute("uid"))
+
       removeQuestionByID(e.target.getAttribute("data-id"));
+      // if(user.uid === e.target.getAttribute("uid"))
+      //   setInQueue(false)
     }
   };
 
   return (
-    <Draggable defaultPosition={{ x: 50, y: 50 }} onMouseDown={handleMouseDown}>
+    <Draggable defaultPosition={{ x: 50, y: 100 }} onMouseDown={handleMouseDown}>
       <div className="absolute z-10 cursor-move">
         <QuestionQueueHeader
           length={questions.length}
           minimzed={minimzed}
           manuallyRegisterToMessageQueue={manuallyRegisterToMessageQueue}
-          inQueue={inQueue}
-          isOwner={isOwner}
+          // inQueue={inQueue}
+          // isOwner={isOwner}
         />
         {!minimzed && (
           <DetailedQuestionQueue
             questions={questions}
             isOwner={isOwner}
             uid={user.uid}
+            // setInQueue={setInQueue}
           />
         )}
       </div>

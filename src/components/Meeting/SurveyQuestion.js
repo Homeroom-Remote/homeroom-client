@@ -38,7 +38,7 @@ export default function SurveyQuestion({
             <div className="timer-wrapper">
               <CountdownCircleTimer
                 isPlaying
-                duration={parseInt(surveyTime) + 1000}
+                duration={parseInt(surveyTime)}
                 trailColor={getBgFromTheme()}
                 size={70}
                 colors={["#004777", "#F7B801", "#A30000", "#A30000"]}

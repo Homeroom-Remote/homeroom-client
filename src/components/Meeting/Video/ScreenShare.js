@@ -1,5 +1,4 @@
 export default function ScreenShare({ stream, me }) {
-  console.log(stream);
   return (
     <div
       className={

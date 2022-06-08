@@ -141,17 +141,18 @@ export default function Meeting() {
   /////////////////
   const [questionQueue, setQuestionQueue] = useState([]);
   const [showQuestionQueue, setShowQuestionQueue] = useState(false);
-  const [inQueue, setInQueue] = useState(false);
+  // const [inQueue, setInQueue] = useState(false);
   const toggleQuestionQueue = () => setShowQuestionQueue((val) => !val);
   const removeQuestionByID = (id) => {
     RemoveFromMessageQueue(room, id);
-    setInQueue(false)
+    // setInQueue(false)
   };
 
   ///////////////
   // Share Screen
   ///////////////
   const [shareScreen, setShareScreen] = useState(false);
+  const [shareScreenMode, setShareScreenMode] = useState(false);
   const shareScreenStream = useRef(null);
   const toggleShareScreen = () => {
     if (shareScreen === false && room) {
@@ -188,17 +189,14 @@ export default function Meeting() {
     if (camera) setCamera(!camera);
     else if (askBeforeVideo) {
       Swal.fire({
-        // width: "20%",
         title: "Are you sure you want to turn on the camera?",
         color: "rgb(74, 222, 128)",
         background: "rgb(126, 34, 206)",
         showCancelButton: true,
         confirmButtonColor: "rgb(34, 197, 94)",
         confirmButtonText: "Yes, turn on my camera",
-        // cancelButtonColor: "rgb(168, 85, 247)",
         cancelButtonText: "Cancel",
         icon: "question",
-        // backdrop: 'rgba(0,0,123,0.4)'
       }).then((result) => {
         if (result.isConfirmed) {
           setCamera(!camera);
@@ -376,8 +374,11 @@ export default function Meeting() {
       console.warn("stop share warning", message);
     } else if (message.event === "start") {
       setScreenSharer({ user: message.user, streamId: message.streamId });
+      setShareScreenMode(true);
     } else if (message.event === "stop") {
+      setShareScreen(false);
       setScreenSharer(null);
+      setShareScreenMode(false);
     }
   }
 
@@ -522,6 +523,7 @@ export default function Meeting() {
   ////////
   useEffect(() => {
     Peer.updateStream(myStream, peers, setPeers);
+    refreshRoomCallbacks(room);
   }, [myStream]);
 
   useEffect(() => {
@@ -598,7 +600,9 @@ export default function Meeting() {
           .then((handPrediction) => {
             handPrediction && HandleGesturePrediction(handPrediction);
           })
-          .catch();
+          .catch(() => {})
+          .finally(() => {});
+
         FaceRecognition.Detect(vidEl)
           .then((facePrediction) => {
             facePrediction?.score &&
@@ -622,10 +626,10 @@ export default function Meeting() {
 
     if (prediction === "raise_hand") {
       RegisterToMessageQueue(room);
-      setInQueue(true);
+      // setInQueue(true);
     } else if (prediction === "fist") {
       RemoveFromMessageQueue(room);
-      setInQueue(false);
+      // setInQueue(false);
     }
 
     // Display on my video object
@@ -644,7 +648,7 @@ export default function Meeting() {
 
   function manuallyRegisterToMessageQueue() {
     RegisterToMessageQueue(room);
-    setInQueue(true);
+    // setInQueue(true);
   }
 
   ////////////
@@ -695,7 +699,8 @@ export default function Meeting() {
             questions={questionQueue}
             removeQuestionByID={removeQuestionByID}
             manuallyRegisterToMessageQueue={manuallyRegisterToMessageQueue}
-            inQueue={inQueue}
+            // inQueue={inQueue}
+            // setInQueue={setInQueue}
           />
         )}
         {showExpressionsChart && (
@@ -741,6 +746,7 @@ export default function Meeting() {
               myScreenShare={shareScreenStream.current}
               otherParticipants={peers}
               screenSharer={screenSharer}
+              shareScreenMode={shareScreenMode}
             />
           </div>
 

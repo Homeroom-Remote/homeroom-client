@@ -111,7 +111,7 @@ export default function Favorite({ setOverlayComponent }) {
   }
 
   return (
-    <div className="p-2 overflow-x-auto">
+    <div className="p-2 overflow-x-auto h-full">
       <table className="items-center w-full bg-transparent border-collapse table-auto">
         <thead>
           <tr>

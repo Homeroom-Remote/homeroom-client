@@ -10,6 +10,8 @@ import useMeeting from "../../../stores/meetingStore";
 import usePopup from "../../../stores/popupStore";
 import Button from "../../Button";
 import RemoveButton from "../../RemoveButton";
+import Swal from "sweetalert2";
+import useTheme from "../../../stores/themeStore";
 
 function NoFavoriteComponent() {
   return (
@@ -39,6 +41,8 @@ function LoadingComponent() {
 function FavoriteComponent({ favorite, removeMeetingFromFavoritesById }) {
   const { joinMeeting } = useMeeting();
   const { setShow, setOpts } = usePopup();
+  const { getBgFromTheme, getTextFromTheme } = useTheme();
+
   const styles = {
     head_th:
       "px-6 align-middle border border-solid py-3 text-md uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left dark:bg-dark-800 dark:text-text-200 dark:border-dark-700 bg-lt-400 text-text-200 border-lt-200",
@@ -50,12 +54,20 @@ function FavoriteComponent({ favorite, removeMeetingFromFavoritesById }) {
     if (meeting.status === "online") {
       joinMeeting(meeting.id);
     } else {
-      setOpts({
-        title: "Meeting Offline",
-        body: "Can not join meeting right now, try again later.",
-        type: "error",
-      });
-      setShow(true);
+      // setOpts({
+      //   title: "Meeting Offline",
+      //   body: "Can not join meeting right now, try again later.",
+      //   type: "error",
+      // });
+      // setShow(true);
+      Swal.fire({
+        title: "Can not join meeting right now, try again later.",
+        showConfirmButton: false,
+        timer: 2500,
+        background: getBgFromTheme(),
+        color: getTextFromTheme(),
+        icon: "error",
+      })
     }
   };
   return (

@@ -12,6 +12,7 @@ import OnlineIndicator from "../../OnlineIndicator";
 import useMeeting from "../../../stores/meetingStore";
 import StarButton from "../../StarButton";
 
+
 export default function History() {
   const [loading, setLoading] = useState(true);
   const [history, setHistory] = useState([]);
@@ -116,8 +117,8 @@ export default function History() {
   }
 
   return (
-    <div className="p-2 overflow-x-auto">
-      <table className="items-center w-full bg-transparent border-collapse table-auto">
+    <div className="p-2 overflow-x-auto h-full ">
+      <table className="items-center w-full h-full bg-transparent border-collapse table-auto">
         <thead>
           <tr>
             <th className={styles.head_th}>Owner</th>
