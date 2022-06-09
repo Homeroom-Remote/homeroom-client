@@ -2,6 +2,11 @@ import fistIcon from "../../../utils/fist_icon.png";
 import likeIcon from "../../../utils/like_icon.png";
 import dislikeIcon from "../../../utils/dislike_icon.png";
 import raiseHandIcon from "../../../utils/raise_hand_icon.png";
+import questionQueueImg from "../../../utils/question_queue.png";
+import concentrationImg from "../../../utils/concentrationImg.png";
+import expressionsImg from "../../../utils/expressionsImg.png";
+
+
 
 const GeneralFAQ = [
   {
@@ -85,7 +90,7 @@ const GeneralFAQ = [
           participants at a suitable time, without the need to interrupt the
           meeting flow!
         </p>
-        <img src="" alt="question queue" className="h-[35px]" />
+        <img src={questionQueueImg} alt="question queue" className="h-[65px]" />
       </div>
     ),
   },
@@ -114,7 +119,7 @@ const OwnerFAQ = [
           button on the bottom Toolbar. Then wait a few seconds for the data to
           start flowing, and adjust your meeting as you see fit!
         </p>
-        <img src="" alt="concentration" className="h-[35px]" />
+        <img src={concentrationImg} alt="concentration" className="h-[300px]" />
       </div>
     ),
   },
@@ -130,7 +135,7 @@ const OwnerFAQ = [
           button on the bottom Toolbar. Then wait a few seconds for the data to
           start flowing, and adjust your meeting as you see fit!
         </p>
-        <img src="" alt="expressions" className="h-[35px]" />
+        <img src={expressionsImg} alt="expressions" className="h-[300px]" />
       </div>
     ),
   },
