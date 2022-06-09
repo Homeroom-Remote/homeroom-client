@@ -4,6 +4,7 @@ import Sidebar from "./Sidebar";
 import Header from "./Header";
 import useSettings from "../../stores/settingsStore";
 import useVideoSettings from "../../stores/videoSettingsStore";
+import { input } from "@tensorflow/tfjs";
 const globalStyles =
   // eslint-disable-next-line no-multi-str
   "bg-lt-100 text-text-900 \
@@ -35,18 +36,19 @@ export default function Home() {
 
   useEffect(() => {
     const inputs = JSON.parse(localStorage.getItem("inputs"));
+    if (!inputs) return
     Object?.entries(inputs)?.forEach(([k, v]) => {
       if (k === "askBeforeAudio" && askBeforeAudio !== v)
         toggleAskBeforeAudio();
       else if (k === "askBeforeVideo" && askBeforeVideo !== v)
         toggleAskBeforeVideo();
-      else if (k === "autoCopyLink" && autoCopyLink !== v) 
+      else if (k === "autoCopyLink" && autoCopyLink !== v)
         toggleAutoCopyLink();
       else if (k === "showConnectionTime" && showConnectionTime !== v)
         toggleShowConnectionTime();
-      else if (k === "defaultVideo" && defaultVideo !== v) 
+      else if (k === "defaultVideo" && defaultVideo !== v)
         toggleVideo();
-      else if (k === "defaultAudio" && defaultAudio !== v) 
+      else if (k === "defaultAudio" && defaultAudio !== v)
         toggleAudio();
     });
   }, []);
