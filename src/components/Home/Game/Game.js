@@ -9,7 +9,6 @@ export default function Game() {
 
   useEffect(() => {
     Swal.fire({
-      // width: "20%",
       title: "Choose game mode:",
       color: "rgb(74, 222, 128)",
       background: "rgb(126, 34, 206)",
@@ -19,7 +18,6 @@ export default function Game() {
       cancelButtonColor: "rgb(34, 197, 94)",
       cancelButtonText: "Play with hand gestures",
       icon: "question",
-      // backdrop: 'rgba(0,0,123,0.4)'
     }).then((result) => {
       if (result.isConfirmed) {
         setArrowGame(true);
@@ -37,9 +35,6 @@ export default function Game() {
         <p className="text-center text-primary-400 text-2xl">
           Play the game while waiting for your meeting to start!
         </p>
-        <article className="text-center text-secondary-500 text-lg">
-          <p id="score">Your score: 0. Best Score: 0</p>
-        </article>
       </header>
 
       <article className="w-full flex flex-col items-center">
