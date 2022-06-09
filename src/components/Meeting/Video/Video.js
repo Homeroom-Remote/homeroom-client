@@ -63,7 +63,7 @@ function Video({ stream, name, id, me = false, small = false }) {
   return (
     <div
       className={
-        "h-full max-w-max dark:bg-dark-800 bg-lt-300 place-items-center justify-center flex p-2 shadow-lg rounded-lg relative box-border " +
+        "h-full dark:bg-dark-800 bg-lt-300 place-items-center justify-center flex p-2 shadow-lg rounded-lg relative box-border " +
         audibleHandler()
       }
     >

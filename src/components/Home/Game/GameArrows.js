@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 
 export default function Game() {
+  const savedHighScore = JSON.parse(localStorage.getItem("high-score-arrows"));
   const [result, setResult] = useState(0);
-  const [bestResult, setBestResult] = useState(0);
+  const [bestResult, setBestResult] = useState(savedHighScore ? savedHighScore : 0);
   const toggleBestResult = (x) => {
-    if (x > bestResult) setBestResult(x);
+    if (x > bestResult) {
+      setBestResult(x);
+      localStorage.setItem("high-score-arrows", JSON.stringify(x));
+    }
   };
 
   useEffect(() => {
@@ -86,7 +90,7 @@ export default function Game() {
     function update() {
       ctx?.clearRect(0, 0, canvas.width, canvas.height);
       gameState.enemyTimeout -= 1;
-      if (gameState.enemyTimeout == 0) {
+      if (gameState.enemyTimeout === 0) {
         gameState.enemyTimeout = Math.floor(gameState.enemyTimeoutInit);
         gameState.enemies.push({
           x: canvas.width,
@@ -128,21 +132,21 @@ export default function Game() {
         }
       }
       //   document.getElementById("score").innerHTML = "score: " + gameState.trophy;
-      if (gameState.score % 3 == 0 && gameState.friendAdded == false) {
+      if (gameState.score % 3 === 0 && gameState.friendAdded === false) {
         gameState.friends.push({
           x: random(canvas.width - 20),
           y: random(canvas.height - 20),
         });
         gameState.friendAdded = true;
       }
-      if (gameState.score % 3 == 1 && gameState.friendAdded == true) {
+      if (gameState.score % 3 === 1 && gameState.friendAdded === true) {
         gameState.friendAdded = false;
       }
       for (let i = 0; i < gameState.friends.length; ++i) {
         ctx.fillStyle = "#FF0000";
         ctx.fillRect(gameState.friends[i].x, gameState.friends[i].y, 5, 5);
       }
-      if (checkCollision(gameState) == true) {
+      if (checkCollision(gameState) === true) {
         gameState = {
           rectPosX: 10,
           rectPosY: canvas.height / 2 - 10,
@@ -161,18 +165,19 @@ export default function Game() {
     }
     setInterval(update, 20);
     document.addEventListener("keydown", function (event) {
-      if (event.code == "ArrowRight") {
+      if (event.code === "ArrowRight") {
         gameState.rectVelocity.x = gameState.playerSpeed;
       }
-      if (event.code == "ArrowLeft") {
+      if (event.code === "ArrowLeft") {
         gameState.rectVelocity.x = -gameState.playerSpeed;
       }
-      if (event.code == "ArrowDown") {
+      if (event.code === "ArrowDown") {
         gameState.rectVelocity.y = gameState.playerSpeed;
       }
-      if (event.code == "ArrowUp") {
+      if (event.code === "ArrowUp") {
         gameState.rectVelocity.y = -gameState.playerSpeed;
       }
+      
     });
   }, []);
 

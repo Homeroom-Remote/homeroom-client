@@ -9,11 +9,11 @@ export default function SurveyQuestion({
   setSurveyAnswerWindow,
 }) {
   const [answer, setAnswer] = useState(true);
-  const { getBgFromTheme, getTextFromTheme } = useTheme();
+  const { getBgFromTheme } = useTheme();
 
   const renderTime = ({ remainingTime }) => {
     if (remainingTime === 0) {
-      return <div className="timer">Too lale...</div>;
+      return <div className="timer">Too late...</div>;
     }
 
     return (

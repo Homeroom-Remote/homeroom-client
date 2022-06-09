@@ -3,18 +3,15 @@ import {
   MutedMic,
   Cam,
   MutedCam,
-  Security,
   Participants,
   Chat,
   ShareScreen,
-  Record,
   Survey,
   Archive,
   Reactions,
   Eye,
   EyeOff,
 } from "../../utils/svgs";
-import { useState } from "react";
 import useMeeting from "../../stores/meetingStore";
 import Button from "../Button";
 import useUser from "../../stores/userStore";
@@ -26,6 +23,7 @@ function ToolbarButton(props) {
   const LogoOff = props.logoOff;
   const textOn = props.textOn;
   const textOff = props.textOff;
+
 
   const getBackgroundStyles = () => {
     const baseBgColors =

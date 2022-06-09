@@ -46,10 +46,8 @@ function ChatTab({ name, messages, unread, active, onClick }) {
 
 function Message({ message, user }) {
   const getMessageStyles = () => {
-    ////////////////
-    if (message?.me || message.uid.startsWith(getMeetingFromUserID(user.uid))) return "font-bold text-primary-600";
-    // if (message?.me) return "font-bold text-primary-600";
-    ////////////////
+    if (message?.me || message.uid.startsWith(getMeetingFromUserID(user.uid)))
+      return "font-bold text-primary-600";
     return "font-medium dark:text-text-400 text-text-800";
   };
 
