@@ -1,14 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 
 function Video({ stream, name, id, me = false, small = false }) {
+  const [shouldDisplayVideoStream, setShouldDisplayVideoStream] =
+    useState(false);
   const [isTalking, setIsTalking] = useState(false);
   const audioDetectionInterval = useRef(null);
-
-  const shouldDisplayVideoStream =
-    stream &&
-    stream.active &&
-    stream.getVideoTracks().length > 0 &&
-    stream.getVideoTracks()[0].enabled;
 
   const getHandGestureStyles = () => {
     if (!me) return "absolute top-2 right-2 text-3xl";
@@ -21,7 +17,8 @@ function Video({ stream, name, id, me = false, small = false }) {
   };
 
   useEffect(() => {
-    const hasAudio = stream?.getAudioTracks().length > 0;
+    if (!stream) return;
+    const hasAudio = stream.getAudioTracks().length > 0;
 
     const removeAudioListener = () => {
       if (audioDetectionInterval.current) {
@@ -91,11 +88,20 @@ function Video({ stream, name, id, me = false, small = false }) {
       <p id={`hand-gesture-${id}`} className={getHandGestureStyles()}></p>
       <video
         className={small ? "w-40 h-40" : "h-full w-auto"}
+        muted={me}
         ref={(e) => {
-          if (e) e.srcObject = stream;
+          if (e) {
+            e.srcObject = stream;
+            setShouldDisplayVideoStream(
+              stream &&
+                stream.active &&
+                stream.getVideoTracks().length > 0 &&
+                stream.getVideoTracks()[0].enabled
+            );
+          }
         }}
         autoPlay={true}
-      />
+      ></video>
       {!shouldDisplayVideoStream && (
         <h1 className="font-bold text-4xl absolute">{name}</h1>
       )}

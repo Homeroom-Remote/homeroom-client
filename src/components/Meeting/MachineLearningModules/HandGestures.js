@@ -82,7 +82,7 @@ function InitThumbsDown() {
 }
 
 async function Init() {
-  if (!net) net = await handpose.load({ maxContinuousChecks: 1 });
+  if (!net) net = await handpose.load();
   InitThumbsDown();
   InitRaiseHand();
   InitFist();
@@ -103,7 +103,7 @@ async function Detect(video) {
     }
     net.estimateHands(video, true).then(async (hand) => {
       if (hand.length > 0) {
-        const gesture = await GestureEstimator.estimate(hand[0].landmarks, 8.5);
+        const gesture = await GestureEstimator.estimate(hand[0].landmarks, 9);
 
         if (gesture.gestures?.length > 0) {
           const confidence = gesture.gestures.map(

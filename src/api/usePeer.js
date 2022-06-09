@@ -24,7 +24,39 @@ function addScreenShare(stream, peers) {
   peers.forEach((peer) =>
     peer.peer.send({ event: "share-screen", id: stream.id })
   );
-  peers.forEach((peer) => peer.peer.addStream(stream));
+  peers.forEach((peer) => {
+    peer.peer.addStream(stream);
+  });
+}
+
+function removeTrack(stream, track, peers) {
+  if (!stream || !track || !peers) return;
+  peers.forEach((peer) => {
+    if (!peer.peer.destroying) peer.peer.removeTrack(track, stream);
+  });
+}
+
+function addTrack(stream, track, peers) {
+  if (!stream || !track || !peers) return;
+  peers.forEach((peer) => {
+    if (!peer.peer.destroying) {
+      console.log(track, stream, peer);
+      peer.peer.addTrack(track, stream);
+    }
+  });
+}
+
+/**
+ * Removes client stream in other clients
+ * @param {MediaStream} stream
+ * @param {Array} peers
+ * @param {Function} setter
+ */
+function removeStreamFromPeers(stream, peers) {
+  if (!stream || !peers) return;
+  peers.forEach((peer) => {
+    if (!peer.peer.destroying) peer.peer.removeStream(stream);
+  });
 }
 
 /**
@@ -33,17 +65,11 @@ function addScreenShare(stream, peers) {
  * @param {Array} peers
  * @param {Function} setter
  */
-function updateStream(stream, peers, setter) {
-  // Remove former stream
+function updateStream(stream, peers) {
+  if (!stream || !peers) return;
   peers.forEach((peer) => {
-    if (peer.localStream) {
-      peer.peer.removeStream(peer.localStream);
-    }
-
-    if (stream) {
+    if (!peer.peer.destroying) {
       peer.peer.addStream(stream);
-      let peerCopy = { ...peer, localStream: stream };
-      updatePeers(peerCopy.id, peerCopy, setter);
     }
   });
 }
@@ -90,6 +116,14 @@ function createPeer(room, message, initiator, peers, myStream, setter) {
   );
 
   initiator || peer.signal(message.data);
+  peer.on("track", (track, stream) => {
+    function removeTrack() {
+      track.stop();
+      stream.removeTrack(track);
+    }
+    track.addEventListener("mute", removeTrack);
+    track.addEventListener("ended", removeTrack);
+  });
 
   peer.on("stream", (peerStream) => {
     updatePeers(
@@ -107,25 +141,7 @@ function createPeer(room, message, initiator, peers, myStream, setter) {
   });
 
   peer.on("error", (err) => {
-    console.warn(err, "-> usePeer error from ", message.sessionId);
-  });
-
-  peer.on("track", (track, stream) => {
-    // Mute happens when track is removed (audio and video)
-    track.addEventListener("mute", () => {
-      updatePeers(
-        message.sessionId,
-        {
-          id: message.sessionId,
-          uid: message.uid,
-          peer: peer,
-          room: room,
-          name: message.name,
-          stream: stream,
-        },
-        setter
-      );
-    });
+    console.warn(err, "<- usePeer error from ", message.sessionId);
   });
 
   updatePeers(
@@ -182,8 +198,11 @@ const PeerWrapper = {
   destroyPeer,
   onHandRecognition,
   updateStream,
+  removeStreamFromPeers,
   getNameFromID,
   addScreenShare,
   removeScreenShare,
+  removeTrack,
+  addTrack,
 };
 export default PeerWrapper;

@@ -230,16 +230,40 @@ export default function Meeting() {
 
   useEffect(() => {
     setDate(new Date());
-    return () => myStream && stopStream(myStream);
-  }, []);
+    if (!HandGestures.IsReady()) {
+      async function InitGestures() {
+        await HandGestures.Init();
+      }
 
+      InitGestures();
+    }
+
+    if (!FaceRecognition.IsReady()) {
+      async function InitFaceRecognition() {
+        await FaceRecognition.Init();
+      }
+
+      InitFaceRecognition();
+    }
+    setMachineLearningReady(true);
+
+    return () => {
+      if (myStream) {
+        stopStream(myStream);
+        Peer.removeStreamFromPeers(myStream);
+      }
+      if (detectionInterval.current) {
+        clearInterval(detectionInterval.current);
+        detectionInterval.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (chat) {
       GetChat(room);
     }
   }, [chat]);
-
 
   const refreshMedia = (video, audio) => {
     function getMedia(constraints) {
@@ -248,11 +272,48 @@ export default function Meeting() {
 
     getMedia({ video, audio })
       .then((stream) => {
-        if (myStream) stopStream(myStream);
-        setMyStream(stream);
+        if (myStream) {
+          const hasFormerVideo = !!myStream.getVideoTracks().length > 0;
+          const hasFormerAudio = !!myStream.getAudioTracks().length > 0;
+          const hasCurrentVideo = !!stream.getVideoTracks().length > 0;
+          const hasCurrentAudio = !!stream.getAudioTracks().length > 0;
+
+          if (hasFormerVideo && !video) {
+            const track = myStream.getVideoTracks()[0];
+            Peer.removeTrack(myStream, track, peers);
+            myStream.removeTrack(track);
+          }
+          if (hasFormerAudio && !audio) {
+            const track = myStream.getAudioTracks()[0];
+            Peer.removeTrack(myStream, track, peers);
+            myStream.removeTrack(track);
+          }
+          if (hasCurrentAudio && !hasFormerAudio) {
+            const track = stream.getAudioTracks()[0];
+            Peer.addTrack(myStream, track, peers);
+            myStream.addTrack(track);
+          }
+          if (hasCurrentVideo && !hasFormerVideo) {
+            const track = stream.getVideoTracks()[0];
+            Peer.addTrack(myStream, track, peers);
+            myStream.addTrack(track);
+          }
+          checkUpdatedStream();
+        } else {
+          setMyStream(stream);
+          Peer.updateStream(stream, peers);
+        }
       })
-      .catch(() => {
-        if (myStream) stopStream(myStream);
+      .catch((e) => {
+        if (myStream) {
+          myStream
+            .getTracks()
+            .forEach((tr) => Peer.removeTrack(myStream, tr, peers));
+          stopStream(myStream);
+          Peer.removeStreamFromPeers(myStream);
+          setCamera(false);
+          setMicrophone(false);
+        }
         setMyStream(null);
       });
   };
@@ -514,7 +575,6 @@ export default function Meeting() {
   // Peers
   ////////
   useEffect(() => {
-    Peer.updateStream(myStream, peers, setPeers);
     refreshRoomCallbacks(room);
   }, [myStream]);
 
@@ -558,28 +618,17 @@ export default function Meeting() {
   /////
   // AI
   /////
+
   useEffect(() => {
-    if (!HandGestures.IsReady()) {
-      async function InitGestures() {
-        await HandGestures.Init();
-      }
+    checkUpdatedStream();
+  }, [myStream]);
 
-      InitGestures();
-    }
-
-    if (!FaceRecognition.IsReady()) {
-      async function InitFaceRecognition() {
-        await FaceRecognition.Init();
-      }
-
-      InitFaceRecognition();
-    }
-    setMachineLearningReady(true);
-
+  function checkUpdatedStream() {
     const hasVideoStream = !!myStream?.getVideoTracks().length > 0;
+    const vidEl = document.querySelector("#hiddenVideoEl");
 
     // Remove interval if stream is offline
-    if (detectionInterval.current && !hasVideoStream) {
+    if (detectionInterval.current && (!hasVideoStream || !vidEl?.srcObject)) {
       clearInterval(detectionInterval.current);
       detectionInterval.current = null;
     }
@@ -587,7 +636,8 @@ export default function Meeting() {
     // Add interval if stream is online
     if (!detectionInterval.current && hasVideoStream) {
       detectionInterval.current = setInterval(async () => {
-        const vidEl = document.querySelector("#hiddenVideoEl");
+        if (!vidEl?.srcObject || !vidEl.srcObject.active)
+          clearInterval(detectionInterval.current);
         HandGestures.Detect(vidEl)
           .then((handPrediction) => {
             handPrediction && HandleGesturePrediction(handPrediction);
@@ -605,21 +655,13 @@ export default function Meeting() {
           .catch(() => {});
       }, handIntervalTime);
     }
-
-    return () => {
-      detectionInterval.current && clearInterval(detectionInterval.current);
-      detectionInterval.current = null;
-    };
-  }, [myStream]);
-
+  }
   function HandleGesturePrediction(prediction) {
     // Send to room (other participants)
     SendHandGesture(room, prediction);
 
-    if (prediction === "raise_hand")
-      RegisterToMessageQueue(room);
-    else if (prediction === "fist")
-      RemoveFromMessageQueue(room);
+    if (prediction === "raise_hand") RegisterToMessageQueue(room);
+    else if (prediction === "fist") RemoveFromMessageQueue(room);
 
     // Display on my video object
     const id = "me";
@@ -720,6 +762,7 @@ export default function Meeting() {
           <video
             className="hidden"
             id="hiddenVideoEl"
+            muted={true}
             ref={(e) => {
               if (e) e.srcObject = myStream;
             }}
