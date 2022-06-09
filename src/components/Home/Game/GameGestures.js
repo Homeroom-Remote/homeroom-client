@@ -1,12 +1,10 @@
-import { useEffect, useState, useRef } from "react";
-
-import * as fp from "fingerpose";
-import * as tf from "@tensorflow/tfjs";
+import { useEffect, useRef } from "react";
 import * as handpose from "@tensorflow-models/handpose";
 
 export default function Game() {
+  const savedHighScore = JSON.parse(localStorage.getItem("high-score-gestures"));
   const result = useRef(0);
-  const bestResult = useRef(0);
+  const bestResult = useRef(savedHighScore ? savedHighScore : 0);
   const Prediction = useRef({
     lastReading: null,
     callback: null,
@@ -134,6 +132,7 @@ export default function Game() {
     if (x > bestResult.current) {
       bestResult.current = x;
       document.getElementById("best-score").innerText = x;
+      localStorage.setItem("high-score-gestures", JSON.stringify(x));
     }
   };
 

@@ -134,12 +134,12 @@ export default function RegularVideoDisplay({
       )}
       <div className={getGridStyles()}>
         {NUM_OF_VIDEOS_IN_PAGE(startIndex) === NUM_OF_VIDEOS - 1 && (
-          <Video stream={myStream} name={"Me"} id={"me"} me={true} />
+          <div className=" w-full h-full"><Video stream={myStream} name={"Me"} id={"me"} me={true} /></div>
         )}
         {peersToShow.map((peer, idx) => (
           <div
             key={`peer-stream-${idx}-${peer.name}`}
-            className="h-full w-auto"
+            className="h-full w-full"
           >
             <Video
               stream={getStream(peer)}

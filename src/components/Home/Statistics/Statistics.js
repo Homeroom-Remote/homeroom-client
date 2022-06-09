@@ -155,7 +155,7 @@ export default function Statistics() {
     var toReturn = [];
     for (var i = 0; i < data.meeting_logs.length; i++) {
       var arr = [];
-      arr.push(["Minute", "Angry", "Disgusted", "Fearful", "Happy", "Neutural", "Sad"]);
+      arr.push(["Minute", "Angry", "Disgusted", "Fearful", "Happy", "Neutral", "Sad"]);
       var size = data.meeting_logs[i].log.length;
       for (var j = 0; j < size; j++) {
         var temp = [
@@ -240,6 +240,14 @@ export default function Statistics() {
       position: "bottom", 
       textStyle: { color: getTextFromTheme() }
     },
+    colors: [
+      "#f43f5e",
+      "#14b8a6",
+      "#d946ef",
+      "#3b82f6",
+      "#94a3b8",
+      "#fdba74",
+    ],
     hAxis: { 
       title: "Time",
       textStyle: { color: getTextFromTheme()}, 

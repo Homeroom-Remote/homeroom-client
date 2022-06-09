@@ -86,9 +86,7 @@ export default function Meeting() {
   const { meetingID, exitMeeting, setOwner, screenSharer, setScreenSharer } =
     useMeeting();
   const [peers, setPeers] = useState([]);
-  ///////////////
   const [date, setDate] = useState(null);
-  ///////////////
 
   // Survey
   const [survey, setSurvey] = useState(false);
@@ -141,11 +139,9 @@ export default function Meeting() {
   /////////////////
   const [questionQueue, setQuestionQueue] = useState([]);
   const [showQuestionQueue, setShowQuestionQueue] = useState(false);
-  // const [inQueue, setInQueue] = useState(false);
   const toggleQuestionQueue = () => setShowQuestionQueue((val) => !val);
   const removeQuestionByID = (id) => {
     RemoveFromMessageQueue(room, id);
-    // setInQueue(false)
   };
 
   ///////////////
@@ -233,20 +229,17 @@ export default function Meeting() {
   };
 
   useEffect(() => {
-    ////////
     setDate(new Date());
-    ////////
     return () => myStream && stopStream(myStream);
   }, []);
 
-  ////////////////////////////////////
+
   useEffect(() => {
     if (chat) {
       GetChat(room);
     }
   }, [chat]);
 
-  ////////////////////////////////////
 
   const refreshMedia = (video, audio) => {
     function getMedia(constraints) {
@@ -453,7 +446,7 @@ export default function Meeting() {
   const onGeneralMessage = (msg) => {
     generalChatSetter && generalChatSetter((c) => [...c, msg]);
   };
-  ////////////////////
+
   function onGetChat(msg) {
     var i = 0;
     while (
@@ -465,7 +458,6 @@ export default function Meeting() {
       generalChatSetter && generalChatSetter((c) => [...c, msg[i]]);
     }
   }
-  ////////////////////
 
   function onHandRecognition(message) {
     const gestureObject = Peer.onHandRecognition(message, peers);
@@ -624,13 +616,10 @@ export default function Meeting() {
     // Send to room (other participants)
     SendHandGesture(room, prediction);
 
-    if (prediction === "raise_hand") {
+    if (prediction === "raise_hand")
       RegisterToMessageQueue(room);
-      // setInQueue(true);
-    } else if (prediction === "fist") {
+    else if (prediction === "fist")
       RemoveFromMessageQueue(room);
-      // setInQueue(false);
-    }
 
     // Display on my video object
     const id = "me";
@@ -648,12 +637,11 @@ export default function Meeting() {
 
   function manuallyRegisterToMessageQueue() {
     RegisterToMessageQueue(room);
-    // setInQueue(true);
   }
 
-  ////////////
+  /////////
   // Survey
-  ////////////
+  /////////
   const toggleSurvey = () => {
     setSurvey(!survey);
   };
@@ -699,8 +687,6 @@ export default function Meeting() {
             questions={questionQueue}
             removeQuestionByID={removeQuestionByID}
             manuallyRegisterToMessageQueue={manuallyRegisterToMessageQueue}
-            // inQueue={inQueue}
-            // setInQueue={setInQueue}
           />
         )}
         {showExpressionsChart && (

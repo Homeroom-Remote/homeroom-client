@@ -44,8 +44,6 @@ function QuestionQueueHeader({
   length,
   minimzed,
   manuallyRegisterToMessageQueue,
-  // inQueue,
-  isOwner,
 }) {
   function handleClick() {
     manuallyRegisterToMessageQueue();
@@ -78,8 +76,6 @@ export default function QuestionQueue({
   questions,
   removeQuestionByID,
   manuallyRegisterToMessageQueue,
-  // inQueue,
-  // setInQueue,
 }) {
   const [minimzed, setMinimzed] = useState(false);
 
@@ -91,14 +87,8 @@ export default function QuestionQueue({
 
   const handleMouseDown = (e) => {
     if (e.target.id === "toggle_minimized") toggleMinimzed();
-    else if (e.target.id.startsWith("remove_question")) {
-      // console.log(user.uid)
-      console.log(e.target.getAttribute("uid"))
-
+    else if (e.target.id.startsWith("remove_question"))
       removeQuestionByID(e.target.getAttribute("data-id"));
-      // if(user.uid === e.target.getAttribute("uid"))
-      //   setInQueue(false)
-    }
   };
 
   return (
@@ -108,15 +98,12 @@ export default function QuestionQueue({
           length={questions.length}
           minimzed={minimzed}
           manuallyRegisterToMessageQueue={manuallyRegisterToMessageQueue}
-          // inQueue={inQueue}
-          // isOwner={isOwner}
         />
         {!minimzed && (
           <DetailedQuestionQueue
             questions={questions}
             isOwner={isOwner}
             uid={user.uid}
-            // setInQueue={setInQueue}
           />
         )}
       </div>

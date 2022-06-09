@@ -18,11 +18,10 @@ export default function Home() {
     setMainComponent(components[index]);
   };
 
-  /////////////////////////////////////////////
+  ////////////////
   // load settings
-  /////////////////////////////////////////////
-  const { defaultVideo, defaultAudio, toggleVideo, toggleAudio } =
-    useVideoSettings();
+  ////////////////
+  const { defaultVideo, defaultAudio, toggleVideo, toggleAudio } = useVideoSettings();
   const {
     askBeforeVideo,
     askBeforeAudio,
@@ -41,14 +40,16 @@ export default function Home() {
         toggleAskBeforeAudio();
       else if (k === "askBeforeVideo" && askBeforeVideo !== v)
         toggleAskBeforeVideo();
-      else if (k === "autoCopyLink" && autoCopyLink !== v) toggleAutoCopyLink();
+      else if (k === "autoCopyLink" && autoCopyLink !== v) 
+        toggleAutoCopyLink();
       else if (k === "showConnectionTime" && showConnectionTime !== v)
         toggleShowConnectionTime();
-      else if (k === "defaultVideo" && defaultVideo !== v) toggleVideo();
-      else if (k === "defaultAudio" && defaultAudio !== v) toggleAudio();
+      else if (k === "defaultVideo" && defaultVideo !== v) 
+        toggleVideo();
+      else if (k === "defaultAudio" && defaultAudio !== v) 
+        toggleAudio();
     });
   }, []);
-  ////////////////////////////////////////////
 
   return (
     <div className={globalStyles}>
