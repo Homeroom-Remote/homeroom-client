@@ -100,7 +100,11 @@ export default function ScreenShareVideoDisplay({
         (stream) => stream.id !== screenSharer.streamId
       );
     } else {
-      return activeStreams[activeStreams.length - 1];
+      const activeWithoutShare = activeStreams.filter(
+        (stream) => stream.id !== screenSharer.streamId
+      );
+      if (activeWithoutShare.length <= 0) return 0;
+      return activeWithoutShare[activeWithoutShare.length - 1];
     }
   };
 

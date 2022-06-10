@@ -580,13 +580,13 @@ export default function Meeting() {
     const vidEl = document.querySelector("#hiddenVideoEl");
 
     // Remove interval if stream is offline
-    if (detectionTimeout.current && !hasVideoStream) {
+    if (detectionTimeout.current) {
       clearTimeout(detectionTimeout.current);
       detectionTimeout.current = null;
     }
 
     // Add interval
-    if (hasVideoStream && !detectionTimeout.current) {
+    if (hasVideoStream) {
       async function MachineLearningFunctionality() {
         const t = new Date().getTime();
         const [handPrediction, facePrediction] = await Promise.all([
