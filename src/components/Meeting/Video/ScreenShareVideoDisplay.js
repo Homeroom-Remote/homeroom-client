@@ -100,7 +100,7 @@ export default function ScreenShareVideoDisplay({
         (stream) => stream.id !== screenSharer.streamId
       );
     } else {
-      return activeStreams[0];
+      return activeStreams[activeStreams.length - 1];
     }
   };
 

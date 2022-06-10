@@ -453,6 +453,7 @@ export default function Meeting() {
   }
 
   function onUpdateParticipants(room, message) {
+    console.log("update bitch", message);
     Peer.updateParticipants(
       message?.participants,
       peers,
