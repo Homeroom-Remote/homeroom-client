@@ -5,6 +5,8 @@ import raiseHandIcon from "../../../utils/raise_hand_icon.png";
 import questionQueueImg from "../../../utils/question_queue.png";
 import concentrationImg from "../../../utils/concentrationImg.png";
 import expressionsImg from "../../../utils/expressionsImg.png";
+import tipsImg from "../../../utils/tipsImg.png";
+import satisticsImg from "../../../utils/satisticsImg.png";
 
 
 
@@ -152,7 +154,7 @@ const OwnerFAQ = [
           concentration) to present the owner with rich timestamped information
           that will help him review and improve his meetings.
         </p>
-        <img src="" alt="statistics" className="h-[35px]" />
+        <img src={satisticsImg} alt="statistics" className="h-[300px]" />
       </div>
     ),
   },
@@ -168,7 +170,7 @@ const OwnerFAQ = [
           they will help you focus on what's most important for your next
           meeting!
         </p>
-        <img src="" alt="tips" className="h-[35px]" />
+        <img src={tipsImg} alt="tips" className="h-[300px]" />
       </div>
     ),
   },

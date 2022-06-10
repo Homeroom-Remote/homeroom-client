@@ -119,7 +119,7 @@ export default function RegularVideoDisplay({
     if (activeStreams.length <= 0) {
       return null;
     } else {
-      return activeStreams[0];
+      return activeStreams[activeStreams.length - 1];
     }
   };
 

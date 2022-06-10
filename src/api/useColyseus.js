@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { getToken } from "./auth";
 import useUser from "../stores/userStore";
 
-const defaultWsUrl = `ws://homeroom-server.herokuapp.com/:3030`;
+const defaultWsUrl = `ws://${window.location.hostname}:3030`;
 
 export default function RoomManager(meetingID, options) {
   const [isOnline, setIsOnline] = useState(false);

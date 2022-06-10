@@ -29,23 +29,6 @@ function addScreenShare(stream, peers) {
   });
 }
 
-function removeTrack(stream, track, peers) {
-  if (!stream || !track || !peers) return;
-  peers.forEach((peer) => {
-    if (!peer.peer.destroying) peer.peer.removeTrack(track, stream);
-  });
-}
-
-function addTrack(stream, track, peers) {
-  if (!stream || !track || !peers) return;
-  peers.forEach((peer) => {
-    if (!peer.peer.destroying) {
-      console.log(track, stream, peer);
-      peer.peer.addTrack(track, stream);
-    }
-  });
-}
-
 /**
  * Removes client stream in other clients
  * @param {MediaStream} stream
@@ -72,6 +55,22 @@ function updateStream(stream, peers) {
       peer.peer.addStream(stream);
     }
   });
+}
+
+function updateParticipants(participantObject, peers, setter, room, myStream) {
+  Object.keys(participantObject)
+    .filter((sessionId) => !peers[sessionId])
+    .forEach((sessionId) => {
+      console.log(`Initiating new connection with ${sessionId}`);
+      createPeer(
+        room,
+        participantObject[sessionId],
+        true,
+        peers,
+        myStream,
+        setter
+      );
+    });
 }
 
 /**
@@ -202,7 +201,6 @@ const PeerWrapper = {
   getNameFromID,
   addScreenShare,
   removeScreenShare,
-  removeTrack,
-  addTrack,
+  updateParticipants,
 };
 export default PeerWrapper;

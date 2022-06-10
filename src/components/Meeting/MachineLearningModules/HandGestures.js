@@ -1,13 +1,20 @@
 import * as fp from "fingerpose";
-import * as tf from "@tensorflow/tfjs";
 import * as handpose from "@tensorflow-models/handpose";
+import * as tf from "@tensorflow/tfjs-core";
+import "@tensorflow/tfjs-backend-webgl";
+import Duck from "./duck.jpg";
 
 var net = null;
 var ThumbsDownGesture = null;
 var RaiseHandGesture = null;
 var FistGesture = null;
 var GestureEstimator = null;
+const state = {
+  backend: "webgl",
+};
+
 function IsReady() {
+  console.log(`isReaddy ${!!net}`);
   return !!net;
 }
 
@@ -82,7 +89,13 @@ function InitThumbsDown() {
 }
 
 async function Init() {
-  if (!net) net = await handpose.load();
+  await tf.setBackend(state.backend);
+  if (!tf.env().getAsync("WASM_HAS_SIMD_SUPPORT") && state.backend == "wasm") {
+    console.warn(
+      "The backend is set to WebAssembly and SIMD support is turned off.\nThis could bottleneck your performance greatly, thus to prevent this enable SIMD Support in chrome://flags"
+    );
+  }
+  net = await handpose.load();
   InitThumbsDown();
   InitRaiseHand();
   InitFist();
@@ -96,30 +109,30 @@ async function Init() {
 }
 
 async function Detect(video) {
-  return new Promise((resolve, reject) => {
-    if (video.paused) {
-      reject("video paused");
-      return;
-    }
-    net.estimateHands(video, true).then(async (hand) => {
-      if (hand.length > 0) {
-        const gesture = await GestureEstimator.estimate(hand[0].landmarks, 9);
+  try {
+    if (video.paused) return null;
 
-        if (gesture.gestures?.length > 0) {
-          const confidence = gesture.gestures.map(
-            (prediction) => prediction.score
-          );
-          const maxConfidence = confidence.indexOf(
-            Math.max.apply(null, confidence)
-          );
+    const hand = await net.estimateHands(video);
+    if (hand.length <= 0) return null;
 
-          resolve(gesture.gestures[maxConfidence].name);
-          return;
-        }
-      }
-      reject("no hands");
-    });
-  });
+    const gesture = await GestureEstimator.estimate(hand[0].landmarks, 8.8);
+    if (!gesture.gestures?.length || gesture.gestures?.length <= 0) return null;
+
+    const confidence = gesture.gestures.map((prediction) => prediction.score);
+    const maxConfidence = confidence.indexOf(Math.max.apply(null, confidence));
+
+    return gesture.gestures[maxConfidence].name;
+  } catch (e) {
+    throw e;
+  }
+}
+
+async function ColdStart() {
+  const img = document.createElement("img");
+  img.src = Duck;
+  img.width = 480;
+  img.height = 640;
+  return await net.estimateHands(img);
 }
 
 const HandGestures = {
@@ -128,6 +141,7 @@ const HandGestures = {
   Init,
   Detect,
   Destroy,
+  ColdStart,
 };
 
 export default HandGestures;

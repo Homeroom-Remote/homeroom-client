@@ -105,8 +105,8 @@ export default function Meeting() {
   const { setShow, setOpts } = usePopup();
 
   // Hand recognition
-  const handIntervalTime = 1000; // Every 1s
-  var detectionInterval = useRef(null);
+  const MachineLearningTimeout = 2100; // Every 5s
+  var detectionTimeout = useRef(null);
   const handGestures = useRef(new Map());
 
   ////////////////
@@ -230,33 +230,21 @@ export default function Meeting() {
 
   useEffect(() => {
     setDate(new Date());
-    if (!HandGestures.IsReady()) {
-      async function InitGestures() {
-        await HandGestures.Init();
-      }
-
-      InitGestures();
+    //////////////////////////////
+    async function initMachineLearning() {
+      await HandGestures.Init();
+      await FaceRecognition.Init();
+      await HandGestures.ColdStart();
+      await HandGestures.ColdStart();
+      await FaceRecognition.ColdStart();
+      await FaceRecognition.ColdStart();
+      setMachineLearningReady(true);
     }
 
-    if (!FaceRecognition.IsReady()) {
-      async function InitFaceRecognition() {
-        await FaceRecognition.Init();
-      }
+    initMachineLearning();
 
-      InitFaceRecognition();
-    }
-    setMachineLearningReady(true);
-
-    return () => {
-      if (myStream) {
-        stopStream(myStream);
-        Peer.removeStreamFromPeers(myStream);
-      }
-      if (detectionInterval.current) {
-        clearInterval(detectionInterval.current);
-        detectionInterval.current = null;
-      }
-    };
+    //////////////////////////////
+    return () => myStream && stopStream(myStream);
   }, []);
 
   useEffect(() => {
@@ -270,50 +258,13 @@ export default function Meeting() {
       return navigator.mediaDevices.getUserMedia(constraints);
     }
 
-    getMedia({ video, audio })
+    getMedia({ video: video ? { facingMode: "user" } : false, audio })
       .then((stream) => {
-        if (myStream) {
-          const hasFormerVideo = !!myStream.getVideoTracks().length > 0;
-          const hasFormerAudio = !!myStream.getAudioTracks().length > 0;
-          const hasCurrentVideo = !!stream.getVideoTracks().length > 0;
-          const hasCurrentAudio = !!stream.getAudioTracks().length > 0;
-
-          if (hasFormerVideo && !video) {
-            const track = myStream.getVideoTracks()[0];
-            Peer.removeTrack(myStream, track, peers);
-            myStream.removeTrack(track);
-          }
-          if (hasFormerAudio && !audio) {
-            const track = myStream.getAudioTracks()[0];
-            Peer.removeTrack(myStream, track, peers);
-            myStream.removeTrack(track);
-          }
-          if (hasCurrentAudio && !hasFormerAudio) {
-            const track = stream.getAudioTracks()[0];
-            Peer.addTrack(myStream, track, peers);
-            myStream.addTrack(track);
-          }
-          if (hasCurrentVideo && !hasFormerVideo) {
-            const track = stream.getVideoTracks()[0];
-            Peer.addTrack(myStream, track, peers);
-            myStream.addTrack(track);
-          }
-          checkUpdatedStream();
-        } else {
-          setMyStream(stream);
-          Peer.updateStream(stream, peers);
-        }
+        if (myStream) stopStream(myStream);
+        setMyStream(stream);
       })
-      .catch((e) => {
-        if (myStream) {
-          myStream
-            .getTracks()
-            .forEach((tr) => Peer.removeTrack(myStream, tr, peers));
-          stopStream(myStream);
-          Peer.removeStreamFromPeers(myStream);
-          setCamera(false);
-          setMicrophone(false);
-        }
+      .catch(() => {
+        if (myStream) stopStream(myStream);
         setMyStream(null);
       });
   };
@@ -351,6 +302,10 @@ export default function Meeting() {
       {
         name: "join",
         callback: (room, message) => onPeerJoin(room, message),
+      },
+      {
+        name: "update-participants",
+        callback: (room, message) => onUpdateParticipants(room, message),
       },
       {
         name: "leave",
@@ -494,7 +449,17 @@ export default function Meeting() {
   }
 
   function onPeerJoin(room, message) {
-    Peer.createPeer(room, message, true, peers, myStream, setPeers);
+    // Peer.createPeer(room, message, true, peers, myStream, setPeers);
+  }
+
+  function onUpdateParticipants(room, message) {
+    Peer.updateParticipants(
+      message?.participants,
+      peers,
+      setPeers,
+      room,
+      myStream
+    );
   }
 
   function onPeerLeave(room, message) {
@@ -518,16 +483,6 @@ export default function Meeting() {
     for (; i < msg.length; i++) {
       generalChatSetter && generalChatSetter((c) => [...c, msg[i]]);
     }
-  }
-
-  function onHandRecognition(message) {
-    const gestureObject = Peer.onHandRecognition(message, peers);
-    if (!gestureObject) {
-      console.warn("onHandRecognition warning: gestureObject is null");
-      return;
-    }
-
-    addGestureToVideo(gestureObject, gestureObject.sender);
   }
 
   useEffect(() => {
@@ -575,6 +530,7 @@ export default function Meeting() {
   // Peers
   ////////
   useEffect(() => {
+    Peer.updateStream(myStream, peers, setPeers);
     refreshRoomCallbacks(room);
   }, [myStream]);
 
@@ -618,44 +574,53 @@ export default function Meeting() {
   /////
   // AI
   /////
-
   useEffect(() => {
-    checkUpdatedStream();
-  }, [myStream]);
-
-  function checkUpdatedStream() {
     const hasVideoStream = !!myStream?.getVideoTracks().length > 0;
     const vidEl = document.querySelector("#hiddenVideoEl");
 
     // Remove interval if stream is offline
-    if (detectionInterval.current && (!hasVideoStream || !vidEl?.srcObject)) {
-      clearInterval(detectionInterval.current);
-      detectionInterval.current = null;
+    if (detectionTimeout.current && !hasVideoStream) {
+      clearTimeout(detectionTimeout.current);
+      detectionTimeout.current = null;
     }
 
-    // Add interval if stream is online
-    if (!detectionInterval.current && hasVideoStream) {
-      detectionInterval.current = setInterval(async () => {
-        if (!vidEl?.srcObject || !vidEl.srcObject.active)
-          clearInterval(detectionInterval.current);
-        HandGestures.Detect(vidEl)
-          .then((handPrediction) => {
-            handPrediction && HandleGesturePrediction(handPrediction);
-          })
-          .catch(() => {})
-          .finally(() => {});
+    // Add interval
+    if (hasVideoStream && !detectionTimeout.current) {
+      async function MachineLearningFunctionality() {
+        const t = new Date().getTime();
+        const [handPrediction, facePrediction] = await Promise.all([
+          HandGestures.Detect(vidEl),
+          FaceRecognition.Detect(vidEl),
+        ]);
 
-        FaceRecognition.Detect(vidEl)
-          .then((facePrediction) => {
-            facePrediction?.score &&
-              HandleConcentrationPrediction(facePrediction.score);
-            facePrediction?.expressions &&
-              handleExpressionsPrediction(facePrediction.expressions);
-          })
-          .catch(() => {});
-      }, handIntervalTime);
+        console.log(`ml: ${(new Date().getTime() - t) / 1000}s`);
+
+        if (handPrediction) HandleGesturePrediction(handPrediction);
+        if (facePrediction) {
+          facePrediction.score &&
+            HandleConcentrationPrediction(facePrediction.score);
+          facePrediction.expressions &&
+            handleExpressionsPrediction(facePrediction.expressions);
+        }
+
+        detectionTimeout.current = setTimeout(
+          MachineLearningFunctionality,
+          MachineLearningTimeout
+        );
+      }
+      detectionTimeout.current = setTimeout(
+        MachineLearningFunctionality,
+        MachineLearningTimeout
+      );
     }
-  }
+
+    return () => {
+      detectionTimeout.current && clearInterval(detectionTimeout.current);
+      const mediaSrc = vidEl?.srcObject;
+      if (mediaSrc) stopStream(mediaSrc);
+    };
+  }, [myStream]);
+
   function HandleGesturePrediction(prediction) {
     // Send to room (other participants)
     SendHandGesture(room, prediction);
@@ -764,7 +729,7 @@ export default function Meeting() {
             id="hiddenVideoEl"
             muted={true}
             ref={(e) => {
-              if (e) e.srcObject = myStream;
+              if (e && myStream) e.srcObject = myStream.clone();
             }}
             autoPlay={true}
           ></video>
