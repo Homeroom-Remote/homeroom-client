@@ -1,5 +1,5 @@
-import * as tf from "@tensorflow/tfjs";
 import * as faceapi from "@vladmandic/face-api";
+import Duck from "./duck.jpg";
 
 const modelPath = "models/";
 const optionsTinyFace = new faceapi.TinyFaceDetectorOptions({
@@ -71,28 +71,39 @@ async function Init() {
 }
 
 async function Detect(video) {
-  return new Promise(async (resolve, reject) => {
-    if (video.paused) reject("video paused");
-    try {
-      const dataTinyYolo = await faceapi
-        .detectAllFaces(video, optionsTinyFace)
-        .withFaceExpressions();
-      const returnObj = {
-        score: dataTinyYolo[0]?.detection._score || 0,
-        expressions: clampThreshold(dataTinyYolo[0]?.expressions, 0.1),
-      };
+  if (video.paused) return null;
 
-      resolve(returnObj);
-    } catch (e) {
-      //ignore
-    }
-  });
+  try {
+    const dataTinyYolo = await faceapi
+      .detectAllFaces(video, optionsTinyFace)
+      .withFaceExpressions();
+
+    if (!dataTinyYolo || dataTinyYolo.length <= 0) return;
+
+    const returnObj = {
+      score: dataTinyYolo[0]?.detection._score || 0,
+      expressions: clampThreshold(dataTinyYolo[0]?.expressions, 0.1),
+    };
+
+    return returnObj;
+  } catch (e) {
+    throw e;
+  }
+}
+
+async function ColdStart() {
+  const img = document.createElement("img");
+  img.src = Duck;
+  return await faceapi
+    .detectAllFaces(img, optionsTinyFace)
+    .withFaceExpressions();
 }
 
 const FaceRecognition = {
   Init,
   IsReady,
   Detect,
+  ColdStart,
 };
 
 export default FaceRecognition;

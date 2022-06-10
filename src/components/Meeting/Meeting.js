@@ -105,8 +105,8 @@ export default function Meeting() {
   const { setShow, setOpts } = usePopup();
 
   // Hand recognition
-  const handIntervalTime = 1000; // Every 1s
-  var detectionInterval = useRef(null);
+  const MachineLearningTimeout = 2100; // Every 5s
+  var detectionTimeout = useRef(null);
   const handGestures = useRef(new Map());
 
   ////////////////
@@ -230,9 +230,22 @@ export default function Meeting() {
 
   useEffect(() => {
     setDate(new Date());
+    //////////////////////////////
+    async function initMachineLearning() {
+      await HandGestures.Init();
+      await FaceRecognition.Init();
+      await HandGestures.ColdStart();
+      await HandGestures.ColdStart();
+      await FaceRecognition.ColdStart();
+      await FaceRecognition.ColdStart();
+      setMachineLearningReady(true);
+    }
+
+    initMachineLearning();
+
+    //////////////////////////////
     return () => myStream && stopStream(myStream);
   }, []);
-
 
   useEffect(() => {
     if (chat) {
@@ -240,13 +253,12 @@ export default function Meeting() {
     }
   }, [chat]);
 
-
   const refreshMedia = (video, audio) => {
     function getMedia(constraints) {
       return navigator.mediaDevices.getUserMedia(constraints);
     }
 
-    getMedia({ video, audio })
+    getMedia({ video: video ? { facingMode: "user" } : false, audio })
       .then((stream) => {
         if (myStream) stopStream(myStream);
         setMyStream(stream);
@@ -459,16 +471,6 @@ export default function Meeting() {
     }
   }
 
-  function onHandRecognition(message) {
-    const gestureObject = Peer.onHandRecognition(message, peers);
-    if (!gestureObject) {
-      console.warn("onHandRecognition warning: gestureObject is null");
-      return;
-    }
-
-    addGestureToVideo(gestureObject, gestureObject.sender);
-  }
-
   useEffect(() => {
     // Join room
     if (!room) {
@@ -559,56 +561,49 @@ export default function Meeting() {
   // AI
   /////
   useEffect(() => {
-    if (!HandGestures.IsReady()) {
-      async function InitGestures() {
-        await HandGestures.Init();
-      }
-
-      InitGestures();
-    }
-
-    if (!FaceRecognition.IsReady()) {
-      async function InitFaceRecognition() {
-        await FaceRecognition.Init();
-      }
-
-      InitFaceRecognition();
-    }
-    setMachineLearningReady(true);
-
     const hasVideoStream = !!myStream?.getVideoTracks().length > 0;
+    const vidEl = document.querySelector("#hiddenVideoEl");
 
     // Remove interval if stream is offline
-    if (detectionInterval.current && !hasVideoStream) {
-      clearInterval(detectionInterval.current);
-      detectionInterval.current = null;
+    if (detectionTimeout.current && !hasVideoStream) {
+      clearTimeout(detectionTimeout.current);
+      detectionTimeout.current = null;
     }
 
-    // Add interval if stream is online
-    if (!detectionInterval.current && hasVideoStream) {
-      detectionInterval.current = setInterval(async () => {
-        const vidEl = document.querySelector("#hiddenVideoEl");
-        HandGestures.Detect(vidEl)
-          .then((handPrediction) => {
-            handPrediction && HandleGesturePrediction(handPrediction);
-          })
-          .catch(() => {})
-          .finally(() => {});
+    // Add interval
+    if (hasVideoStream && !detectionTimeout.current) {
+      async function MachineLearningFunctionality() {
+        const t = new Date().getTime();
+        const [handPrediction, facePrediction] = await Promise.all([
+          HandGestures.Detect(vidEl),
+          FaceRecognition.Detect(vidEl),
+        ]);
 
-        FaceRecognition.Detect(vidEl)
-          .then((facePrediction) => {
-            facePrediction?.score &&
-              HandleConcentrationPrediction(facePrediction.score);
-            facePrediction?.expressions &&
-              handleExpressionsPrediction(facePrediction.expressions);
-          })
-          .catch(() => {});
-      }, handIntervalTime);
+        console.log(`ml: ${(new Date().getTime() - t) / 1000}s`);
+
+        if (handPrediction) HandleGesturePrediction(handPrediction);
+        if (facePrediction) {
+          facePrediction.score &&
+            HandleConcentrationPrediction(facePrediction.score);
+          facePrediction.expressions &&
+            handleExpressionsPrediction(facePrediction.expressions);
+        }
+
+        detectionTimeout.current = setTimeout(
+          MachineLearningFunctionality,
+          MachineLearningTimeout
+        );
+      }
+      detectionTimeout.current = setTimeout(
+        MachineLearningFunctionality,
+        MachineLearningTimeout
+      );
     }
 
     return () => {
-      detectionInterval.current && clearInterval(detectionInterval.current);
-      detectionInterval.current = null;
+      detectionTimeout.current && clearInterval(detectionTimeout.current);
+      const mediaSrc = vidEl?.srcObject;
+      if (mediaSrc) stopStream(mediaSrc);
     };
   }, [myStream]);
 
@@ -616,10 +611,8 @@ export default function Meeting() {
     // Send to room (other participants)
     SendHandGesture(room, prediction);
 
-    if (prediction === "raise_hand")
-      RegisterToMessageQueue(room);
-    else if (prediction === "fist")
-      RemoveFromMessageQueue(room);
+    if (prediction === "raise_hand") RegisterToMessageQueue(room);
+    else if (prediction === "fist") RemoveFromMessageQueue(room);
 
     // Display on my video object
     const id = "me";
@@ -720,8 +713,9 @@ export default function Meeting() {
           <video
             className="hidden"
             id="hiddenVideoEl"
+            muted={true}
             ref={(e) => {
-              if (e) e.srcObject = myStream;
+              if (e && myStream) e.srcObject = myStream.clone();
             }}
             autoPlay={true}
           ></video>
