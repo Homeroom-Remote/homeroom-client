@@ -304,6 +304,10 @@ export default function Meeting() {
         callback: (room, message) => onPeerJoin(room, message),
       },
       {
+        name: "update-participants",
+        callback: (room, message) => onUpdateParticipants(room, message),
+      },
+      {
         name: "leave",
         callback: (room, message) => onPeerLeave(room, message),
       },
@@ -445,7 +449,17 @@ export default function Meeting() {
   }
 
   function onPeerJoin(room, message) {
-    Peer.createPeer(room, message, true, peers, myStream, setPeers);
+    // Peer.createPeer(room, message, true, peers, myStream, setPeers);
+  }
+
+  function onUpdateParticipants(room, message) {
+    Peer.updateParticipants(
+      message?.participants,
+      peers,
+      setPeers,
+      room,
+      myStream
+    );
   }
 
   function onPeerLeave(room, message) {

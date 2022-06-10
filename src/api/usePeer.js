@@ -48,6 +48,22 @@ function updateStream(stream, peers, setter) {
   });
 }
 
+function updateParticipants(participantObject, peers, setter, room, myStream) {
+  Object.keys(participantObject)
+    .filter((sessionId) => !peers[sessionId])
+    .forEach((sessionId) => {
+      console.log(`Initiating new connection with ${sessionId}`);
+      createPeer(
+        room,
+        participantObject[sessionId],
+        true,
+        peers,
+        myStream,
+        setter
+      );
+    });
+}
+
 /**
  * Creates (or negotiates signal) peer.
  * @param {Object} room
@@ -185,5 +201,6 @@ const PeerWrapper = {
   getNameFromID,
   addScreenShare,
   removeScreenShare,
+  updateParticipants,
 };
 export default PeerWrapper;
