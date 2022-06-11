@@ -453,7 +453,6 @@ export default function Meeting() {
   }
 
   function onUpdateParticipants(room, message) {
-    console.log("update bitch", message);
     Peer.updateParticipants(
       message?.participants,
       peers,
@@ -577,7 +576,6 @@ export default function Meeting() {
   /////
   useEffect(() => {
     const hasVideoStream = !!myStream?.getVideoTracks().length > 0;
-    const vidEl = document.querySelector("#hiddenVideoEl");
 
     // Remove interval if stream is offline
     if (detectionTimeout.current) {
@@ -587,14 +585,18 @@ export default function Meeting() {
 
     // Add interval
     if (hasVideoStream) {
+      document.querySelector("#hiddenVideoEl").srcObject = myStream;
       async function MachineLearningFunctionality() {
+        const vidEl = document.querySelector("#hiddenVideoEl");
+        vidEl.play();
+
         const t = new Date().getTime();
         const [handPrediction, facePrediction] = await Promise.all([
           HandGestures.Detect(vidEl),
           FaceRecognition.Detect(vidEl),
         ]);
 
-        console.log(`ml: ${(new Date().getTime() - t) / 1000}s`);
+        console.log(`detection time: ${(new Date().getTime() - t) / 1000}s`);
 
         if (handPrediction) HandleGesturePrediction(handPrediction);
         if (facePrediction) {
@@ -617,8 +619,6 @@ export default function Meeting() {
 
     return () => {
       detectionTimeout.current && clearInterval(detectionTimeout.current);
-      const mediaSrc = vidEl?.srcObject;
-      if (mediaSrc) stopStream(mediaSrc);
     };
   }, [myStream]);
 
@@ -729,9 +729,6 @@ export default function Meeting() {
             className="hidden"
             id="hiddenVideoEl"
             muted={true}
-            ref={(e) => {
-              if (e && myStream) e.srcObject = myStream.clone();
-            }}
             autoPlay={true}
           ></video>
 

@@ -88,7 +88,7 @@ export default function ScreenShareVideoDisplay({
   }, [otherParticipants]);
 
   const getStream = (peer) => {
-    if (!peer) return null;
+    if (!peer || !screenSharer) return null;
     const activeStreams = peer.peer._remoteStreams.filter(
       (stream) => stream.active === true
     );

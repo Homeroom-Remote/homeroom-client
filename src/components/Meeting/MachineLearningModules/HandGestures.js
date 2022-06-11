@@ -123,6 +123,7 @@ async function Detect(video) {
 
     return gesture.gestures[maxConfidence].name;
   } catch (e) {
+    console.warn(e);
     throw e;
   }
 }
