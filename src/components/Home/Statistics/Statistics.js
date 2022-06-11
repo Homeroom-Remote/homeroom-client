@@ -8,7 +8,6 @@ import useUser from "../../../stores/userStore";
 import LoadingSVG from "../../../utils/seo.svg";
 import useTheme from "../../../stores/themeStore";
 
-
 export default function Statistics() {
   const { getBgFromTheme, getTextFromTheme } = useTheme();
   const { user } = useUser();
@@ -30,14 +29,13 @@ export default function Statistics() {
 
   const [loading, setLoading] = useState(true);
 
-
   useEffect(() => {
     setLoading(true);
     setTimeout(() => {
       get(getMeetingFromUserID(user.uid))
         .then((data) => {
           setParticipationData(parserParticipationData(data));
-          setExpressionsData(parserExpressionsData(data))
+          setExpressionsData(parserExpressionsData(data));
           setConcentrationData(parserConcentrationData(data));
           setGrade(parserGrade(data));
           setTips(parserTips(data));
@@ -47,17 +45,15 @@ export default function Statistics() {
           console.warn("data for above warning", e);
         })
         .finally(() => {
-          setLoading(false)
+          setLoading(false);
         });
     }, [1000]);
   }, []);
 
-
   useEffect(() => {
-    if(!loading && participationData && participationData.length > 0)
-      handleChange(0)
-  }, [loading])
-
+    if (!loading && participationData && participationData.length > 0)
+      handleChange(0);
+  }, [loading]);
 
   function fromJToTime(j) {
     var seconds = (j + 1) * 5,
@@ -77,34 +73,31 @@ export default function Statistics() {
     return `${hours}:${minutes}:${seconds}`;
   }
 
-  
   function secondsToTime(seconds) {
     var minutes = 0,
-     hours = 0;
+      hours = 0;
     while (seconds >= 60) {
-      minutes += 1
-      seconds -= 60
+      minutes += 1;
+      seconds -= 60;
     }
     while (minutes >= 60) {
-      hours += 1
-      minutes -= 60
+      hours += 1;
+      minutes -= 60;
     }
-    if (hours < 10) hours = `0${hours}`
-    if (minutes < 10) minutes = `0${minutes}`
-    if (seconds < 10) seconds = `0${seconds}`
-    return `${hours}:${minutes}:${seconds}`
+    if (hours < 10) hours = `0${hours}`;
+    if (minutes < 10) minutes = `0${minutes}`;
+    if (seconds < 10) seconds = `0${seconds}`;
+    return `${hours}:${minutes}:${seconds}`;
   }
-  
 
   function handleChange(event) {
-    var index = (event === 0 ?  0 : parseInt(event.target.value));
+    var index = event === 0 ? 0 : parseInt(event.target.value);
     setParticipationToShow(participationData[index]);
     setConcentrationToShow(concentrationData[index]);
-    setExpressionsToShow(expressionsData[index])
+    setExpressionsToShow(expressionsData[index]);
     setGradeToShow(parseFloat(grade[index]));
     setTipsToShow(tips[index]);
-  };
-
+  }
 
   function parserParticipationData(data) {
     var toReturn = [];
@@ -122,7 +115,7 @@ export default function Statistics() {
         var temp = [
           secondsToTime(parseInt(data.meeting_logs[i].engagementLogs[j].after)),
           questionSum,
-          chatSum
+          chatSum,
         ];
         arr.push(temp);
       }
@@ -130,7 +123,6 @@ export default function Statistics() {
     }
     return toReturn;
   }
-
 
   function parserConcentrationData(data) {
     var toReturn = [];
@@ -150,12 +142,19 @@ export default function Statistics() {
     return toReturn;
   }
 
-
   function parserExpressionsData(data) {
     var toReturn = [];
     for (var i = 0; i < data.meeting_logs.length; i++) {
       var arr = [];
-      arr.push(["Minute", "Angry", "Disgusted", "Fearful", "Happy", "Neutral", "Sad"]);
+      arr.push([
+        "Minute",
+        "Angry",
+        "Disgusted",
+        "Fearful",
+        "Happy",
+        "Neutral",
+        "Sad",
+      ]);
       var size = data.meeting_logs[i].log.length;
       for (var j = 0; j < size; j++) {
         var temp = [
@@ -174,7 +173,6 @@ export default function Statistics() {
     return toReturn;
   }
 
-
   function parserGrade(data) {
     var toReturn = [];
     for (var i = 0; i < data.meeting_logs.length; i++) {
@@ -182,7 +180,6 @@ export default function Statistics() {
     }
     return toReturn;
   }
-
 
   function parserTips(data) {
     var toReturn = [];
@@ -192,43 +189,42 @@ export default function Statistics() {
     return toReturn;
   }
 
-
   const optionsForConcentrationGraph = {
     curveType: "function",
-    legend: { 
-      position: "bottom", 
-      textStyle: { color: getTextFromTheme() }
+    legend: {
+      position: "bottom",
+      textStyle: { color: getTextFromTheme() },
     },
     colors: ["rgb(192, 132, 252)", "rgb(74, 222, 128)"],
-    hAxis: { 
+    hAxis: {
       title: "Time",
-      textStyle: { color: getTextFromTheme()}, 
-      titleTextStyle: { color: getTextFromTheme(), bold: true } 
+      textStyle: { color: getTextFromTheme() },
+      titleTextStyle: { color: getTextFromTheme(), bold: true },
     },
     vAxis: {
       title: "Score",
       textStyle: { color: getTextFromTheme() },
-      titleTextStyle: { color: getTextFromTheme(), bold: true } 
+      titleTextStyle: { color: getTextFromTheme(), bold: true },
     },
     backgroundColor: getBgFromTheme(),
     lineWidth: 4,
   };
 
   const optionsForParticipationGraph = {
-    legend: { 
+    legend: {
       position: "bottom",
-      textStyle: { color: getTextFromTheme() }
+      textStyle: { color: getTextFromTheme() },
     },
     colors: ["rgb(192, 132, 252)", "rgb(74, 222, 128)"],
-    hAxis: { 
-      title: "Time", 
+    hAxis: {
+      title: "Time",
       textStyle: { color: getTextFromTheme() },
-      titleTextStyle: { color: getTextFromTheme(), bold: true } 
+      titleTextStyle: { color: getTextFromTheme(), bold: true },
     },
-    vAxis: { 
+    vAxis: {
       title: "Count",
       textStyle: { color: getTextFromTheme() },
-      titleTextStyle: { color: getTextFromTheme(), bold: true } 
+      titleTextStyle: { color: getTextFromTheme(), bold: true },
     },
     backgroundColor: getBgFromTheme(),
     lineWidth: 1,
@@ -236,28 +232,21 @@ export default function Statistics() {
   };
   const optionsForExpressionsGraph = {
     curveType: "function",
-    legend: { 
-      position: "bottom", 
-      textStyle: { color: getTextFromTheme() }
+    legend: {
+      position: "bottom",
+      textStyle: { color: getTextFromTheme() },
     },
-    colors: [
-      "#f43f5e",
-      "#14b8a6",
-      "#d946ef",
-      "#3b82f6",
-      "#94a3b8",
-      "#fdba74",
-    ],
-    hAxis: { 
+    colors: ["#f43f5e", "#14b8a6", "#d946ef", "#3b82f6", "#94a3b8", "#fdba74"],
+    hAxis: {
       title: "Time",
-      textStyle: { color: getTextFromTheme()}, 
-      titleTextStyle: { color: getTextFromTheme(), bold: true } 
+      textStyle: { color: getTextFromTheme() },
+      titleTextStyle: { color: getTextFromTheme(), bold: true },
     },
     vAxis: {
       title: "Score",
       viewWindow: { min: 0, max: 1 },
       textStyle: { color: getTextFromTheme() },
-      titleTextStyle: { color: getTextFromTheme(), bold: true } 
+      titleTextStyle: { color: getTextFromTheme(), bold: true },
     },
     backgroundColor: getBgFromTheme(),
     lineWidth: 4,
@@ -298,75 +287,80 @@ export default function Statistics() {
 
   return (
     <div className="px-6 pt-6 py-16 2xl:container h-full overflow-auto">
-      <div className="flex justify-center items-center mb-4">        
+      <div className="flex flex-col justify-center items-center mb-4">
         <select
+          id="meeting"
           onChange={handleChange}
-          className=" bg-primary-500 w-fit"
+          className="bg-lt-100 border border-gray-300 text-gray-900 
+          text-md rounded focus:ring-primary-500 focus:border-primary-500 
+          block p-4 dark:bg-transparent dark:border-gray-600 dark:placeholder-gray-400 
+          dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
         >
           {concentrationData.map((meeting, index) => (
-            <option value={index}>Meeting number {index + 1}</option>
-          ))
-          }
+            <option
+              key={`meeting-n-${index}`}
+              value={index}
+              className="dark:bg-dark-700 transition ease-in-out duration-100 my-1.5 hover:dark:bg-primary-500"
+            >
+              Meeting number {index + 1}
+            </option>
+          ))}
         </select>
       </div>
       <div className=" w-[50%] ml-[25%] mb-16">
-          {gradeToShow >= 0 && (
-            <LectureGrade grade={gradeToShow} tips={tipsToShow} />
-          )}
-        </div>
-        <div className=" grid grid-rows-2 h-full">
+        {gradeToShow >= 0 && (
+          <LectureGrade grade={gradeToShow} tips={tipsToShow} />
+        )}
+      </div>
+      <div className=" grid grid-rows-2 h-full">
         <div className="grid grid-cols-12 h-full col-span-4">
-        <div className="  col-start-2 col-span-10 mb-4">
+          <div className="  col-start-2 col-span-10 mb-4">
             <LectureResults
-              data={concentrationToShow.length > 1
-                ?
-                  expressionsToShow
-                :
-                  [
-                    ["Minute", "Expressions"],
-                    ["0", 0],
-                  ]
+              data={
+                concentrationToShow.length > 1
+                  ? expressionsToShow
+                  : [
+                      ["Minute", "Expressions"],
+                      ["0", 0],
+                    ]
               }
               options={optionsForExpressionsGraph}
               header={"Expressions Performance"}
             />
-        </div>
+          </div>
 
-        <div className=" col-span-5 col-start-2 w-full mb-20 gap-4 -ml-2">
+          <div className=" col-span-5 col-start-2 w-full mb-20 gap-4 -ml-2">
             <LectureResults
-              data={concentrationToShow.length > 1 
-                ? 
-                  concentrationToShow 
-                : 
-                  [
-                    ["Minute", "Concentration"],
-                    ["0", 0],
-                  ]
+              data={
+                concentrationToShow.length > 1
+                  ? concentrationToShow
+                  : [
+                      ["Minute", "Concentration"],
+                      ["0", 0],
+                    ]
               }
               options={optionsForConcentrationGraph}
               header={"Concentration Performance"}
             />
-        </div>
-        <div className=" col-start-7 col-span-5 w-full mb-20 ml-2">
+          </div>
+          <div className=" col-start-7 col-span-5 w-full mb-20 ml-2">
             <LectureResults
-              data={participationToShow.length > 1
-                ? 
-                  participationToShow
-                :
-                  [
-                    ["Minute", "Questions", "Chat"],
-                    ["0", 0, 0],
-                  ]
+              data={
+                participationToShow.length > 1
+                  ? participationToShow
+                  : [
+                      ["Minute", "Questions", "Chat"],
+                      ["0", 0, 0],
+                    ]
               }
               options={optionsForParticipationGraph}
               header={"Participation Performance"}
               isAreaChart={true}
             />
-        </div>          
-        <div />
+          </div>
+          <div />
         </div>
       </div>
     </div>
   );
 }
-

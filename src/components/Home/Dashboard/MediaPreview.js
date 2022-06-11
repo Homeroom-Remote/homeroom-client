@@ -45,7 +45,7 @@ export default function SeeMyself() {
             Media Preview
           </h2>
           <div className="h-full w-auto">
-            <Video stream={myStream} name={"My Video"} />
+            <Video stream={myStream} name={"My Video"} small={true} />
           </div>
           <div className="flex flex-row justify-center items-center gap-x-2 w-full">
             <Button onClick={toggleCamera} text={text} />

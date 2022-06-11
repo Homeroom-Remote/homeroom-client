@@ -41,6 +41,7 @@ import {
   SendSurveyAnswer,
 } from "../../api/room";
 import HandGestures from "./MachineLearningModules/HandGestures";
+import FaceRecognition from "./MachineLearningModules/FaceRecognition";
 
 ////////////////
 // State & Store
@@ -55,7 +56,7 @@ import useSettings from "../../stores/settingsStore";
 // Utils
 ////////
 import handGestureList from "../../utils/handGestureList";
-import FaceRecognition from "./MachineLearningModules/FaceRecognition";
+import bells from "../../utils/bells.wav";
 
 const globalStyles =
   // eslint-disable-next-line no-multi-str
@@ -244,7 +245,10 @@ export default function Meeting() {
     initMachineLearning();
 
     //////////////////////////////
-    return () => myStream && stopStream(myStream);
+    return () => {
+      if (myStream) stopStream(myStream);
+      if (screenSharer) setScreenSharer(null);
+    };
   }, []);
 
   useEffect(() => {
@@ -449,6 +453,7 @@ export default function Meeting() {
   }
 
   function onPeerJoin(room, message) {
+    new Audio(bells).play();
     // Peer.createPeer(room, message, true, peers, myStream, setPeers);
   }
 

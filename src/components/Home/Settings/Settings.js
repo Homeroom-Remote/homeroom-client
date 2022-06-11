@@ -11,10 +11,12 @@ export default function Settings() {
     askBeforeAudio,
     autoCopyLink,
     showConnectionTime,
+    playJoinSound,
     toggleAskBeforeVideo,
     toggleAskBeforeAudio,
     toggleAutoCopyLink,
     toggleShowConnectionTime,
+    togglePlayJoinSound,
   } = useSettings();
 
   useEffect(() => {
@@ -25,6 +27,7 @@ export default function Settings() {
       askBeforeAudio,
       autoCopyLink,
       showConnectionTime,
+      playJoinSound,
     };
     localStorage.setItem("inputs", JSON.stringify(inputs));
   }, [
@@ -34,6 +37,7 @@ export default function Settings() {
     askBeforeAudio,
     autoCopyLink,
     showConnectionTime,
+    playJoinSound,
   ]);
 
   return (
@@ -75,6 +79,12 @@ export default function Settings() {
           checked={showConnectionTime}
           onChange={toggleShowConnectionTime}
           id={"show-time-toggle"}
+        />
+        <Toggle
+          text={"Play a sound when a new participant joins the meeting."}
+          checked={playJoinSound}
+          onChange={togglePlayJoinSound}
+          id={"play-join-sound"}
         />
       </div>
     </article>

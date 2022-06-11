@@ -22,34 +22,36 @@ export default function Home() {
   ////////////////
   // load settings
   ////////////////
-  const { defaultVideo, defaultAudio, toggleVideo, toggleAudio } = useVideoSettings();
+  const { defaultVideo, defaultAudio, toggleVideo, toggleAudio } =
+    useVideoSettings();
   const {
     askBeforeVideo,
     askBeforeAudio,
     autoCopyLink,
     showConnectionTime,
+    playJoinSound,
     toggleAskBeforeVideo,
     toggleAskBeforeAudio,
     toggleAutoCopyLink,
     toggleShowConnectionTime,
+    togglePlayJoinSound,
   } = useSettings();
 
   useEffect(() => {
     const inputs = JSON.parse(localStorage.getItem("inputs"));
-    if (!inputs) return
+    if (!inputs) return;
     Object?.entries(inputs)?.forEach(([k, v]) => {
       if (k === "askBeforeAudio" && askBeforeAudio !== v)
         toggleAskBeforeAudio();
       else if (k === "askBeforeVideo" && askBeforeVideo !== v)
         toggleAskBeforeVideo();
-      else if (k === "autoCopyLink" && autoCopyLink !== v)
-        toggleAutoCopyLink();
+      else if (k === "autoCopyLink" && autoCopyLink !== v) toggleAutoCopyLink();
       else if (k === "showConnectionTime" && showConnectionTime !== v)
         toggleShowConnectionTime();
-      else if (k === "defaultVideo" && defaultVideo !== v)
-        toggleVideo();
-      else if (k === "defaultAudio" && defaultAudio !== v)
-        toggleAudio();
+      else if (k === "defaultVideo" && defaultVideo !== v) toggleVideo();
+      else if (k === "defaultAudio" && defaultAudio !== v) toggleAudio();
+      else if (k === "playJoinSound" && playJoinSound !== v)
+        togglePlayJoinSound();
     });
   }, []);
 

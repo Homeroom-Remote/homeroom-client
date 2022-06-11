@@ -60,7 +60,7 @@ function Video({ stream, name, id, me = false, small = false }) {
   return (
     <div
       className={
-        "h-full dark:bg-dark-800 bg-lt-300 place-items-center justify-center flex p-2 shadow-lg rounded-lg relative box-border " +
+        "h-full dark:bg-dark-800 bg-lt-300 place-items-center justify-center flex p-2 shadow-lg rounded-lg relative box-border overflow-hidden " +
         audibleHandler()
       }
     >
@@ -88,7 +88,7 @@ function Video({ stream, name, id, me = false, small = false }) {
       <p id={`hand-gesture-${id}`} className={getHandGestureStyles()}></p>
       <video
         muted={me}
-        className={small ? "w-40 h-40" : "h-full w-auto"}
+        className={small ? "object-contain max-w-48 max-h-48" : "h-full w-auto"}
         ref={(e) => {
           if (e) {
             e.srcObject = stream;
@@ -102,9 +102,10 @@ function Video({ stream, name, id, me = false, small = false }) {
         }}
         autoPlay={true}
       ></video>
-      {!shouldDisplayVideoStream && (
+      {!shouldDisplayVideoStream && !small && (
         <h1 className="font-bold text-4xl absolute">{name}</h1>
       )}
+      {small && <h3 className="font-medium text-md absolute top-0">{name}</h3>}
     </div>
   );
 }

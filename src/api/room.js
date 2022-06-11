@@ -1,6 +1,8 @@
 import * as Colyseus from "colyseus.js";
 
-const wsURL = `ws://homeroom-server.herokuapp.com/:3030`;
+// const wsURL = `ws://homeroom-server.herokuapp.com/:3030`;
+const wsURL = `ws://${window.location.hostname}:3030`;
+
 const client = new Colyseus.Client(wsURL);
 
 /**

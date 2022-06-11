@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Header from "./Header";
 import QuickSelection from "./QuickSelection";
 import Overlay from "../../Overlay";
