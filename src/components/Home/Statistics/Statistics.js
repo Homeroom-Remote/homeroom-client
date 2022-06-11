@@ -156,7 +156,6 @@ export default function Statistics() {
         "Sad",
         "Surprised",
       ]);
-      console.log(data.meeting_logs[i].log);
       var size = data.meeting_logs[i].log.length;
       for (var j = 0; j < size; j++) {
         var temp = [
