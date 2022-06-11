@@ -96,15 +96,13 @@ export default function ScreenShareVideoDisplay({
       return null;
     } else if (screenSharer?.user === peer.uid) {
       // return regular webcam video if has one
-      return activeStreams.find(
-        (stream) => stream.id !== screenSharer.streamId
-      );
-    } else {
       const activeWithoutShare = activeStreams.filter(
         (stream) => stream.id !== screenSharer.streamId
       );
-      if (activeWithoutShare.length <= 0) return 0;
+      if (activeWithoutShare.length <= 0) return null;
       return activeWithoutShare[activeWithoutShare.length - 1];
+    } else {
+      return activeStreams[activeStreams.length - 1];
     }
   };
 
