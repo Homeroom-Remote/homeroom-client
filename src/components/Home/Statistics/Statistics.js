@@ -154,7 +154,9 @@ export default function Statistics() {
         "Happy",
         "Neutral",
         "Sad",
+        "Surprised",
       ]);
+      console.log(data.meeting_logs[i].log);
       var size = data.meeting_logs[i].log.length;
       for (var j = 0; j < size; j++) {
         var temp = [
@@ -165,6 +167,7 @@ export default function Statistics() {
           data.meeting_logs[i].log[j].expressions.expressions.happy,
           data.meeting_logs[i].log[j].expressions.expressions.neutral,
           data.meeting_logs[i].log[j].expressions.expressions.sad,
+          data.meeting_logs[i].log[j].expressions.expressions.surprised,
         ];
         arr.push(temp);
       }
