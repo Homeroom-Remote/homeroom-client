@@ -121,6 +121,7 @@ export default function UsePeer() {
   }
 
   function updateParticipants(participantObject, room, myStream) {
+    console.log("updating participants", participantObject);
     Object.keys(participantObject)
       .filter((sessionId) => !getPeers()[sessionId])
       .forEach((sessionId) => {
@@ -129,15 +130,20 @@ export default function UsePeer() {
 
     // reconnect timeout
     setTimeout(() => {
-      getPeers()
-        .filter((peer) => !peer.peer._connected)
-        .forEach((peer) => {
-          console.log("reconnecting to because connected was false", peer.id);
-          destroyPeer(peer.id);
-          removePeerById(peer.id);
-          createPeer(room, participantObject[peer.id], true, myStream);
-        });
-    }, 3000);
+      const unconnectedPeers = getPeers().filter(
+        (peer) => peer.peer._connected === false
+      );
+      var filteredParticipantObject = {};
+      unconnectedPeers.forEach((peer) => {
+        console.log("reconnecting to because connected was false", peer.id);
+        filteredParticipantObject[peer.id] = participantObject[peer.id];
+        destroyPeer(peer.id);
+        removePeerById(peer.id);
+      });
+
+      unconnectedPeers.length > 0 &&
+        updateParticipants(filteredParticipantObject, room, myStream);
+    }, 5000);
   }
   ///////////////////////////////////
 
