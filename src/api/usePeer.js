@@ -85,7 +85,8 @@ function updateParticipants(participantObject, peers, setter, room, myStream) {
  */
 function createPeer(room, message, initiator, peers, myStream, setter) {
   const peerExists = peers.find((peer) => peer.id === message.sessionId);
-  if (!initiator && peerExists) {
+  console.log(`peerExists: ${!!peerExists} nPeers: ${peers.length}`);
+  if (!initiator && peerExists && peerExists.peer._connected) {
     // Recieved signal
     peerExists.peer.signal(message.data);
     return;
@@ -94,11 +95,20 @@ function createPeer(room, message, initiator, peers, myStream, setter) {
   const peer = new Peer({
     initiator: initiator,
     trickle: true,
-    stream: myStream,
+    stream: myStream || false,
   });
 
   peer.on("signal", (data) => {
+    console.log("signaling peer");
     room.send("signal", { sessionId: message.sessionId, data: data });
+  });
+
+  peer.on("connect", () => {
+    console.log("connected with peer");
+  });
+
+  peer.on("close", () => {
+    console.log("closed connection with peer");
   });
 
   updatePeers(
@@ -109,22 +119,26 @@ function createPeer(room, message, initiator, peers, myStream, setter) {
       peer: peer,
       room: room,
       name: message.name,
-      stream: null,
     },
     setter
   );
 
   initiator || peer.signal(message.data);
   peer.on("track", (track, stream) => {
+    console.log("track", track, stream);
     function removeTrack() {
-      track.stop();
-      stream.removeTrack(track);
+      console.log("removing track");
+      // track.stop();
+      // stream.removeTrack(track);
     }
+    function addTrack() {}
     track.addEventListener("mute", removeTrack);
     track.addEventListener("ended", removeTrack);
+    track.addEventListener("unmute", (e) => console.log("track unmute", e));
   });
 
   peer.on("stream", (peerStream) => {
+    console.log(peerStream.getTracks());
     updatePeers(
       message.sessionId,
       {
@@ -163,6 +177,7 @@ function createPeer(room, message, initiator, peers, myStream, setter) {
  * @param {Function} setter
  */
 function destroyPeer(peerToRemoveId, peers, setter) {
+  console.log("destroying peer", peerToRemoveId);
   const peerToRemove = peers.find((peer) => peer.id === peerToRemoveId);
   peerToRemove?.peer?.destroy();
   setter((prev) => prev.filter((peer) => peer.id !== peerToRemoveId));
