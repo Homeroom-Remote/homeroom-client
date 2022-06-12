@@ -34,7 +34,7 @@ export default function UsePeer() {
     );
     peerExists &&
       console.log(peerExists, `destroyed: ${peerExists.peer.destroyed}`);
-    if (!initiator && peerExists) {
+    if (!initiator && peerExists && !peerExists.peer.destroyed) {
       // Recieved signal
       peerExists.peer.signal(message.data);
       return;
