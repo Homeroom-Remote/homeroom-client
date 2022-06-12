@@ -568,8 +568,9 @@ export default function Meeting() {
     });
 
     // Place the corresponding gesture
-    document.getElementById(`hand-gesture-${id}`).innerText =
-      handGestureList[gestureObject.message];
+    if (document.getElementById(`hand-gesture-${id}`))
+      document.getElementById(`hand-gesture-${id}`).innerText =
+        handGestureList[gestureObject.message];
   }
 
   function onHandRecognition(message) {
