@@ -86,7 +86,8 @@ function updateParticipants(participantObject, peers, setter, room, myStream) {
 function createPeer(room, message, initiator, peers, myStream, setter) {
   const peerExists = peers.find((peer) => peer.id === message.sessionId);
   console.log(`peerExists: ${!!peerExists} nPeers: ${peers.length}`);
-  if (!initiator && peerExists && peerExists.peer._connected) {
+  peerExists && console.log(peerExists);
+  if (!initiator && peerExists) {
     // Recieved signal
     peerExists.peer.signal(message.data);
     return;
@@ -123,7 +124,7 @@ function createPeer(room, message, initiator, peers, myStream, setter) {
     setter
   );
 
-  initiator || peer.signal(message.data);
+  // initiator || peer.signal(message.data);
   peer.on("track", (track, stream) => {
     console.log("track", track, stream);
     function removeTrack() {
@@ -179,6 +180,7 @@ function createPeer(room, message, initiator, peers, myStream, setter) {
 function destroyPeer(peerToRemoveId, peers, setter) {
   console.log("destroying peer", peerToRemoveId);
   const peerToRemove = peers.find((peer) => peer.id === peerToRemoveId);
+  console.log(peerToRemove);
   peerToRemove?.peer?.destroy();
   setter((prev) => prev.filter((peer) => peer.id !== peerToRemoveId));
 }
