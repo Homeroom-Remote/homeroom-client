@@ -1,111 +1,48 @@
 import Video from "./Video";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { NextPageArrow, PrevPageArrow } from "../../../utils/svgs";
+import PaginationHelper from "./PaginationHelper";
+import useMeeting from "../../../stores/meetingStore";
 
 const NUM_OF_VIDEOS = 9;
-export default function RegularVideoDisplay({
-  otherParticipants,
-  myStream,
-  screenSharer,
-}) {
-  const NUM_OF_VIDEOS_IN_PAGE = (startIndex) => {
-    if (startIndex === 0) return NUM_OF_VIDEOS - 1;
-    return NUM_OF_VIDEOS;
-  };
-  const [forInitialize, setForInitialize] = useState(false);
-  const [startIndex, setStartIndex] = useState(0);
-  const [endIndex, setEndIndex] = useState(
-    Math.min(NUM_OF_VIDEOS_IN_PAGE(startIndex), otherParticipants.length)
-  );
-  const [forwardClick, setForwardClick] = useState(false);
-  const [backwardClick, setBackwardClick] = useState(false);
-  const [peersToShow, setPeersToShow] = useState([]);
-  const showPagination = () => otherParticipants.length >= NUM_OF_VIDEOS;
+export default function RegularVideoDisplay({ myStream, screenSharer }) {
+  const { peers, getPeers } = useMeeting();
+  const [page, setPage] = useState(1);
+  const [visiblePeers, setVisiblePeers] = useState([]);
+  let pagination = useRef(new PaginationHelper(peers, NUM_OF_VIDEOS));
 
-  const toggleForward = () => {
-    if (!otherParticipants) return;
-    setForInitialize(true);
-    setForwardClick(true);
-    setEndIndex(Math.min(endIndex + NUM_OF_VIDEOS, otherParticipants.length));
-  };
-
-  const toggleBackward = () => {
-    setForInitialize(true);
-    if (startIndex === NUM_OF_VIDEOS - 1) {
-      setBackwardClick(true);
-      setEndIndex(Math.min(NUM_OF_VIDEOS - 1, otherParticipants.length));
-    } else if (startIndex >= NUM_OF_VIDEOS_IN_PAGE(startIndex)) {
-      setBackwardClick(true);
-      setEndIndex(-1);
-    }
-  };
-
-  useEffect(() => {
-    if (!forInitialize) return;
-    if (endIndex === -1) {
-      setEndIndex(Math.min(startIndex, otherParticipants.length));
-      return;
-    } else if (backwardClick) {
-      setBackwardClick(false);
-      if (startIndex === NUM_OF_VIDEOS - 1) {
-        setStartIndex(0);
-      } else if (startIndex > NUM_OF_VIDEOS - 1) {
-        setStartIndex(
-          Math.min(startIndex - NUM_OF_VIDEOS, otherParticipants.length)
-        );
-      }
-    } else if (forwardClick) {
-      setForwardClick(false);
-      setStartIndex(startIndex + NUM_OF_VIDEOS_IN_PAGE(startIndex));
-    }
-  }, [endIndex]);
-
-  useEffect(() => {
-    if (!forInitialize) return;
-    setPeersToShow(otherParticipants.slice(startIndex, endIndex));
-  }, [startIndex]);
-
-  useEffect(() => {
-    if (startIndex > otherParticipants.length) toggleBackward();
-    else if (endIndex > otherParticipants.length)
-      // Someone on this page left
-      setEndIndex(otherParticipants.length - 1);
-    else if (
-      endIndex < otherParticipants.length - 1 &&
-      otherParticipants.length - endIndex < NUM_OF_VIDEOS_IN_PAGE(startIndex) // New participant in this page
-    )
-      setEndIndex(otherParticipants.length - 1);
-    setEndIndex(
-      Math.min(NUM_OF_VIDEOS_IN_PAGE(startIndex), otherParticipants.length)
+  const showPagination = () => pagination.current.pageCount > 1;
+  const toggleForward = () =>
+    setPage((currPage) =>
+      pagination.current.hasNext(currPage) ? currPage + 1 : currPage
     );
-    setPeersToShow(otherParticipants.slice(startIndex, endIndex));
-  }, [otherParticipants]);
+  const toggleBackward = () =>
+    setPage((currPage) => (currPage > 1 ? currPage - 1 : currPage));
+  useEffect(() => {
+    var paginationHelper = new PaginationHelper(getPeers(), NUM_OF_VIDEOS);
+    setVisiblePeers(paginationHelper.pageItems(page));
+    pagination.current.current = paginationHelper;
+  }, [peers]);
 
   const getGridStyles = () => {
     const combineStyles = (styleStrings) => styleStrings.join(" ");
-    const numParticipantsInThisPage = () => {
-      if (startIndex === 0) return 1 + peersToShow.length;
-      return peersToShow.length;
-    };
-    //const numParticipantsInThisPage = 1 + peersToShow.length; // My video + peers in this page
+
+    let nItemsInPage = visiblePeers.length;
+    if (nItemsInPage < NUM_OF_VIDEOS) nItemsInPage += 1; // add user video
+
     const baseStyles = "p-2 grid gap-x-2 gap-y-2 w-full h-full";
+    console.log(nItemsInPage);
+    if (nItemsInPage <= 1) return combineStyles([baseStyles, "px-20"]);
 
-    if (numParticipantsInThisPage() === 1)
-      return combineStyles([baseStyles, "px-20"]);
+    if (nItemsInPage === 2) return combineStyles([baseStyles, "grid-cols-2"]);
 
-    if (numParticipantsInThisPage() === 2)
-      return combineStyles([baseStyles, "grid-cols-2"]);
-
-    if (numParticipantsInThisPage() === 3)
-      return combineStyles([baseStyles, "grid-cols-3"]);
-
-    if (numParticipantsInThisPage() === 4)
+    if (nItemsInPage <= 4)
       return combineStyles([baseStyles, "grid-cols-2 grid-rows-2"]);
 
-    if (numParticipantsInThisPage() <= 6)
+    if (nItemsInPage <= 6)
       return combineStyles([baseStyles, "grid-cols-3 grid-rows-2"]);
 
-    if (numParticipantsInThisPage() <= 9)
+    if (nItemsInPage <= 9)
       return combineStyles([baseStyles, "grid-cols-3 grid-rows-3"]);
 
     return [baseStyles];
@@ -133,10 +70,10 @@ export default function RegularVideoDisplay({
         </div>
       )}
       <div className={getGridStyles()}>
-        {NUM_OF_VIDEOS_IN_PAGE(startIndex) === NUM_OF_VIDEOS - 1 && (
+        {!pagination.current.hasNext(page) && (
           <Video stream={myStream} name={"Me"} id={"me"} me={true} />
         )}
-        {peersToShow.map((peer, idx) => (
+        {visiblePeers.map((peer, idx) => (
           <div
             key={`peer-stream-${idx}-${peer.name}`}
             className="h-full w-auto"

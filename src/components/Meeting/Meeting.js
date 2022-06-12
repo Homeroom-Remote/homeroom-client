@@ -20,7 +20,7 @@ import SurveyQuestion from "./SurveyQuestion";
 //////
 // API
 //////
-import Peer from "../../api/usePeer";
+import usePeer from "../../api/usePeer";
 import { getToken } from "../../api/auth";
 import {
   CreateRoom,
@@ -86,7 +86,6 @@ export default function Meeting() {
   const [room, setRoom] = useState(null);
   const { meetingID, exitMeeting, setOwner, screenSharer, setScreenSharer } =
     useMeeting();
-  const [peers, setPeers] = useState([]);
   const [date, setDate] = useState(null);
 
   // Survey
@@ -100,6 +99,19 @@ export default function Meeting() {
     surveyAnswerSetter = data[1];
     refreshRoomCallbacks(room);
   };
+
+  // Peers
+  const {
+    addScreenShare,
+    removeScreenShare,
+    removeStreamFromPeers,
+    updateStream,
+    onPeerHandRecognition,
+    getNameFromID,
+    updateParticipants,
+    destroyPeer,
+    createPeer,
+  } = usePeer();
 
   // etc
   const { user } = useUser();
@@ -166,14 +178,14 @@ export default function Meeting() {
           .then((stream) => {
             stream.screenShare = true;
             shareScreenStream.current = stream;
-            Peer.addScreenShare(shareScreenStream.current, peers);
+            addScreenShare(shareScreenStream.current);
             StartScreenShare(room, stream.id);
             setShareScreen(true);
           })
           .catch((e) => console.warn("get display media (screen share):", e));
       }
     } else if (shareScreen === true && room) {
-      Peer.removeScreenShare(shareScreenStream.current, peers);
+      removeScreenShare(shareScreenStream.current);
       StopScreenShare(room);
       setShareScreen(false);
     }
@@ -458,21 +470,15 @@ export default function Meeting() {
   }
 
   function onUpdateParticipants(room, message) {
-    Peer.updateParticipants(
-      message?.participants,
-      peers,
-      setPeers,
-      room,
-      myStream
-    );
+    updateParticipants(message?.participants, room, myStream);
   }
 
   function onPeerLeave(room, message) {
-    Peer.destroyPeer(message.sessionId, peers, setPeers);
+    destroyPeer(message.sessionId);
   }
 
   function onPeerSignal(room, message) {
-    Peer.createPeer(room, message, false, peers, myStream, setPeers);
+    createPeer(room, message, false, myStream);
   }
   const onGeneralMessage = (msg) => {
     generalChatSetter && generalChatSetter((c) => [...c, msg]);
@@ -535,14 +541,9 @@ export default function Meeting() {
   // Peers
   ////////
   useEffect(() => {
-    Peer.updateStream(myStream, peers, setPeers);
+    updateStream(myStream);
     refreshRoomCallbacks(room);
   }, [myStream]);
-
-  useEffect(() => {
-    // Closure hell - the callbacks can't figure out who peers are so I just update them naivly.
-    refreshRoomCallbacks(room);
-  }, [peers]);
 
   function addGestureToVideo(gestureObject, id) {
     const gestureTTL = 10000; // for timeout - show gesture on video object
@@ -566,7 +567,7 @@ export default function Meeting() {
   }
 
   function onHandRecognition(message) {
-    const gestureObject = Peer.onHandRecognition(message, peers);
+    const gestureObject = onPeerHandRecognition(message);
 
     if (!gestureObject) {
       console.warn("onHandRecognition warning: gestureObject is null");
@@ -741,7 +742,6 @@ export default function Meeting() {
             <VideoWrapper
               myStream={myStream}
               myScreenShare={shareScreenStream.current}
-              otherParticipants={peers}
               screenSharer={screenSharer}
               shareScreenMode={shareScreenMode}
             />
@@ -781,7 +781,6 @@ export default function Meeting() {
           )}
           {participants && (
             <Participants
-              peers={peers}
               cameraState={camera}
               microphoneState={microphone}
               isChatOpen={chat}

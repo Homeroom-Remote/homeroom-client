@@ -36,12 +36,11 @@ function Participant({
 }
 
 export default function Participants({
-  peers,
   cameraState,
   microphoneState,
   isChatOpen,
 }) {
-  const { owner } = useMeeting();
+  const { owner, peers } = useMeeting();
   const { user } = useUser();
   const isAudioOnline = (stream) =>
     !(

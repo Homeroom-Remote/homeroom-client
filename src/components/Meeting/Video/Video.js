@@ -1,13 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 
 function Video({ stream, name, id, me = false, small = false }) {
-  const [shouldDisplayVideoStream, setShouldDisplayVideoStream] =
-    useState(false);
   const [isTalking, setIsTalking] = useState(false);
   const audioDetectionInterval = useRef(null);
 
+  const shouldDisplayVideoStream =
+    stream &&
+    stream.active &&
+    stream.getVideoTracks().length > 0 &&
+    !stream.getVideoTracks()[0].muted;
+
   const getHandGestureStyles = () => {
-    if (!me) return "absolute top-2 right-2 text-3xl";
     return "absolute left-1/2 -translate-x-1/2 text-[80px]";
   };
 
@@ -92,12 +95,6 @@ function Video({ stream, name, id, me = false, small = false }) {
         ref={(e) => {
           if (e) {
             e.srcObject = stream;
-            setShouldDisplayVideoStream(
-              stream &&
-                stream.active &&
-                stream.getVideoTracks().length > 0 &&
-                stream.getVideoTracks()[0].enabled
-            );
           }
         }}
         autoPlay={true}
