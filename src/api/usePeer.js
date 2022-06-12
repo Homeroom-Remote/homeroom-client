@@ -48,7 +48,7 @@ export default function UsePeer() {
     initiator || peer.signal(message.data);
 
     function refreshPeer() {
-      console.log("refreshing peer");
+      console.log("refreshing peer (track event)");
       removePeerById(id);
       addPeer(constructPeerObject(id, message.uid, peer, room, message.name));
     }
@@ -73,7 +73,7 @@ export default function UsePeer() {
     });
 
     peer.on("stream", (peerStream) => {
-      console.log(peerStream.getTracks());
+      console.log("onStream", peerStream.getTracks());
     });
 
     peer.on("error", (err) => {
@@ -97,7 +97,7 @@ export default function UsePeer() {
     const peerToRemove = getPeerById(peerToRemoveId);
     console.log(peerToRemove, getPeers());
     if (!peerToRemove) return;
-    if (peerToRemove.peer._connected) peerToRemove.peer.destroy();
+    if (!peerToRemove.peer.destroyed) peerToRemove.peer.destroy();
     removePeerById(peerToRemoveId);
   }
 

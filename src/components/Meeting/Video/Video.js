@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 
 function Video({ stream, name, id, me = false, small = false }) {
+  !me && console.log(`video update for ${name}`, stream?.getTracks());
   const [isTalking, setIsTalking] = useState(false);
   const audioDetectionInterval = useRef(null);
 
