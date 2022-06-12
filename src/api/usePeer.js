@@ -32,7 +32,7 @@ export default function UsePeer() {
       `peerExists: ${!!peerExists} nPeers: ${getPeers().length}`,
       getPeers()
     );
-    peerExists && console.log(peerExists);
+    peerExists && console.log(peerExists, `destroyed: ${peerExists.destroyed}`);
     if (!initiator && peerExists) {
       // Recieved signal
       peerExists.peer.signal(message.data);
@@ -50,7 +50,8 @@ export default function UsePeer() {
     function refreshPeer() {
       console.log("refreshing peer (track event)");
       removePeerById(id);
-      addPeer(constructPeerObject(id, message.uid, peer, room, message.name));
+      if (!peer.destroyed)
+        addPeer(constructPeerObject(id, message.uid, peer, room, message.name));
     }
 
     peer.on("signal", (data) => {
