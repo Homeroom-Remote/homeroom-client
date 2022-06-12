@@ -276,11 +276,17 @@ export default function Meeting() {
 
     getMedia({ video: video ? { facingMode: "user" } : false, audio })
       .then((stream) => {
-        if (myStream) stopStream(myStream);
+        if (myStream) {
+          stopStream(myStream);
+          removeStreamFromPeers(myStream);
+        }
         setMyStream(stream);
       })
       .catch(() => {
-        if (myStream) stopStream(myStream);
+        if (myStream) {
+          stopStream(myStream);
+          removeStreamFromPeers(myStream);
+        }
         setMyStream(null);
       });
   };

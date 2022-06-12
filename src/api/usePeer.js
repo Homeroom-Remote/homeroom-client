@@ -32,20 +32,33 @@ export default function UsePeer() {
       `peerExists: ${!!peerExists} nPeers: ${getPeers().length}`,
       getPeers()
     );
-    peerExists && console.log(peerExists, `destroyed: ${peerExists.destroyed}`);
+    peerExists &&
+      console.log(peerExists, `destroyed: ${peerExists.peer.destroyed}`);
     if (!initiator && peerExists) {
       // Recieved signal
       peerExists.peer.signal(message.data);
       return;
     }
 
+    if (myStream) myStream.getTracks().forEach((t) => (t.enabled = true));
+
     const peer = new Peer({
       initiator: initiator,
       trickle: true,
-      stream: myStream || false,
+      config: {
+        iceServers: [
+          { urls: "stun:stun.l.google.com:19302" },
+          { urls: "stun:global.stun.twilio.com:3478?transport=udp" },
+        ],
+      },
+      stream: myStream ? myStream : false,
     });
 
-    initiator || peer.signal(message.data);
+    try {
+      initiator || peer.signal(message.data);
+    } catch (e) {
+      console.log("peer signal error", e);
+    }
 
     function refreshPeer() {
       console.log("refreshing peer (track event)");
@@ -65,6 +78,7 @@ export default function UsePeer() {
 
     peer.on("close", () => {
       console.log("closed connection with peer");
+      destroyPeer(id);
     });
 
     peer.on("track", (track, stream) => {
@@ -94,12 +108,16 @@ export default function UsePeer() {
    * @param {Function} setter
    */
   function destroyPeer(peerToRemoveId) {
-    console.log("destroying peer", peerToRemoveId);
-    const peerToRemove = getPeerById(peerToRemoveId);
-    console.log(peerToRemove, getPeers());
-    if (!peerToRemove) return;
-    if (!peerToRemove.peer.destroyed) peerToRemove.peer.destroy();
-    removePeerById(peerToRemoveId);
+    try {
+      console.log("destroying peer", peerToRemoveId);
+      const peerToRemove = getPeerById(peerToRemoveId);
+      console.log(peerToRemove, getPeers());
+      if (!peerToRemove) return;
+      if (!peerToRemove.peer.destroyed) peerToRemove.peer.destroy();
+      removePeerById(peerToRemoveId);
+    } catch (e) {
+      console.log("destroyPeer error", e);
+    }
   }
 
   function updateParticipants(participantObject, room, myStream) {
@@ -142,7 +160,9 @@ export default function UsePeer() {
   ///////////////////////////////////
   function removeScreenShare(stream) {
     if (!stream) return;
-    getPeers().forEach((peer) => peer.peer.removeStream(stream));
+    getPeers().forEach(
+      (peer) => peer && !peer.peer.destroyed && peer.peer.removeStream(stream)
+    );
   }
 
   function addScreenShare(stream) {
