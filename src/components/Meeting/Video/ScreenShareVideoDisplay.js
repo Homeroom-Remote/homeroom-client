@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import useUser from "../../../stores/userStore";
 import Video from "./Video";
 import ScreenShare from "./ScreenShare";
 import useMeeting from "../../../stores/meetingStore";
+import PaginationHelper from "./PaginationHelper";
 
 import { NextPageArrow, PrevPageArrow } from "../../../utils/svgs";
 
@@ -13,75 +14,23 @@ export default function ScreenShareVideoDisplay({
   screenSharer,
   myScreenShare,
 }) {
-  const { peers } = useMeeting();
   const { user } = useUser();
-  const NUM_OF_VIDEOS_IN_PAGE = (startIndex) => {
-    if (startIndex === 0) return NUM_OF_VIDEOS - 1;
-    return NUM_OF_VIDEOS;
-  };
-  const [forInitialize, setForInitialize] = useState(false);
-  const [startIndex, setStartIndex] = useState(0);
-  const [endIndex, setEndIndex] = useState(
-    Math.min(NUM_OF_VIDEOS_IN_PAGE(startIndex), peers.length)
-  );
-  const [forwardClick, setForwardClick] = useState(false);
-  const [backwardClick, setBackwardClick] = useState(false);
-  const [peersToShow, setPeersToShow] = useState([]);
-  const showPagination = () => peers.length >= NUM_OF_VIDEOS;
+  const { peers, getPeers } = useMeeting();
+  const [page, setPage] = useState(1);
+  const [visiblePeers, setVisiblePeers] = useState([]);
+  let pagination = useRef(new PaginationHelper(peers, NUM_OF_VIDEOS));
 
-  const toggleForward = () => {
-    if (!peers) return;
-    setForInitialize(true);
-    setForwardClick(true);
-    setEndIndex(Math.min(endIndex + NUM_OF_VIDEOS, peers.length));
-  };
-
-  const toggleBackward = () => {
-    setForInitialize(true);
-    if (startIndex === NUM_OF_VIDEOS - 1) {
-      setBackwardClick(true);
-      setEndIndex(Math.min(NUM_OF_VIDEOS - 1, peers.length));
-    } else if (startIndex >= NUM_OF_VIDEOS_IN_PAGE(startIndex)) {
-      setBackwardClick(true);
-      setEndIndex(-1);
-    }
-  };
-
+  const showPagination = () => pagination.current.pageCount > 1;
+  const toggleForward = () =>
+    setPage((currPage) =>
+      pagination.current.hasNext(currPage) ? currPage + 1 : currPage
+    );
+  const toggleBackward = () =>
+    setPage((currPage) => (currPage > 1 ? currPage - 1 : currPage));
   useEffect(() => {
-    if (!forInitialize) return;
-    if (endIndex === -1) {
-      setEndIndex(Math.min(startIndex, peers.length));
-      return;
-    } else if (backwardClick) {
-      setBackwardClick(false);
-      if (startIndex === NUM_OF_VIDEOS - 1) {
-        setStartIndex(0);
-      } else if (startIndex > NUM_OF_VIDEOS - 1) {
-        setStartIndex(Math.min(startIndex - NUM_OF_VIDEOS, peers.length));
-      }
-    } else if (forwardClick) {
-      setForwardClick(false);
-      setStartIndex(startIndex + NUM_OF_VIDEOS_IN_PAGE(startIndex));
-    }
-  }, [endIndex]);
-
-  useEffect(() => {
-    if (!forInitialize) return;
-    setPeersToShow(peers.slice(startIndex, endIndex));
-  }, [startIndex]);
-
-  useEffect(() => {
-    if (startIndex > peers.length) toggleBackward();
-    else if (endIndex > peers.length)
-      // Someone on this page left
-      setEndIndex(peers.length - 1);
-    else if (
-      endIndex < peers.length - 1 &&
-      peers.length - endIndex < NUM_OF_VIDEOS_IN_PAGE(startIndex) // New participant in this page
-    )
-      setEndIndex(peers.length - 1);
-    setEndIndex(Math.min(NUM_OF_VIDEOS_IN_PAGE(startIndex), peers.length));
-    setPeersToShow(peers.slice(startIndex, endIndex));
+    var paginationHelper = new PaginationHelper(getPeers(), NUM_OF_VIDEOS);
+    setVisiblePeers(paginationHelper.pageItems(page));
+    pagination.current.current = paginationHelper;
   }, [peers]);
 
   const getStream = (peer) => {
@@ -127,7 +76,7 @@ export default function ScreenShareVideoDisplay({
           </div>
         )}
         <div className="flex flex-row around gap-x-2 p-2 w-full">
-          {NUM_OF_VIDEOS_IN_PAGE(startIndex) === NUM_OF_VIDEOS - 1 && (
+          {!pagination.current.hasNext(page) && (
             <Video
               stream={myStream}
               name={"Me"}
@@ -137,7 +86,7 @@ export default function ScreenShareVideoDisplay({
             />
           )}
 
-          {peersToShow.map((peer, idx) => (
+          {visiblePeers.map((peer, idx) => (
             <div key={`peer-stream-${idx}-${peer.name}`} className="">
               <Video
                 stream={getStream(peer)}
