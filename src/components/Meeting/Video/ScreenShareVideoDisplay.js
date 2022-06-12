@@ -1,91 +1,37 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import useUser from "../../../stores/userStore";
 import Video from "./Video";
 import ScreenShare from "./ScreenShare";
+import useMeeting from "../../../stores/meetingStore";
+import PaginationHelper from "./PaginationHelper";
 
 import { NextPageArrow, PrevPageArrow } from "../../../utils/svgs";
 
 const NUM_OF_VIDEOS = 9;
 
 export default function ScreenShareVideoDisplay({
-  otherParticipants,
   myStream,
   screenSharer,
   myScreenShare,
 }) {
   const { user } = useUser();
-  const NUM_OF_VIDEOS_IN_PAGE = (startIndex) => {
-    if (startIndex === 0) return NUM_OF_VIDEOS - 1;
-    return NUM_OF_VIDEOS;
-  };
-  const [forInitialize, setForInitialize] = useState(false);
-  const [startIndex, setStartIndex] = useState(0);
-  const [endIndex, setEndIndex] = useState(
-    Math.min(NUM_OF_VIDEOS_IN_PAGE(startIndex), otherParticipants.length)
-  );
-  const [forwardClick, setForwardClick] = useState(false);
-  const [backwardClick, setBackwardClick] = useState(false);
-  const [peersToShow, setPeersToShow] = useState([]);
-  const showPagination = () => otherParticipants.length >= NUM_OF_VIDEOS;
+  const { peers, getPeers } = useMeeting();
+  const [page, setPage] = useState(1);
+  const [visiblePeers, setVisiblePeers] = useState([]);
+  let pagination = useRef(new PaginationHelper(peers, NUM_OF_VIDEOS));
 
-  const toggleForward = () => {
-    if (!otherParticipants) return;
-    setForInitialize(true);
-    setForwardClick(true);
-    setEndIndex(Math.min(endIndex + NUM_OF_VIDEOS, otherParticipants.length));
-  };
-
-  const toggleBackward = () => {
-    setForInitialize(true);
-    if (startIndex === NUM_OF_VIDEOS - 1) {
-      setBackwardClick(true);
-      setEndIndex(Math.min(NUM_OF_VIDEOS - 1, otherParticipants.length));
-    } else if (startIndex >= NUM_OF_VIDEOS_IN_PAGE(startIndex)) {
-      setBackwardClick(true);
-      setEndIndex(-1);
-    }
-  };
-
-  useEffect(() => {
-    if (!forInitialize) return;
-    if (endIndex === -1) {
-      setEndIndex(Math.min(startIndex, otherParticipants.length));
-      return;
-    } else if (backwardClick) {
-      setBackwardClick(false);
-      if (startIndex === NUM_OF_VIDEOS - 1) {
-        setStartIndex(0);
-      } else if (startIndex > NUM_OF_VIDEOS - 1) {
-        setStartIndex(
-          Math.min(startIndex - NUM_OF_VIDEOS, otherParticipants.length)
-        );
-      }
-    } else if (forwardClick) {
-      setForwardClick(false);
-      setStartIndex(startIndex + NUM_OF_VIDEOS_IN_PAGE(startIndex));
-    }
-  }, [endIndex]);
-
-  useEffect(() => {
-    if (!forInitialize) return;
-    setPeersToShow(otherParticipants.slice(startIndex, endIndex));
-  }, [startIndex]);
-
-  useEffect(() => {
-    if (startIndex > otherParticipants.length) toggleBackward();
-    else if (endIndex > otherParticipants.length)
-      // Someone on this page left
-      setEndIndex(otherParticipants.length - 1);
-    else if (
-      endIndex < otherParticipants.length - 1 &&
-      otherParticipants.length - endIndex < NUM_OF_VIDEOS_IN_PAGE(startIndex) // New participant in this page
-    )
-      setEndIndex(otherParticipants.length - 1);
-    setEndIndex(
-      Math.min(NUM_OF_VIDEOS_IN_PAGE(startIndex), otherParticipants.length)
+  const showPagination = () => pagination.current.pageCount > 1;
+  const toggleForward = () =>
+    setPage((currPage) =>
+      pagination.current.hasNext(currPage) ? currPage + 1 : currPage
     );
-    setPeersToShow(otherParticipants.slice(startIndex, endIndex));
-  }, [otherParticipants]);
+  const toggleBackward = () =>
+    setPage((currPage) => (currPage > 1 ? currPage - 1 : currPage));
+  useEffect(() => {
+    var paginationHelper = new PaginationHelper(getPeers(), NUM_OF_VIDEOS);
+    setVisiblePeers(paginationHelper.pageItems(page));
+    pagination.current.current = paginationHelper;
+  }, [peers]);
 
   const getStream = (peer) => {
     if (!peer || !screenSharer) return null;
@@ -96,15 +42,13 @@ export default function ScreenShareVideoDisplay({
       return null;
     } else if (screenSharer?.user === peer.uid) {
       // return regular webcam video if has one
-      return activeStreams.find(
-        (stream) => stream.id !== screenSharer.streamId
-      );
-    } else {
       const activeWithoutShare = activeStreams.filter(
         (stream) => stream.id !== screenSharer.streamId
       );
-      if (activeWithoutShare.length <= 0) return 0;
+      if (activeWithoutShare.length <= 0) return null;
       return activeWithoutShare[activeWithoutShare.length - 1];
+    } else {
+      return activeStreams[activeStreams.length - 1];
     }
   };
 
@@ -114,9 +58,7 @@ export default function ScreenShareVideoDisplay({
     if (isSharerMe()) {
       return myScreenShare;
     } else {
-      const peer = otherParticipants?.find(
-        (peer) => peer.uid === screenSharer?.user
-      );
+      const peer = peers?.find((peer) => peer.uid === screenSharer?.user);
       return peer?.peer._remoteStreams.find(
         (stream) => stream.id === screenSharer?.streamId
       );
@@ -134,7 +76,7 @@ export default function ScreenShareVideoDisplay({
           </div>
         )}
         <div className="flex flex-row around gap-x-2 p-2 w-full">
-          {NUM_OF_VIDEOS_IN_PAGE(startIndex) === NUM_OF_VIDEOS - 1 && (
+          {!pagination.current.hasNext(page) && (
             <Video
               stream={myStream}
               name={"Me"}
@@ -144,7 +86,7 @@ export default function ScreenShareVideoDisplay({
             />
           )}
 
-          {peersToShow.map((peer, idx) => (
+          {visiblePeers.map((peer, idx) => (
             <div key={`peer-stream-${idx}-${peer.name}`} className="">
               <Video
                 stream={getStream(peer)}

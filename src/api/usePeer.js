@@ -1,206 +1,199 @@
 import Peer from "simple-peer";
+import useMeeting from "../stores/meetingStore";
 
-/**
- * Updated peers given an id, new object & setter (setPeer)
- * @param {String} id
- * @param {Object} obj
- * @param {Function} setter
- */
-function updatePeers(id, obj, setter) {
-  setter((prev) => {
-    let filtered = prev.filter((peer) => peer.id !== id);
-    return [...filtered, obj];
-  });
-}
+export default function UsePeer() {
+  const { addPeer, removePeerById, getPeerById, getPeers } = useMeeting();
 
-function removeScreenShare(stream, peers) {
-  if (!stream) return;
-  peers.forEach((peer) => peer.peer.removeStream(stream));
-}
+  function constructPeerObject(id, uid, peerObject, roomObject, name) {
+    return {
+      id: id,
+      uid: uid,
+      peer: peerObject,
+      room: roomObject,
+      name: name,
+    };
+  }
+  // Connections
+  ///////////////////////////////////
 
-function addScreenShare(stream, peers) {
-  if (!stream) return;
-
-  peers.forEach((peer) =>
-    peer.peer.send({ event: "share-screen", id: stream.id })
-  );
-  peers.forEach((peer) => {
-    peer.peer.addStream(stream);
-  });
-}
-
-/**
- * Removes client stream in other clients
- * @param {MediaStream} stream
- * @param {Array} peers
- * @param {Function} setter
- */
-function removeStreamFromPeers(stream, peers) {
-  if (!stream || !peers) return;
-  peers.forEach((peer) => {
-    if (!peer.peer.destroying) peer.peer.removeStream(stream);
-  });
-}
-
-/**
- * Updates client stream in other clients
- * @param {MediaStream} stream
- * @param {Array} peers
- * @param {Function} setter
- */
-function updateStream(stream, peers) {
-  if (!stream || !peers) return;
-  peers.forEach((peer) => {
-    if (!peer.peer.destroying) {
-      peer.peer.addStream(stream);
+  /**
+   * Creates (or negotiates signal) peer.
+   * @param {Object} room
+   * @param {Object} message
+   * @param {Boolean} initiator
+   * @param {MediaStream} myStream
+   * @returns
+   */
+  function createPeer(room, message, initiator, myStream) {
+    const id = message.sessionId;
+    console.log(message, `initator: ${initiator}`);
+    const peerExists = getPeerById(message.sessionId);
+    console.log(
+      `peerExists: ${!!peerExists} nPeers: ${getPeers().length}`,
+      getPeers()
+    );
+    peerExists && console.log(peerExists, `destroyed: ${peerExists.destroyed}`);
+    if (!initiator && peerExists) {
+      // Recieved signal
+      peerExists.peer.signal(message.data);
+      return;
     }
-  });
-}
 
-function updateParticipants(participantObject, peers, setter, room, myStream) {
-  Object.keys(participantObject)
-    .filter((sessionId) => !peers[sessionId])
-    .forEach((sessionId) => {
-      console.log(`Initiating new connection with ${sessionId}`);
-      createPeer(
-        room,
-        participantObject[sessionId],
-        true,
-        peers,
-        myStream,
-        setter
-      );
+    const peer = new Peer({
+      initiator: initiator,
+      trickle: true,
+      stream: myStream || false,
     });
-}
 
-/**
- * Creates (or negotiates signal) peer.
- * @param {Object} room
- * @param {Object} message
- * @param {Boolean} initiator
- * @param {Array} peers
- * @param {MediaStream} myStream
- * @param {Function} setter
- * @returns
- */
-function createPeer(room, message, initiator, peers, myStream, setter) {
-  const peerExists = peers.find((peer) => peer.id === message.sessionId);
-  if (!initiator && peerExists) {
-    // Recieved signal
-    peerExists.peer.signal(message.data);
-    return;
+    initiator || peer.signal(message.data);
+
+    function refreshPeer() {
+      console.log("refreshing peer (track event)");
+      removePeerById(id);
+      if (!peer.destroyed)
+        addPeer(constructPeerObject(id, message.uid, peer, room, message.name));
+    }
+
+    peer.on("signal", (data) => {
+      console.log("signaling peer");
+      room.send("signal", { sessionId: message.sessionId, data: data });
+    });
+
+    peer.on("connect", () => {
+      console.log("connected with peer");
+    });
+
+    peer.on("close", () => {
+      console.log("closed connection with peer");
+    });
+
+    peer.on("track", (track, stream) => {
+      track.addEventListener("unmute", refreshPeer);
+      track.addEventListener("mute", refreshPeer);
+      track.addEventListener("ended", refreshPeer);
+    });
+
+    peer.on("stream", (peerStream) => {
+      console.log("onStream", peerStream.getTracks());
+    });
+
+    peer.on("error", (err) => {
+      console.warn(err, "<- usePeer error from ", id);
+    });
+
+    if (!peerExists) {
+      console.log("adding peer");
+      addPeer(constructPeerObject(id, message.uid, peer, room, message.name));
+    }
   }
 
-  const peer = new Peer({
-    initiator: initiator,
-    trickle: true,
-    stream: myStream,
-  });
+  /**
+   * Destroys a peer
+   * @param {String} peerToRemoveId
+   * @param {Array} peers
+   * @param {Function} setter
+   */
+  function destroyPeer(peerToRemoveId) {
+    console.log("destroying peer", peerToRemoveId);
+    const peerToRemove = getPeerById(peerToRemoveId);
+    console.log(peerToRemove, getPeers());
+    if (!peerToRemove) return;
+    if (!peerToRemove.peer.destroyed) peerToRemove.peer.destroy();
+    removePeerById(peerToRemoveId);
+  }
 
-  peer.on("signal", (data) => {
-    room.send("signal", { sessionId: message.sessionId, data: data });
-  });
+  function updateParticipants(participantObject, room, myStream) {
+    Object.keys(participantObject)
+      .filter((sessionId) => !getPeers()[sessionId])
+      .forEach((sessionId) => {
+        createPeer(room, participantObject[sessionId], true, myStream);
+      });
+  }
+  ///////////////////////////////////
 
-  updatePeers(
-    message.sessionId,
-    {
-      id: message.sessionId,
-      uid: message.uid,
-      peer: peer,
-      room: room,
-      name: message.name,
-      stream: null,
-    },
-    setter
-  );
+  // Stream
+  ///////////////////////////////////
 
-  initiator || peer.signal(message.data);
-  peer.on("track", (track, stream) => {
-    function removeTrack() {
-      track.stop();
-      stream.removeTrack(track);
-    }
-    track.addEventListener("mute", removeTrack);
-    track.addEventListener("ended", removeTrack);
-  });
+  /**
+   * Removes client stream in other clients
+   * @param {MediaStream} stream
+   * @param {Array} peers
+   * @param {Function} setter
+   */
+  function removeStreamFromPeers(stream) {
+    if (!stream || !getPeers()) return;
+    getPeers().forEach((peer) => {
+      if (!peer.peer.destroying && !peer.peer.destroyed)
+        peer.peer.removeStream(stream);
+    });
+  }
+  function updateStream(stream) {
+    if (!stream || !getPeers()) return;
+    getPeers().forEach((peer) => {
+      if (!peer.peer?.destroying && !peer.peer?.destroyed) {
+        peer.peer.addStream(stream);
+      }
+    });
+  }
 
-  peer.on("stream", (peerStream) => {
-    updatePeers(
-      message.sessionId,
-      {
-        id: message.sessionId,
-        uid: message.uid,
-        peer: peer,
-        room: room,
-        name: message.name,
-        stream: peerStream,
-      },
-      setter
+  ///////////////////////////////////
+
+  // Screen share
+  ///////////////////////////////////
+  function removeScreenShare(stream) {
+    if (!stream) return;
+    getPeers().forEach((peer) => peer.peer.removeStream(stream));
+  }
+
+  function addScreenShare(stream) {
+    if (!stream) return;
+
+    getPeers().forEach((peer) =>
+      peer.peer.send({ event: "share-screen", id: stream.id })
     );
-  });
+    getPeers().forEach((peer) => {
+      peer.peer.addStream(stream);
+    });
+  }
+  ///////////////////////////////////
 
-  peer.on("error", (err) => {
-    console.warn(err, "<- usePeer error from ", message.sessionId);
-  });
+  // ETC
+  ///////////////////////////////////
 
-  updatePeers(
-    message.sessionId,
-    {
-      id: message.sessionId,
-      uid: message.uid,
-      peer: peer,
-      room: room,
-      name: message.name,
-    },
-    setter
-  );
+  /**
+   *
+   * @param {Object} message
+   * @param {Array} peers
+   * @returns
+   */
+  function onPeerHandRecognition(message) {
+    const peerExists = getPeerById(message.sender);
+    if (!peerExists) return false;
+    const gestureObject = {
+      message: message.message,
+      time: message.time,
+      sender: message.sender,
+    }; // Create object for this gesture
+
+    return gestureObject;
+  }
+
+  function getNameFromID(id) {
+    const peerExists = getPeerById(id);
+    if (!peerExists) return false;
+    return peerExists.name;
+  }
+  ///////////////////////////////////
+
+  return {
+    addScreenShare,
+    removeScreenShare,
+    removeStreamFromPeers,
+    updateStream,
+    onPeerHandRecognition,
+    getNameFromID,
+    updateParticipants,
+    destroyPeer,
+    createPeer,
+  };
 }
-
-/**
- * Destroys a peer
- * @param {String} peerToRemoveId
- * @param {Array} peers
- * @param {Function} setter
- */
-function destroyPeer(peerToRemoveId, peers, setter) {
-  const peerToRemove = peers.find((peer) => peer.id === peerToRemoveId);
-  peerToRemove?.peer?.destroy();
-  setter((prev) => prev.filter((peer) => peer.id !== peerToRemoveId));
-}
-
-/**
- *
- * @param {Object} message
- * @param {Array} peers
- * @returns
- */
-function onHandRecognition(message, peers) {
-  const peerExists = peers.find((peer) => peer.id === message.sender);
-  if (!peerExists) return false;
-  const gestureObject = {
-    message: message.message,
-    time: message.time,
-    sender: message.sender,
-  }; // Create object for this gesture
-
-  return gestureObject;
-}
-
-function getNameFromID(id, peers) {
-  const peerExists = peers.find((peer) => peer.id === id);
-  if (!peerExists) return false;
-  return peerExists.name;
-}
-
-const PeerWrapper = {
-  createPeer,
-  destroyPeer,
-  onHandRecognition,
-  updateStream,
-  removeStreamFromPeers,
-  getNameFromID,
-  addScreenShare,
-  removeScreenShare,
-  updateParticipants,
-};
-export default PeerWrapper;

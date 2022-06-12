@@ -36,23 +36,48 @@ function Participant({
 }
 
 export default function Participants({
-  peers,
   cameraState,
   microphoneState,
   isChatOpen,
 }) {
-  const { owner } = useMeeting();
+  const { owner, getPeers, peers } = useMeeting();
   const { user } = useUser();
-  const isAudioOnline = (stream) =>
-    !(
-      typeof stream?.getAudioTracks()[0] === "undefined" ||
-      stream?.getAudioTracks()[0]?.muted
-    );
-  const isVideoOnline = (stream) =>
-    !(
-      typeof stream?.getVideoTracks()[0] === "undefined" ||
-      stream?.getVideoTracks()[0]?.muted
-    );
+  const getActiveStreams = (peer) =>
+    peer?.peer?._remoteStreams?.filter((stream) => stream.active === true);
+  const isAudioOnline = (peer) => {
+    const activeStreams = getActiveStreams(peer);
+    console.log(activeStreams);
+    if (activeStreams?.length > 0) {
+      const audio = activeStreams[activeStreams.length - 1].getAudioTracks();
+      console.log(audio);
+      if (
+        audio &&
+        audio[0] !== undefined &&
+        audio[0].enabled &&
+        !audio[0].muted
+      ) {
+        console.log("here");
+        return true;
+      }
+    }
+
+    return false;
+  };
+  const isVideoOnline = (peer) => {
+    const activeStreams = getActiveStreams(peer);
+    if (activeStreams?.length > 0) {
+      const video = activeStreams[activeStreams.length - 1].getVideoTracks();
+      if (
+        video &&
+        video[0] !== undefined &&
+        video[0].enabled &&
+        !video[0].muted
+      )
+        return true;
+    }
+
+    return false;
+  };
   return (
     <div
       className={
@@ -70,12 +95,12 @@ export default function Participants({
           isMe={true}
           isOwner={user.uid === owner}
         />
-        {peers.map((peer, index) => (
+        {getPeers().map((peer, index) => (
           <Participant
             key={`participant-${peer.name}-${index}`}
             name={peer.name}
-            microphoneState={isAudioOnline(peer.stream)}
-            cameraState={isVideoOnline(peer.stream)}
+            microphoneState={isAudioOnline(peer)}
+            cameraState={isVideoOnline(peer)}
             isOwner={peer.uid === owner}
           />
         ))}
