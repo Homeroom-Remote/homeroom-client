@@ -129,7 +129,8 @@ export default function UsePeer() {
   function updateStream(stream) {
     if (!stream || !getPeers()) return;
     getPeers().forEach((peer) => {
-      if (!peer.peer?.destroying && !peer.peer?.destroyed()) {
+      console.log(peer.peer, peer.peer.destroyed);
+      if (!peer.peer?.destroying && !peer.peer?.destroyed) {
         peer.peer.addStream(stream);
       }
     });
