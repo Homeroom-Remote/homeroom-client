@@ -115,7 +115,7 @@ async function Detect(video) {
     const hand = await net.estimateHands(video);
     if (hand.length <= 0) return null;
 
-    const gesture = await GestureEstimator.estimate(hand[0].landmarks, 8.8);
+    const gesture = await GestureEstimator.estimate(hand[0].landmarks, 9.5);
     if (!gesture.gestures?.length || gesture.gestures?.length <= 0) return null;
 
     const confidence = gesture.gestures.map((prediction) => prediction.score);

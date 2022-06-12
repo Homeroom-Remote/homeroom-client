@@ -11,7 +11,7 @@ function Video({ stream, name, id, me = false, small = false }) {
     !stream.getVideoTracks()[0].muted;
 
   const getHandGestureStyles = () => {
-    return "absolute left-1/2 -translate-x-1/2 text-[80px]";
+    return "absolute left-1/2 -translate-x-1/2 top-0 text-[40px]";
   };
 
   const audibleHandler = () => {
