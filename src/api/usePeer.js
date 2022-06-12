@@ -126,6 +126,18 @@ export default function UsePeer() {
       .forEach((sessionId) => {
         createPeer(room, participantObject[sessionId], true, myStream);
       });
+
+    // reconnect timeout
+    setTimeout(() => {
+      getPeers()
+        .filter((peer) => !peer.peer._connected)
+        .forEach((peer) => {
+          console.log("reconnecting to because connected was false", peer.id);
+          destroyPeer(peer.id);
+          removePeerById(peer.id);
+          createPeer(room, participantObject[peer.id], true, myStream);
+        });
+    }, 3000);
   }
   ///////////////////////////////////
 
